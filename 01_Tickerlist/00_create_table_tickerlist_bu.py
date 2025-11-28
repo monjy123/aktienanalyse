@@ -1,6 +1,12 @@
-from db import get_connection
+import os
+import mysql.connector
 from mysql.connector import Error as MySQLError
 
+DB_HOST = os.getenv("MYDB_HOST", "127.0.0.1")
+DB_PORT = int(os.getenv("MYDB_PORT", "3306"))
+DB_USER = os.getenv("MYDB_USER", "monjy")
+DB_PASSWORD = os.getenv("MYDB_PASSWORD", "Emst4558!!")
+DB_NAME = "tickerdb"   # <--- final korrekt
 TABLE_NAME = "tickerlist"
 
 CREATE_TABLE_SQL = f"""
@@ -27,15 +33,22 @@ CREATE TABLE IF NOT EXISTS `{TABLE_NAME}` (
 
 def main():
     try:
-        con = get_connection(db_name="ticker")  # <<< WICHTIG
+        con = mysql.connector.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            autocommit=True
+        )
         cur = con.cursor()
         cur.execute(CREATE_TABLE_SQL)
-        print(f"✔ Tabelle '{TABLE_NAME}' wurde in 'tickerdb' erstellt.")
+        print(f"✔ Tabelle '{TABLE_NAME}' erfolgreich erstellt.")
         cur.close()
         con.close()
 
     except MySQLError as e:
-        print("❌ Fehler:", e)
+        print("❌ Fehler bei der Tabellenerstellung:", e)
 
 if __name__ == "__main__":
     main()

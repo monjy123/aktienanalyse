@@ -1,23 +1,53 @@
 import os
 import pandas as pd
-from aktien.db import get_connection
+import mysql.connector
 from mysql.connector import Error as MySQLError
 
 # ============================================================
-# CONFIG
+# DB CONFIG
 # ============================================================
 
-DB_SCHEMA = "TICKER"        # <- nutzt DB_NAME_TICKER aus .env
+DB_HOST = os.getenv("MYDB_HOST", "127.0.0.1")
+DB_PORT = int(os.getenv("MYDB_PORT", "3306"))
+DB_USER = os.getenv("MYDB_USER", "monjy")
+DB_PASSWORD = os.getenv("MYDB_PASSWORD", "Emst4558!!")
+DB_NAME = "tickerdb"   # <--- final korrekt
 TABLE_NAME = "tickerlist"
 
+# ============================================================
+# CSV → INDEX + EXCHANGE
+# ============================================================
+
 FILE_CONFIG = {
-    "STOXX600_clean.csv": {"stock_index": "STOXX600", "exchange": None},
-    "DAX_clean.csv":      {"stock_index": "DAX",      "exchange": "Xetra"},
-    "MDAX_clean.csv":     {"stock_index": "MDAX",     "exchange": "Xetra"},
-    "SP500_clean.csv":    {"stock_index": "S&P 500",  "exchange": "New York Stock Exchange"},
-    "FTSE100_clean.csv":  {"stock_index": "FTSE 100", "exchange": "London Stock Exchange"},
-    "NIKKEI225_clean.csv":{"stock_index": "Nikkei 225", "exchange": "Tokyo Stock Exchange"},
+    "STOXX600_clean.csv": {
+        "stock_index": "STOXX600",
+        "exchange": None
+    },
+    "DAX_clean.csv": {
+        "stock_index": "DAX",
+        "exchange": "Xetra"
+    },
+    "MDAX_clean.csv": {
+        "stock_index": "MDAX",
+        "exchange": "Xetra"
+    },
+    "SP500_clean.csv": {
+        "stock_index": "S&P 500",
+        "exchange": "New York Stock Exchange"
+    },
+    "FTSE100_clean.csv": {
+        "stock_index": "FTSE 100",
+        "exchange": "London Stock Exchange"
+    },
+    "NIKKEI225_clean.csv": {
+        "stock_index": "Nikkei 225",
+        "exchange": "Tokyo Stock Exchange"
+    }
 }
+
+# ============================================================
+# SQL STATEMENT
+# ============================================================
 
 INSERT_SQL = f"""
 INSERT INTO `{TABLE_NAME}` 
@@ -40,8 +70,16 @@ ON DUPLICATE KEY UPDATE
 # ============================================================
 
 def import_csv_files():
+
     try:
-        con = get_connection(db_name=DB_SCHEMA, autocommit=False)
+        con = mysql.connector.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            autocommit=False
+        )
     except MySQLError as e:
         print("❌ DB-Verbindung fehlgeschlagen:", e)
         return
@@ -50,19 +88,14 @@ def import_csv_files():
 
     for filename, cfg in FILE_CONFIG.items():
 
-        # Stelle sicher, dass CSVs relativ zum Skriptpfad gefunden werden
-        SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-        full_path = os.path.join(SCRIPT_DIR, filename)
-
-        if not os.path.exists(full_path):
-            print(f"⚠ Datei fehlt: {full_path}")
+        if not os.path.exists(filename):
+            print(f"⚠ Datei fehlt: {filename}")
             continue
 
-        df = pd.read_csv(full_path, dtype=str)
+        print(f"\n==> Verarbeite {filename}")
 
+        df = pd.read_csv(filename, dtype=str)
 
-
-        # Fehlende Spalten hinzufügen
         for col in ["Emittententicker", "Name", "Börse", "ISIN"]:
             if col not in df.columns:
                 df[col] = None
@@ -74,20 +107,21 @@ def import_csv_files():
             name = row["Name"]
             ticker = row["Emittententicker"]
 
-            exchange = (
-                row["Börse"] if cfg["exchange"] is None else cfg["exchange"]
-            )
+            if cfg["exchange"] is None:
+                exchange = row["Börse"] if pd.notna(row["Börse"]) else None
+            else:
+                exchange = cfg["exchange"]
 
             vals = (
                 isin,
                 stock_index,
                 name,
                 ticker,
-                None,  # yf_ticker
-                None,  # eodhd_ticker
+                None,
+                None,
                 exchange,
-                None,  # finanzen_name
-                None   # marketscreener_name
+                None,
+                None
             )
 
             try:

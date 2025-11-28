@@ -2,29 +2,60 @@ import os
 import json
 import time
 import requests
-from difflib import SequenceMatcher
-from db import get_connection
+import mysql.connector
 from mysql.connector import Error as MySQLError
+from difflib import SequenceMatcher
 
 # ============================================================
-#   CONFIG
+#   DB KONFIG
 # ============================================================
 
-DB_SCHEMA = "TICKER"
+DB_HOST = os.getenv("MYDB_HOST", "127.0.0.1")
+DB_PORT = int(os.getenv("MYDB_PORT", "3306"))
+DB_USER = os.getenv("MYDB_USER", "monjy")
+DB_PASSWORD = os.getenv("MYDB_PASSWORD", "Emst4558!!")
+DB_NAME = "tickerdb"
 TABLE_NAME = "tickerlist"
+
 SEARCH_URL = "https://query2.finance.yahoo.com/v1/finance/search"
+
+# ============================================================
+#   MANUELLE OVERRIDES
+# ============================================================
 
 OVERRIDE_FILE = "manual_overrides.json"
 with open(OVERRIDE_FILE, "r") as f:
     MANUAL_OVERRIDES = json.load(f)
 
+# ============================================================
+#   ISIN-MAPPING Version 7 (Stabil)
+# ============================================================
+
 ISIN_SUFFIX_MAP = {
-    "DE": ".DE", "FR": ".PA", "NL": ".AS", "BE": ".BR", "AT": ".VI",
-    "CH": ".SW", "IT": ".MI", "ES": ".MC", "SE": ".ST", "DK": ".CO",
-    "FI": ".HE", "PT": ".LS", "PL": ".WA", "CZ": ".PR", "HU": ".BD",
-    "GB": ".L", "NO": ".OL", "LU": ".AS", "IE": ".L", "US": "", "JP": ".T"
+    "DE": ".DE",
+    "FR": ".PA",
+    "NL": ".AS",
+    "BE": ".BR",
+    "AT": ".VI",
+    "CH": ".SW",
+    "IT": ".MI",
+    "ES": ".MC",
+    "SE": ".ST",
+    "DK": ".CO",
+    "FI": ".HE",
+    "PT": ".LS",
+    "PL": ".WA",
+    "CZ": ".PR",
+    "HU": ".BD",
+    "GB": ".L",
+    "NO": ".OL",
+    "LU": ".AS",
+    "IE": ".L",
+    "US": "",
+    "JP": ".T"
 }
 
+# Fallback-Suffixe (Version 7)
 EU_SUFFIXES = [
     ".AS", ".PA", ".DE", ".BR", ".MC", ".MI", ".L",
     ".SW", ".CO", ".ST", ".HE", ".VI", ".OL"
@@ -58,7 +89,7 @@ def similarity(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 # ============================================================
-#   BEST CANDIDATE
+#   BEST CANDIDATE – VERSION 7 (Fix)
 # ============================================================
 
 def best_candidate(results, preferred_suffix, name):
@@ -97,17 +128,19 @@ def best_candidate(results, preferred_suffix, name):
     return None
 
 # ============================================================
-#   TICKER FINDEN
+#   FIND TICKER
 # ============================================================
 
 def find_yahoo_ticker(name, isin, exchange):
     preferred_suffix = ISIN_SUFFIX_MAP.get(isin[:2].upper(), None)
 
+    # 1) ISIN Suche
     r = yahoo_search(isin)
     t = best_candidate(r, preferred_suffix, name)
     if t:
         return t
 
+    # 2) Name Suche
     r = yahoo_search(name)
     t = best_candidate(r, preferred_suffix, name)
     if t:
@@ -123,7 +156,14 @@ def update_yf_tickers():
 
     print("🔗 Verbinde DB...")
     try:
-        con = get_connection(db_name=DB_SCHEMA, autocommit=False)
+        con = mysql.connector.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            autocommit=False
+        )
     except MySQLError as e:
         print("❌ DB Fehler:", e)
         return
@@ -149,16 +189,18 @@ def update_yf_tickers():
 
         print(f"[{i}/{len(rows)}] {name} ({exchange}) – {isin}")
 
+        # 🔥 1) MANUAL OVERRIDE FIRST
         if isin in MANUAL_OVERRIDES:
             override = MANUAL_OVERRIDES[isin]
             if override:
                 print(f"  ✔ Override → {override}")
                 cur.execute(update_sql, (override, rid))
             else:
-                print("  → ❌ Override: kein Ticker")
+                print("  → ❌ Override sagt 'kein Ticker'")
                 not_found.append((rid, name, exchange, isin))
             continue
 
+        # 🔥 2) Normale Yahoo Logik
         ticker = find_yahoo_ticker(name, isin, exchange)
 
         if not ticker:
