@@ -1,0 +1,32 @@
+# Aktien-Projekt Dependencies
+# Installation: pip install -r requirements.txt
+
+# Datenbank
+mysql-connector-python>=8.0.0
+
+# Datenverarbeitung
+pandas>=2.0.0
+
+# HTTP Requests
+requests>=2.28.0
+
+# Umgebungsvariablen
+python-dotenv>=1.0.0
+
+# Finanzdaten APIs
+yfinance>=0.2.0
+
+# Web Framework
+flask>=3.0.0
+
+# Web Scraping (Selenium)
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+
+# Progress Bars
+tqdm>=4.65.0
+
+# Optionale Dependencies
+# ----------------------
+# Beschreibungen auf Deutsch uebersetzen
+deep-translator>=1.11.0
