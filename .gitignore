@@ -30,3 +30,7 @@ env/
 # Temporaere Dateien
 *.tmp
 *.temp
+
+# Datenbank Backups (zu gross fuer GitHub)
+backups/
+*.sql
