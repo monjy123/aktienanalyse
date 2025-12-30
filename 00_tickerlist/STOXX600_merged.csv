@@ -1,0 +1,614 @@
+Emittententicker,Name,Sektor,Anlageklasse,Marktwert,Gewichtung (%),Nominalwert,Nominale,Kurs,Standort,Börse,Marktwährung,ISIN
+ASML,ASML HOLDING NV,IT,Aktien,"286.448.800,00","3,08","286.448.800,00","302.800,00","946,00",Niederlande,Euronext Amsterdam,EUR,NL0010273215
+ROG,ROCHE HOLDING PAR AG,Gesundheitsversorgung,Aktien,"185.941.539,45","2,00","185.941.539,45","539.603,00","344,59",Schweiz,SIX Swiss Exchange,CHF,CH0012032048
+AZN,ASTRAZENECA PLC,Gesundheitsversorgung,Aktien,"184.137.831,65","1,98","184.137.831,65","1.190.875,00","154,62",Vereinigtes Königreich,London Stock Exchange,GBP,GB0009895292
+HSBA,HSBC HOLDINGS PLC,Financials,Aktien,"168.130.924,56","1,81","168.130.924,56","13.331.968,00","12,61",Vereinigtes Königreich,London Stock Exchange,GBP,GB0005405286
+NOVN,NOVARTIS AG,Gesundheitsversorgung,Aktien,"166.504.562,98","1,79","166.504.562,98","1.475.900,00","112,82",Schweiz,SIX Swiss Exchange,CHF,CH0012005267
+SAP,SAP,IT,Aktien,"165.212.242,90","1,78","165.212.242,90","783.182,00","210,95",Deutschland,Xetra,EUR,DE0007164600
+NESN,NESTLE SA,Nichtzyklische Konsumgüter,Aktien,"164.648.883,14","1,77","164.648.883,14","1.977.321,00","83,27",Schweiz,SIX Swiss Exchange,CHF,CH0038863350
+SHELL,SHELL PLC,Energie,Aktien,"139.835.038,50","1,50","139.835.038,50","4.492.692,00","31,13",Vereinigtes Königreich,Euronext Amsterdam,EUR,GB00BP6MXD84
+SIE,SIEMENS N AG,Industrie,Aktien,"133.546.581,60","1,44","133.546.581,60","576.626,00","231,60",Deutschland,Xetra,EUR,DE0007236101
+MC,LVMH,Zyklische Konsumgüter ,Aktien,"120.377.639,20","1,30","120.377.639,20","194.534,00","618,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121014
+ALV,ALLIANZ,Financials,Aktien,"112.678.376,60","1,21","112.678.376,60","297.226,00","379,10",Deutschland,Xetra,EUR,DE0008404005
+SAN,BANCO SANTANDER SA,Financials,Aktien,"109.829.266,56","1,18","109.829.266,56","11.439.357,00","9,60",Spanien,Bolsa De Madrid,EUR,ES0113900J37
+SU,SCHNEIDER ELECTRIC,Industrie,Aktien,"103.660.457,00","1,12","103.660.457,00","443.942,00","233,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121972
+NOVO B,NOVO NORDISK CLASS B,Gesundheitsversorgung,Aktien,"102.277.644,78","1,10","102.277.644,78","2.471.555,00","41,38",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0062498333
+TTE,TOTALENERGIES,Energie,Aktien,"97.217.116,76","1,05","97.217.116,76","1.741.618,00","55,82",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120271
+ULVR,UNILEVER PLC,Nichtzyklische Konsumgüter,Aktien,"95.729.691,58","1,03","95.729.691,58","1.735.828,00","55,15",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BVZK7T90
+AIR,AIRBUS GROUP,Industrie,Aktien,"87.505.347,90","0,94","87.505.347,90","451.105,00","193,98",Frankreich,Nyse Euronext - Euronext Paris,EUR,NL0000235190
+UBSG,UBS GROUP AG,Financials,Aktien,"85.368.333,01","0,92","85.368.333,01","2.411.488,00","35,40",Schweiz,SIX Swiss Exchange,CHF,CH0244767585
+BATS,BRITISH AMERICAN TOBACCO,Nichtzyklische Konsumgüter,Aktien,"84.657.038,86","0,91","84.657.038,86","1.681.962,00","50,33",Vereinigtes Königreich,London Stock Exchange,GBP,GB0002875804
+SAF,SAFRAN SA,Industrie,Aktien,"84.444.444,00","0,91","84.444.444,00","287.226,00","294,00",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000073272
+BBVA,BANCO BILBAO VIZCAYA ARGENTARIA SA,Financials,Aktien,"84.248.291,14","0,91","84.248.291,14","4.438.793,00","18,98",Spanien,Bolsa De Madrid,EUR,ES0113211835
+IBE,IBERDROLA SA,Versorger,Aktien,"83.619.084,99","0,90","83.619.084,99","4.693.746,00","17,82",Spanien,Bolsa De Madrid,EUR,ES0144580Y14
+RR.,ROLLS-ROYCE HOLDINGS PLC,Industrie,Aktien,"81.845.632,41","0,88","81.845.632,41","6.467.664,00","12,65",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B63H8491
+UCG,UNICREDIT,Financials,Aktien,"79.804.837,24","0,86","79.804.837,24","1.195.399,00","66,76",Italien,Borsa Italiana,EUR,IT0005239360
+ABBN,ABB LTD,Industrie,Aktien,"76.357.521,52","0,82","76.357.521,52","1.212.643,00","62,97",Schweiz,SIX Swiss Exchange,CHF,CH0012221716
+CFR,COMPAGNIE FINANCIERE RICHEMONT SA,Zyklische Konsumgüter ,Aktien,"75.011.947,46","0,81","75.011.947,46","414.148,00","181,12",Schweiz,SIX Swiss Exchange,CHF,CH0210483332
+DTE,DEUTSCHE TELEKOM N AG,Kommunikation,Aktien,"72.499.464,46","0,78","72.499.464,46","2.699.161,00","26,86",Deutschland,Xetra,EUR,DE0005557508
+SAN,SANOFI SA,Gesundheitsversorgung,Aktien,"72.208.081,92","0,78","72.208.081,92","873.344,00","82,68",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120578
+AI,LAIR LIQUIDE SOCIETE ANONYME POUR,Materialien,Aktien,"70.292.577,60","0,76","70.292.577,60","442.760,00","158,76",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120073
+ZURN,ZURICH INSURANCE GROUP AG,Financials,Aktien,"69.656.403,90","0,75","69.656.403,90","112.263,00","620,47",Schweiz,SIX Swiss Exchange,CHF,CH0011075394
+EL,ESSILORLUXOTTICA SA,Gesundheitsversorgung,Aktien,"68.662.200,00","0,74","68.662.200,00","240.920,00","285,00",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121667
+OR,LOREAL SA,Nichtzyklische Konsumgüter,Aktien,"68.452.646,40","0,74","68.452.646,40","184.608,00","370,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120321
+ENR,SIEMENS ENERGY N AG,Industrie,Aktien,"67.373.124,00","0,72","67.373.124,00","545.090,00","123,60",Deutschland,Xetra,EUR,DE000ENER6Y0
+GSK,GLAXOSMITHKLINE,Gesundheitsversorgung,Aktien,"65.219.404,34","0,70","65.219.404,34","3.160.587,00","20,64",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BN7SWP63
+BP.,BP PLC,Energie,Aktien,"64.048.371,92","0,69","64.048.371,92","12.628.926,00","5,07",Vereinigtes Königreich,London Stock Exchange,GBP,GB0007980591
+BNP,BNP PARIBAS SA,Financials,Aktien,"63.225.210,00","0,68","63.225.210,00","821.000,00","77,01",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000131104
+ISP,INTESA SANPAOLO,Financials,Aktien,"62.978.159,09","0,68","62.978.159,09","11.178.232,00","5,63",Italien,Borsa Italiana,EUR,IT0000072618
+RMS,HERMES INTERNATIONAL,Zyklische Konsumgüter ,Aktien,"57.472.355,00","0,62","57.472.355,00","26.995,00","2.129,00",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000052292
+RHM,RHEINMETALL AG,Industrie,Aktien,"56.694.540,00","0,61","56.694.540,00","35.214,00","1.610,00",Deutschland,Xetra,EUR,DE0007030009
+CS,AXA SA,Financials,Aktien,"55.741.401,00","0,60","55.741.401,00","1.420.525,00","39,24",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120628
+BARC,BARCLAYS PLC,Financials,Aktien,"55.068.688,51","0,59","55.068.688,51","10.882.883,00","5,06",Vereinigtes Königreich,London Stock Exchange,GBP,GB0031348658
+MUV2,MUENCHENER RUECKVERSICHERUNGS-GESE,Financials,Aktien,"54.889.424,40","0,59","54.889.424,40","100.383,00","546,80",Deutschland,Xetra,EUR,DE0008430026
+INGA,ING GROEP NV,Financials,Aktien,"53.238.138,98","0,57","53.238.138,98","2.315.205,00","23,00",Niederlande,Euronext Amsterdam,EUR,NL0011821202
+RIO,RIO TINTO PLC,Materialien,Aktien,"52.998.358,52","0,57","52.998.358,52","826.112,00","64,15",Vereinigtes Königreich,London Stock Exchange,GBP,GB0007188757
+ENEL,ENEL,Versorger,Aktien,"51.813.095,40","0,56","51.813.095,40","5.968.563,00","8,68",Italien,Borsa Italiana,EUR,IT0003128367
+DG,VINCI SA,Industrie,Aktien,"51.606.227,20","0,56","51.606.227,20","442.592,00","116,60",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000125486
+NG.,NATIONAL GRID PLC,Versorger,Aktien,"50.467.858,00","0,54","50.467.858,00","3.948.833,00","12,78",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BDR05C01
+LLOY,LLOYDS BANKING GROUP PLC,Financials,Aktien,"50.052.186,05","0,54","50.052.186,05","46.125.233,00","1,09",Vereinigtes Königreich,London Stock Exchange,GBP,GB0008706128
+PRX,PROSUS NV CLASS N,Zyklische Konsumgüter ,Aktien,"50.032.528,00","0,54","50.032.528,00","962.164,00","52,00",Niederlande,Euronext Amsterdam,EUR,NL0013654783
+REL,RELX PLC,Industrie,Aktien,"49.407.441,27","0,53","49.407.441,27","1.436.994,00","34,38",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B2B0DG97
+DBK,DEUTSCHE BANK AG,Financials,Aktien,"47.759.717,29","0,51","47.759.717,29","1.492.258,00","32,01",Deutschland,Xetra,EUR,DE0005140008
+ITX,INDUSTRIA DE DISENO TEXTIL SA,Zyklische Konsumgüter ,Aktien,"46.641.650,70","0,50","46.641.650,70","852.681,00","54,70",Spanien,Bolsa De Madrid,EUR,ES0148396007
+NWG,NATWEST GROUP PLC,Financials,Aktien,"45.112.503,45","0,49","45.112.503,45","6.365.504,00","7,09",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BM8PJY71
+BA.,BAE SYSTEMS PLC,Industrie,Aktien,"45.091.923,56","0,49","45.091.923,56","2.309.402,00","19,53",Vereinigtes Königreich,London Stock Exchange,GBP,GB0002634946
+ABI,ANHEUSER-BUSCH INBEV SA,Nichtzyklische Konsumgüter,Aktien,"41.808.626,00","0,45","41.808.626,00","788.842,00","53,00",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0974293251
+INVE B,INVESTOR CLASS B,Financials,Aktien,"41.639.011,48","0,45","41.639.011,48","1.396.573,00","29,82",Schweden,Nasdaq Omx Nordic,SEK,SE0015811963
+NDA FI,NORDEA BANK,Financials,Aktien,"39.248.139,44","0,42","39.248.139,44","2.522.374,00","15,56",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI4000297767
+GLE,SOCIETE GENERALE SA,Financials,Aktien,"38.383.943,76","0,41","38.383.943,76","604.662,00","63,48",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000130809
+LSEG,LONDON STOCK EXCHANGE GROUP PLC,Financials,Aktien,"37.293.207,74","0,40","37.293.207,74","389.600,00","95,72",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B0SWJX34
+IFX,INFINEON TECHNOLOGIES AG,IT,Aktien,"36.864.732,65","0,40","36.864.732,65","1.004.215,00","36,71",Deutschland,Xetra,EUR,DE0006231004
+BN,DANONE SA,Nichtzyklische Konsumgüter,Aktien,"36.848.463,36","0,40","36.848.463,36","490.528,00","75,12",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120644
+ARGX,ARGENX,Gesundheitsversorgung,Aktien,"36.418.136,80","0,39","36.418.136,80","47.284,00","770,20",Belgien,Nyse Euronext - Euronext Brussels,EUR,NL0010832176
+CPG,COMPASS GROUP PLC,Zyklische Konsumgüter ,Aktien,"35.822.488,98","0,39","35.822.488,98","1.350.088,00","26,53",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BD6K4575
+RKT,RECKITT BENCKISER GROUP PLC,Nichtzyklische Konsumgüter,Aktien,"35.240.336,19","0,38","35.240.336,19","517.295,00","68,12",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B24CGK77
+MBG,MERCEDES-BENZ GROUP N AG,Zyklische Konsumgüter ,Aktien,"33.736.939,68","0,36","33.736.939,68","555.432,00","60,74",Deutschland,Xetra,EUR,DE0007100000
+DHL,DEUTSCHE POST AG,Industrie,Aktien,"32.624.718,69","0,35","32.624.718,69","712.797,00","45,77",Deutschland,Xetra,EUR,DE0005552004
+VOLV B,VOLVO CLASS B,Industrie,Aktien,"32.543.259,14","0,35","32.543.259,14","1.217.024,00","26,74",Schweden,Nasdaq Omx Nordic,SEK,SE0000115446
+GLEN,GLENCORE PLC,Materialien,Aktien,"32.373.605,78","0,35","32.373.605,78","7.438.025,00","4,35",Vereinigtes Königreich,London Stock Exchange,GBP,JE00B4T3BW64
+DSV,DSV,Industrie,Aktien,"32.076.814,28","0,35","32.076.814,28","152.028,00","210,99",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060079531
+HOLN,HOLCIM LTD AG,Materialien,Aktien,"32.075.932,36","0,35","32.075.932,36","406.251,00","78,96",Schweiz,SIX Swiss Exchange,CHF,CH0012214059
+SGO,COMPAGNIE DE SAINT GOBAIN SA,Industrie,Aktien,"31.910.527,00","0,34","31.910.527,00","382.162,00","83,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000125007
+DB1,DEUTSCHE BOERSE AG,Financials,Aktien,"31.754.406,50","0,34","31.754.406,50","144.667,00","219,50",Deutschland,Xetra,EUR,DE0005810055
+SREN,SWISS RE AG,Financials,Aktien,"31.331.028,39","0,34","31.331.028,39","228.549,00","137,09",Schweiz,SIX Swiss Exchange,CHF,CH0126881561
+DGE,DIAGEO PLC,Nichtzyklische Konsumgüter,Aktien,"31.189.677,11","0,34","31.189.677,11","1.701.592,00","18,33",Vereinigtes Königreich,London Stock Exchange,GBP,GB0002374006
+LONN,LONZA GROUP AG,Gesundheitsversorgung,Aktien,"31.182.145,49","0,34","31.182.145,49","54.180,00","575,53",Schweiz,SIX Swiss Exchange,CHF,CH0013841017
+ENGI,ENGIE SA,Versorger,Aktien,"30.620.286,84","0,33","30.620.286,84","1.426.854,00","21,46",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010208488
+ADYEN,ADYEN NV,Financials,Aktien,"30.239.913,60","0,33","30.239.913,60","22.672,00","1.333,80",Niederlande,Euronext Amsterdam,EUR,NL0012969182
+ATCO A,ATLAS COPCO CLASS A,Industrie,Aktien,"30.209.446,33","0,33","30.209.446,33","1.967.726,00","15,35",Schweden,Nasdaq Omx Nordic,SEK,SE0017486889
+BAS,BASF N,Materialien,Aktien,"29.578.423,32","0,32","29.578.423,32","685.638,00","43,14",Deutschland,Xetra,EUR,DE000BASF111
+RACE,FERRARI NV,Zyklische Konsumgüter ,Aktien,"28.890.472,50","0,31","28.890.472,50","93.045,00","310,50",Italien,Borsa Italiana,EUR,NL0011585146
+G,ASSICURAZIONI GENERALI,Financials,Aktien,"28.537.520,40","0,31","28.537.520,40","821.460,00","34,74",Italien,Borsa Italiana,EUR,IT0000062072
+STAN,STANDARD CHARTERED PLC,Financials,Aktien,"28.386.890,82","0,31","28.386.890,82","1.456.407,00","19,49",Vereinigtes Königreich,London Stock Exchange,GBP,GB0004082847
+BAYN,BAYER AG,Gesundheitsversorgung,Aktien,"27.704.556,68","0,30","27.704.556,68","756.645,00","36,62",Deutschland,Xetra,EUR,DE000BAY0017
+CABK,CAIXABANK SA,Financials,Aktien,"27.703.556,52","0,30","27.703.556,52","2.764.826,00","10,02",Spanien,Bolsa De Madrid,EUR,ES0140609019
+HLN,HALEON PLC,Gesundheitsversorgung,Aktien,"27.672.200,84","0,30","27.672.200,84","6.789.798,00","4,08",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BMX86B70
+EUR,EUR CASH,Cash und/oder Derivate,Geldmarkt,"27.642.889,68","0,30","27.642.889,68","27.642.890,00","100,00",Europäische Union,-,EUR,
+AAL,ANGLO AMERICAN PLC,Materialien,Aktien,"27.464.305,30","0,30","27.464.305,30","833.457,00","32,95",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BTK05J60
+III,3I GROUP PLC,Financials,Aktien,"26.907.088,10","0,29","26.907.088,10","753.253,00","35,72",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B1YW4409
+EOAN,E.ON N,Versorger,Aktien,"26.444.945,14","0,28","26.444.945,14","1.704.476,00","15,52",Deutschland,Xetra,EUR,DE000ENAG999
+EXPN,EXPERIAN PLC,Industrie,Aktien,"26.422.756,64","0,28","26.422.756,64","705.353,00","37,46",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B19NLV48
+ENI,ENI,Energie,Aktien,"26.397.861,94","0,28","26.397.861,94","1.648.424,00","16,01",Italien,Borsa Italiana,EUR,IT0003132476
+ALC,ALCON AG,Gesundheitsversorgung,Aktien,"26.333.736,06","0,28","26.333.736,06","384.371,00","68,51",Schweiz,SIX Swiss Exchange,CHF,CH0432492467
+LR,LEGRAND SA,Industrie,Aktien,"25.883.721,00","0,28","25.883.721,00","200.649,00","129,00",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010307819
+TSCO,TESCO PLC,Nichtzyklische Konsumgüter,Aktien,"25.874.310,47","0,28","25.874.310,47","5.057.911,00","5,12",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BLGZ9862
+ASSA B,ASSA ABLOY B,Industrie,Aktien,"24.909.860,80","0,27","24.909.860,80","768.349,00","32,42",Schweden,Nasdaq Omx Nordic,SEK,SE0007100581
+AD,KONINKLIJKE AHOLD DELHAIZE NV,Nichtzyklische Konsumgüter,Aktien,"23.915.278,08","0,26","23.915.278,08","695.616,00","34,38",Niederlande,Euronext Amsterdam,EUR,NL0011794037
+PRU,PRUDENTIAL PLC,Financials,Aktien,"23.242.607,23","0,25","23.242.607,23","1.873.106,00","12,41",Vereinigtes Königreich,London Stock Exchange,GBP,GB0007099541
+UCB,UCB SA,Gesundheitsversorgung,Aktien,"23.028.618,20","0,25","23.028.618,20","95.081,00","242,20",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003739530
+EBS,ERSTE GROUP BANK AG,Financials,Aktien,"22.780.642,60","0,25","22.780.642,60","231.041,00","98,60",Österreich,Wiener Boerse Ag,EUR,AT0000652011
+RWE,RWE AG,Versorger,Aktien,"22.765.580,58","0,24","22.765.580,58","522.986,00","43,53",Deutschland,Xetra,EUR,DE0007037129
+IMB,IMPERIAL BRANDS PLC,Nichtzyklische Konsumgüter,Aktien,"22.043.838,64","0,24","22.043.838,64","586.845,00","37,56",Vereinigtes Königreich,London Stock Exchange,GBP,GB0004544929
+GIVN,GIVAUDAN SA,Materialien,Aktien,"21.936.029,57","0,24","21.936.029,57","6.204,00","3.535,77",Schweiz,SIX Swiss Exchange,CHF,CH0010645932
+SAND,SANDVIK,Industrie,Aktien,"21.887.572,01","0,24","21.887.572,01","815.439,00","26,84",Schweden,Nasdaq Omx Nordic,SEK,SE0000667891
+EQT,EQT,Financials,Aktien,"21.831.345,20","0,23","21.831.345,20","721.843,00","30,24",Schweden,Nasdaq Omx Nordic,SEK,SE0012853455
+SDZ,SANDOZ GROUP AG,Gesundheitsversorgung,Aktien,"21.600.247,09","0,23","21.600.247,09","341.527,00","63,25",Schweiz,SIX Swiss Exchange,CHF,CH1243598427
+FER,FERROVIAL,Industrie,Aktien,"21.550.786,40","0,23","21.550.786,40","381.160,00","56,54",Spanien,Bolsa De Madrid,EUR,NL0015001FS8
+AMS,AMADEUS IT GROUP SA,Zyklische Konsumgüter ,Aktien,"21.388.856,58","0,23","21.388.856,58","347.109,00","61,62",Spanien,Bolsa De Madrid,EUR,ES0109067019
+HEI,HEIDELBERG MATERIALS AG,Materialien,Aktien,"21.327.780,90","0,23","21.327.780,90","97.789,00","218,10",Deutschland,Xetra,EUR,DE0006047004
+SEB A,SKANDINAVISKA ENSKILDA BANKEN,Financials,Aktien,"21.255.745,85","0,23","21.255.745,85","1.211.043,00","17,55",Schweden,Nasdaq Omx Nordic,SEK,SE0000148884
+ADS,ADIDAS N AG,Zyklische Konsumgüter ,Aktien,"21.190.528,80","0,23","21.190.528,80","131.292,00","161,40",Deutschland,Xetra,EUR,DE000A1EWWW0
+SIKA,SIKA AG,Materialien,Aktien,"20.927.655,97","0,23","20.927.655,97","124.006,00","168,76",Schweiz,SIX Swiss Exchange,CHF,CH0418792922
+NOKIA,NOKIA,IT,Aktien,"20.698.016,22","0,22","20.698.016,22","3.900.870,00","5,31",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009000681
+ORA,ORANGE SA,Kommunikation,Aktien,"20.684.409,87","0,22","20.684.409,87","1.513.678,00","13,66",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000133308
+DANSKE,DANSKE BANK,Financials,Aktien,"20.662.578,35","0,22","20.662.578,35","503.550,00","41,03",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010274414
+BMW,BMW AG,Zyklische Konsumgüter ,Aktien,"20.646.680,44","0,22","20.646.680,44","215.834,00","95,66",Deutschland,Xetra,EUR,DE0005190003
+SSE,SSE PLC,Versorger,Aktien,"20.573.949,65","0,22","20.573.949,65","859.534,00","23,94",Vereinigtes Königreich,London Stock Exchange,GBP,GB0007908733
+SLHN,SWISS LIFE HOLDING AG,Financials,Aktien,"20.374.445,74","0,22","20.374.445,74","21.924,00","929,32",Schweiz,SIX Swiss Exchange,CHF,CH0014852781
+CBK,COMMERZBANK AG,Financials,Aktien,"20.205.983,50","0,22","20.205.983,50","582.305,00","34,70",Deutschland,Xetra,EUR,DE000CBK1001
+SWED A,SWEDBANK,Financials,Aktien,"19.837.814,84","0,21","19.837.814,84","699.884,00","28,34",Schweden,Nasdaq Omx Nordic,SEK,SE0000242455
+PRY,PRYSMIAN,Industrie,Aktien,"19.621.196,70","0,21","19.621.196,70","227.255,00","86,34",Italien,Borsa Italiana,EUR,IT0004176001
+ASM,ASM INTERNATIONAL NV,IT,Aktien,"19.519.718,40","0,21","19.519.718,40","35.568,00","548,80",Niederlande,Euronext Amsterdam,EUR,NL0000334118
+SAMPO,SAMPO CLASS A,Financials,Aktien,"19.273.577,79","0,21","19.273.577,79","1.921.593,00","10,03",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI4000552500
+AMRZ,AMRIZE AG,Materialien,Aktien,"19.103.496,00","0,21","19.103.496,00","415.530,00","45,97",Vereinigte Staaten,SIX Swiss Exchange,CHF,CH1430134226
+CAP,CAPGEMINI,IT,Aktien,"18.960.273,60","0,20","18.960.273,60","129.776,00","146,10",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000125338
+GALD,GALDERMA GROUP N AG,Gesundheitsversorgung,Aktien,"18.620.339,32","0,20","18.620.339,32","103.693,00","179,57",Schweiz,SIX Swiss Exchange,CHF,CH1335392721
+KBC,KBC GROEP,Financials,Aktien,"18.547.041,30","0,20","18.547.041,30","171.573,00","108,10",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003565737
+ERIC B,ERICSSON B,IT,Aktien,"18.407.475,17","0,20","18.407.475,17","2.226.049,00","8,27",Schweden,Nasdaq Omx Nordic,SEK,SE0000108656
+UMG,UNIVERSAL MUSIC GROUP NV,Kommunikation,Aktien,"18.280.205,24","0,20","18.280.205,24","843.572,00","21,67",Niederlande,Euronext Amsterdam,EUR,NL0015000IY2
+KNEBV,KONE,Industrie,Aktien,"18.250.929,18","0,20","18.250.929,18","310.707,00","58,74",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009013403
+AHT,ASHTEAD GROUP PLC,Industrie,Aktien,"18.190.245,34","0,20","18.190.245,34","332.249,00","54,75",Vereinigtes Königreich,London Stock Exchange,GBP,GB0000536739
+RYA,RYANAIR HOLDINGS PLC,Industrie,Aktien,"18.060.295,20","0,19","18.060.295,20","640.436,00","28,20",Irland,Irish Stock Exchange - All Market,EUR,IE00BYTBXV33
+PGHN,PARTNERS GROUP HOLDING AG,Financials,Aktien,"17.657.308,78","0,19","17.657.308,78","17.299,00","1.020,71",Schweiz,SIX Swiss Exchange,CHF,CH0024608827
+VWS,VESTAS WIND SYSTEMS,Industrie,Aktien,"17.517.449,57","0,19","17.517.449,57","782.336,00","22,39",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0061539921
+GEBN,GEBERIT AG,Industrie,Aktien,"17.196.622,34","0,19","17.196.622,34","26.300,00","653,86",Schweiz,SIX Swiss Exchange,CHF,CH0030170408
+AV.,AVIVA PLC,Financials,Aktien,"17.038.930,34","0,18","17.038.930,34","2.296.003,00","7,42",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BPQY8M80
+VOW3,VOLKSWAGEN NON-VOTING PREF AG,Zyklische Konsumgüter ,Aktien,"16.993.695,60","0,18","16.993.695,60","159.117,00","106,80",Deutschland,Xetra,EUR,DE0007664039
+HO,THALES SA,Industrie,Aktien,"16.831.188,00","0,18","16.831.188,00","73.821,00","228,00",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121329
+WKL,WOLTERS KLUWER NV,Industrie,Aktien,"16.265.645,52","0,18","16.265.645,52","184.669,00","88,08",Niederlande,Euronext Amsterdam,EUR,NL0000395903
+VOD,VODAFONE GROUP PLC,Kommunikation,Aktien,"16.223.617,05","0,17","16.223.617,05","15.004.549,00","1,08",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BH4HKS39
+KER,KERING SA,Zyklische Konsumgüter ,Aktien,"15.905.371,20","0,17","15.905.371,20","55.074,00","288,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121485
+HEXA B,HEXAGON CLASS B,IT,Aktien,"15.836.387,67","0,17","15.836.387,67","1.577.843,00","10,04",Schweden,Nasdaq Omx Nordic,SEK,SE0015961909
+DTG,DAIMLER TRUCK HOLDING E AG,Industrie,Aktien,"15.820.215,06","0,17","15.820.215,06","430.014,00","36,79",Deutschland,Xetra,EUR,DE000DTR0CK8
+PUB,PUBLICIS GROUPE SA,Kommunikation,Aktien,"15.653.182,48","0,17","15.653.182,48","181.339,00","86,32",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000130577
+STLAM,STELLANTIS NV,Zyklische Konsumgüter ,Aktien,"15.631.859,52","0,17","15.631.859,52","1.537.056,00","10,17",Italien,Borsa Italiana,EUR,NL00150001Q9
+FRE,FRESENIUS SE AND CO KGAA,Gesundheitsversorgung,Aktien,"15.420.071,36","0,17","15.420.071,36","320.984,00","48,04",Deutschland,Xetra,EUR,DE0005785604
+VIE,VEOLIA ENVIRON. SA,Versorger,Aktien,"15.248.469,60","0,16","15.248.469,60","528.360,00","28,86",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000124141
+DNB,DNB BANK,Financials,Aktien,"15.078.897,97","0,16","15.078.897,97","656.313,00","22,98",Norwegen,Oslo Bors Asa,NOK,NO0010161896
+LDO,LEONARDO FINMECCANICA SPA,Industrie,Aktien,"15.048.875,52","0,16","15.048.875,52","309.393,00","48,64",Italien,Borsa Italiana,EUR,IT0003856405
+HEIA,HEINEKEN NV,Nichtzyklische Konsumgüter,Aktien,"15.012.496,00","0,16","15.012.496,00","220.772,00","68,00",Niederlande,Euronext Amsterdam,EUR,NL0000009165
+ML,MICHELIN,Zyklische Konsumgüter ,Aktien,"14.985.174,96","0,16","14.985.174,96","544.124,00","27,54",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR001400AJ45
+ACA,CREDIT AGRICOLE SA,Financials,Aktien,"14.822.168,46","0,16","14.822.168,46","867.047,00","17,09",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000045072
+SHB A,SVENSKA HANDELSBANKEN-A SHS,Financials,Aktien,"14.677.133,76","0,16","14.677.133,76","1.208.625,00","12,14",Schweden,Nasdaq Omx Nordic,SEK,SE0007100599
+MTX,MTU AERO ENGINES HOLDING AG,Industrie,Aktien,"14.669.052,00","0,16","14.669.052,00","41.438,00","354,00",Deutschland,Xetra,EUR,DE000A0D9PT0
+REP,REPSOL SA,Energie,Aktien,"14.425.558,91","0,16","14.425.558,91","884.461,00","16,31",Spanien,Bolsa De Madrid,EUR,ES0173516115
+A5G,AIB GROUP PLC,Financials,Aktien,"14.319.105,22","0,15","14.319.105,22","1.610.698,00","8,89",Irland,Irish Stock Exchange - All Market,EUR,IE00BF0L3536
+NSIS B,NOVOZYMES B,Materialien,Aktien,"13.950.840,46","0,15","13.950.840,46","263.944,00","52,86",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060336014
+PHIA,KONINKLIJKE PHILIPS NV,Gesundheitsversorgung,Aktien,"13.826.496,00","0,15","13.826.496,00","601.152,00","23,00",Niederlande,Euronext Amsterdam,EUR,NL0000009538
+NXT,NEXT PLC,Zyklische Konsumgüter ,Aktien,"13.630.634,70","0,15","13.630.634,70","87.725,00","155,38",Vereinigtes Königreich,London Stock Exchange,GBP,GB0032089863
+ACS,ACS ACTIVIDADES DE CONSTRUCCION Y,Industrie,Aktien,"13.578.251,25","0,15","13.578.251,25","157.429,00","86,25",Spanien,Bolsa De Madrid,EUR,ES0167050915
+BMPS,BANCA MONTE DEI PASCHI DI SIENA SP,Financials,Aktien,"13.491.508,47","0,15","13.491.508,47","1.689.395,00","7,99",Italien,Borsa Italiana,EUR,IT0005508921
+SAB,BANCO DE SABADELL SA,Financials,Aktien,"13.459.309,63","0,14","13.459.309,63","4.093.464,00","3,29",Spanien,Bolsa De Madrid,EUR,ES0113860A34
+ABN,ABN AMRO BANK NV,Financials,Aktien,"13.447.535,50","0,14","13.447.535,50","452.018,00","29,75",Niederlande,Euronext Amsterdam,EUR,NL0011540547
+GMAB,GENMAB,Gesundheitsversorgung,Aktien,"13.287.510,98","0,14","13.287.510,98","49.837,00","266,62",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010272202
+AENA,AENA SME SA,Industrie,Aktien,"13.174.112,25","0,14","13.174.112,25","571.545,00","23,05",Spanien,Bolsa De Madrid,EUR,ES0105046017
+IHG,INTERCONTINENTAL HOTELS GROUP PLC,Zyklische Konsumgüter ,Aktien,"13.137.223,33","0,14","13.137.223,33","117.401,00","111,90",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BHJYC057
+VNA,VONOVIA SE,Immobilien,Aktien,"13.022.715,24","0,14","13.022.715,24","543.519,00","23,96",Deutschland,Xetra,EUR,DE000A1ML7J1
+DSY,DASSAULT SYSTEMES,IT,Aktien,"12.720.944,08","0,14","12.720.944,08","552.604,00","23,02",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0014003TT8
+HBAN,HELVETIA BALOISE HOLDING N AG,Financials,Aktien,"12.468.611,83","0,13","12.468.611,83","59.324,00","210,18",Schweiz,SIX Swiss Exchange,CHF,CH0466642201
+PKO,POWSZECHNA KASA OSZCZEDNOSCI BANK,Financials,Aktien,"12.428.482,20","0,13","12.428.482,20","652.338,00","19,05",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLPKO0000016
+MT,ARCELORMITTAL SA,Materialien,Aktien,"12.246.445,44","0,13","12.246.445,44","321.936,00","38,04",Frankreich,Euronext Amsterdam,EUR,LU1598757687
+NN,NN GROUP NV,Financials,Aktien,"12.222.759,28","0,13","12.222.759,28","193.766,00","63,08",Niederlande,Euronext Amsterdam,EUR,NL0010773842
+SGSN,SGS SA,Industrie,Aktien,"12.219.605,43","0,13","12.219.605,43","130.319,00","93,77",Schweiz,SIX Swiss Exchange,CHF,CH1256740924
+LGEN,LEGAL AND GENERAL GROUP PLC,Financials,Aktien,"12.162.727,63","0,13","12.162.727,63","4.390.796,00","2,77",Vereinigtes Königreich,London Stock Exchange,GBP,GB0005603997
+SAAB B,SAAB CLASS B,Industrie,Aktien,"12.004.059,84","0,13","12.004.059,84","257.743,00","46,57",Schweden,Nasdaq Omx Nordic,SEK,SE0021921269
+WRT1V,WARTSILA,Industrie,Aktien,"11.851.377,70","0,13","11.851.377,70","378.155,00","31,34",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009003727
+HNR1,HANNOVER RUECK,Financials,Aktien,"11.851.833,60","0,13","11.851.833,60","46.224,00","256,40",Deutschland,Xetra,EUR,DE0008402215
+HLMA,HALMA PLC,IT,Aktien,"11.640.855,41","0,13","11.640.855,41","287.239,00","40,53",Vereinigtes Königreich,London Stock Exchange,GBP,GB0004052071
+SCMN,SWISSCOM AG,Kommunikation,Aktien,"11.598.591,13","0,12","11.598.591,13","19.599,00","591,79",Schweiz,SIX Swiss Exchange,CHF,CH0008742519
+KPN,KONINKLIJKE KPN NV,Kommunikation,Aktien,"11.511.739,20","0,12","11.511.739,20","2.961.600,00","3,89",Niederlande,Euronext Amsterdam,EUR,NL0000009082
+BIRG,BANK OF IRELAND GROUP PLC,Financials,Aktien,"11.512.034,50","0,12","11.512.034,50","715.700,00","16,09",Irland,Irish Stock Exchange - All Market,EUR,IE00BD1RP616
+LOGN,LOGITECH INTERNATIONAL SA,IT,Aktien,"11.448.691,29","0,12","11.448.691,29","111.929,00","102,28",Schweiz,SIX Swiss Exchange,CHF,CH0025751329
+MRK,MERCK,Gesundheitsversorgung,Aktien,"11.443.920,00","0,12","11.443.920,00","98.400,00","116,30",Deutschland,Xetra,EUR,DE0006599905
+STMMI,STMICROELECTRONICS NV,IT,Aktien,"11.394.226,17","0,12","11.394.226,17","511.985,00","22,25",Frankreich,Borsa Italiana,EUR,NL0000226223
+BPE,BPER BANCA,Financials,Aktien,"11.326.258,11","0,12","11.326.258,11","1.059.519,00","10,69",Italien,Borsa Italiana,EUR,IT0000066123
+RI,PERNOD RICARD SA,Nichtzyklische Konsumgüter,Aktien,"11.200.656,48","0,12","11.200.656,48","152.764,00","73,32",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120693
+INF,INFORMA PLC,Kommunikation,Aktien,"10.891.086,07","0,12","10.891.086,07","1.023.958,00","10,64",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BMJ6DW54
+BAMI,BANCO BPM,Financials,Aktien,"10.863.303,72","0,12","10.863.303,72","879.976,00","12,35",Italien,Borsa Italiana,EUR,IT0005218380
+SHL,SIEMENS HEALTHINEERS AG,Gesundheitsversorgung,Aktien,"10.736.623,53","0,12","10.736.623,53","249.747,00","42,99",Deutschland,Xetra,EUR,DE000SHL1006
+TEF,TELEFONICA SA,Kommunikation,Aktien,"10.692.360,96","0,12","10.692.360,96","2.931.020,00","3,65",Spanien,Bolsa De Madrid,EUR,ES0178430E18
+EQNR,EQUINOR,Energie,Aktien,"10.637.196,66","0,11","10.637.196,66","546.727,00","19,46",Norwegen,Oslo Bors Asa,NOK,NO0010096985
+ESSITY B,ESSITY CLASS B,Nichtzyklische Konsumgüter,Aktien,"10.579.456,76","0,11","10.579.456,76","443.167,00","23,87",Schweden,Nasdaq Omx Nordic,SEK,SE0009922164
+BAER,JULIUS BAER GRUPPE AG,Financials,Aktien,"10.146.181,90","0,11","10.146.181,90","160.207,00","63,33",Schweiz,SIX Swiss Exchange,CHF,CH0102484968
+GBP,GBP CASH,Cash und/oder Derivate,Geldmarkt,"10.033.073,37","0,11","10.033.073,37","8.768.818,00","114,42",Vereinigtes Königreich,-,GBP,
+ANTO,ANTOFAGASTA PLC,Materialien,Aktien,"10.009.720,27","0,11","10.009.720,27","299.603,00","33,41",Vereinigtes Königreich,London Stock Exchange,GBP,GB0000456144
+PKN,ORLEN SA,Energie,Aktien,"9.996.068,05","0,11","9.996.068,05","454.783,00","21,98",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLPKN0000018
+FBK,FINECOBANK BANCA FINECO,Financials,Aktien,"9.960.929,28","0,11","9.960.929,28","477.056,00","20,88",Italien,Borsa Italiana,EUR,IT0000072170
+TRN,TERNA RETE ELETTRICA NAZIONALE,Versorger,Aktien,"9.900.395,64","0,11","9.900.395,64","1.121.985,00","8,82",Italien,Borsa Italiana,EUR,IT0003242622
+UPM,UPM-KYMMENE,Materialien,Aktien,"9.820.913,08","0,11","9.820.913,08","409.546,00","23,98",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009005987
+MONC,MONCLER,Zyklische Konsumgüter ,Aktien,"9.765.121,00","0,11","9.765.121,00","172.834,00","56,50",Italien,Borsa Italiana,EUR,IT0004965148
+CLNX,CELLNEX TELECOM SA,Kommunikation,Aktien,"9.706.883,40","0,10","9.706.883,40","379.620,00","25,57",Spanien,Bolsa De Madrid,EUR,ES0105066007
+SN.,SMITH AND NEPHEW PLC,Gesundheitsversorgung,Aktien,"9.684.734,72","0,10","9.684.734,72","677.692,00","14,29",Vereinigtes Königreich,London Stock Exchange,GBP,GB0009223206
+BT.A,BT GROUP PLC,Kommunikation,Aktien,"9.639.966,42","0,10","9.639.966,42","4.785.712,00","2,01",Vereinigtes Königreich,London Stock Exchange,GBP,GB0030913577
+SCHP,SCHINDLER HOLDING PAR AG,Industrie,Aktien,"9.601.688,65","0,10","9.601.688,65","31.284,00","306,92",Schweiz,SIX Swiss Exchange,CHF,CH0024638196
+ALFA,ALFA LAVAL,Industrie,Aktien,"9.582.390,20","0,10","9.582.390,20","225.282,00","42,54",Schweden,Nasdaq Omx Nordic,SEK,SE0000695876
+DSFIR,DSM FIRMENICH AG,Materialien,Aktien,"9.557.562,60","0,10","9.557.562,60","140.346,00","68,10",Niederlande,Euronext Amsterdam,EUR,CH1216478797
+LISP,CHOCOLADEFABRIKEN LINDT & SPRUENGL,Nichtzyklische Konsumgüter,Aktien,"9.505.052,48","0,10","9.505.052,48","769,00","12.360,21",Schweiz,SIX Swiss Exchange,CHF,CH0010570767
+EPI A,EPIROC CLASS A,Industrie,Aktien,"9.388.034,89","0,10","9.388.034,89","480.485,00","19,54",Schweden,Nasdaq Omx Nordic,SEK,SE0015658109
+BOL,BOLIDEN,Materialien,Aktien,"9.372.844,98","0,10","9.372.844,98","213.865,00","43,83",Schweden,Nasdaq Omx Nordic,SEK,SE0020050417
+KRZ,KERRY GROUP PLC,Nichtzyklische Konsumgüter,Aktien,"9.346.508,60","0,10","9.346.508,60","123.959,00","75,40",Irland,Irish Stock Exchange - All Market,EUR,IE0004906560
+SGE,THE SAGE GROUP PLC,IT,Aktien,"9.100.720,26","0,10","9.100.720,26","741.627,00","12,27",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B8C3BL03
+EN,BOUYGUES SA,Industrie,Aktien,"9.069.031,36","0,10","9.069.031,36","210.272,00","43,13",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120503
+FGR,EIFFAGE SA,Industrie,Aktien,"9.039.480,30","0,10","9.039.480,30","75.771,00","119,30",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000130452
+VACN,VAT GROUP AG,Industrie,Aktien,"9.033.481,29","0,10","9.033.481,29","21.501,00","420,14",Schweiz,SIX Swiss Exchange,CHF,CH0311864901
+COLO B,COLOPLAST B,Gesundheitsversorgung,Aktien,"8.856.444,23","0,10","8.856.444,23","117.584,00","75,32",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060448595
+SRG,SNAM,Versorger,Aktien,"8.851.096,44","0,10","8.851.096,44","1.586.218,00","5,58",Italien,Borsa Italiana,EUR,IT0003153415
+STMN,STRAUMANN HOLDING AG,Gesundheitsversorgung,Aktien,"8.759.957,05","0,09","8.759.957,05","89.130,00","98,28",Schweiz,SIX Swiss Exchange,CHF,CH1175448666
+KRX,KINGSPAN GROUP PLC,Industrie,Aktien,"8.758.997,50","0,09","8.758.997,50","118.525,00","73,90",Irland,Irish Stock Exchange - All Market,EUR,IE0004927939
+RTO,RENTOKIL INITIAL PLC,Industrie,Aktien,"8.714.811,48","0,09","8.714.811,48","1.784.181,00","4,88",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B082RF11
+IAG,INTERNATIONAL AIRLINES GROUP SA,Industrie,Aktien,"8.386.575,45","0,09","8.386.575,45","1.900.880,00","4,41",Spanien,London Stock Exchange,GBP,ES0177542018
+EDP,EDP ENERGIAS DE PORTUGAL SA,Versorger,Aktien,"8.336.461,14","0,09","8.336.461,14","2.205.413,00","3,78",Portugal,Nyse Euronext - Euronext Lisbon,EUR,PTEDP0AM0009
+HEN3,HENKEL & KGAA PREF AG,Nichtzyklische Konsumgüter,Aktien,"8.307.117,00","0,09","8.307.117,00","120.393,00","69,00",Deutschland,Xetra,EUR,DE0006048432
+SOON,SONOVA HOLDING AG,Gesundheitsversorgung,Aktien,"8.061.288,41","0,09","8.061.288,41","37.683,00","213,92",Schweiz,SIX Swiss Exchange,CHF,CH0012549785
+SPSN,SWISS PRIME SITE AG,Immobilien,Aktien,"7.932.440,08","0,09","7.932.440,08","63.300,00","125,31",Schweiz,SIX Swiss Exchange,CHF,CH0008038389
+BESI,BE SEMICONDUCTOR INDUSTRIES NV,IT,Aktien,"7.865.902,25","0,08","7.865.902,25","56.005,00","140,45",Niederlande,Euronext Amsterdam,EUR,NL0012866412
+CARL B,CARLSBERG AS CL B,Nichtzyklische Konsumgüter,Aktien,"7.810.574,66","0,08","7.810.574,66","72.545,00","107,67",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010181759
+ELE,ENDESA SA,Versorger,Aktien,"7.661.148,09","0,08","7.661.148,09","251.763,00","30,43",Spanien,Bolsa De Madrid,EUR,ES0130670112
+CNA,CENTRICA PLC,Versorger,Aktien,"7.625.504,55","0,08","7.625.504,55","3.978.880,00","1,92",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B033F229
+ENX,EURONEXT NV,Financials,Aktien,"7.579.311,00","0,08","7.579.311,00","60.878,00","124,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,NL0006294274
+KNIN,KUEHNE UND NAGEL INTERNATIONAL AG,Industrie,Aktien,"7.575.788,64","0,08","7.575.788,64","41.839,00","181,07",Schweiz,SIX Swiss Exchange,CHF,CH0025238863
+BG,BAWAG GROUP AG,Financials,Aktien,"7.434.647,50","0,08","7.434.647,50","60.691,00","122,50",Österreich,Wiener Boerse Ag,EUR,AT0000BAWAG2
+URW,UNIBAIL RODAMCO WE STAPLED UNITS,Immobilien,Aktien,"7.390.868,76","0,08","7.390.868,76","81.147,00","91,08",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013326246
+PST,POSTE ITALIANE,Financials,Aktien,"7.340.232,05","0,08","7.340.232,05","356.495,00","20,59",Italien,Borsa Italiana,EUR,IT0003796171
+AC,ACCOR SA,Zyklische Konsumgüter ,Aktien,"7.290.166,81","0,08","7.290.166,81","160.541,00","45,41",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120404
+SGRO,SEGRO REIT PLC,Immobilien,Aktien,"7.185.969,31","0,08","7.185.969,31","915.521,00","7,85",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B5ZN1N88
+AKZA,AKZO NOBEL NV,Materialien,Aktien,"7.166.140,80","0,08","7.166.140,80","132.510,00","54,08",Niederlande,Euronext Amsterdam,EUR,NL0013267909
+UU.,UNITED UTILITIES GROUP PLC,Versorger,Aktien,"7.154.638,84","0,08","7.154.638,84","532.178,00","13,44",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B39J2M42
+METSO,METSO CORPORATION,Industrie,Aktien,"7.073.639,28","0,08","7.073.639,28","482.184,00","14,67",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009014575
+ADM,ADMIRAL GROUP PLC,Financials,Aktien,"7.027.545,77","0,08","7.027.545,77","200.196,00","35,10",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B02J6398
+AGS,AGEAS SA,Financials,Aktien,"6.978.698,30","0,08","6.978.698,30","122.326,00","57,05",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0974264930
+SY1,SYMRISE AG,Materialien,Aktien,"6.967.766,40","0,07","6.967.766,40","103.687,00","67,20",Deutschland,Xetra,EUR,DE000SYM9999
+KOG,KONGSBERG GRUPPEN,Industrie,Aktien,"6.948.152,41","0,07","6.948.152,41","331.935,00","20,93",Norwegen,Oslo Bors Asa,NOK,NO0013536151
+SMIN,SMITHS GROUP PLC,Industrie,Aktien,"6.931.980,33","0,07","6.931.980,33","258.468,00","26,82",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B1WY2338
+BKT,BANKINTER SA,Financials,Aktien,"6.811.031,25","0,07","6.811.031,25","496.250,00","13,73",Spanien,Bolsa De Madrid,EUR,ES0113679I37
+MOWI,MOWI,Nichtzyklische Konsumgüter,Aktien,"6.792.705,66","0,07","6.792.705,66","340.253,00","19,96",Norwegen,Oslo Bors Asa,NOK,NO0003054108
+BVI,BUREAU VERITAS SA,Industrie,Aktien,"6.790.611,60","0,07","6.790.611,60","263.202,00","25,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0006174348
+PZU,PZU SA,Financials,Aktien,"6.744.346,54","0,07","6.744.346,54","441.805,00","15,27",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLPZU0000011
+MAERSK B,A P MOLLER MAERSK B,Industrie,Aktien,"6.692.343,71","0,07","6.692.343,71","3.544,00","1.888,36",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010244508
+QIA,QIAGEN NV,Gesundheitsversorgung,Aktien,"6.662.843,40","0,07","6.662.843,40","169.538,00","39,30",Deutschland,Deutsche Börse AG,EUR,NL0015002CX3
+DPLM,DIPLOMA PLC,Industrie,Aktien,"6.573.056,45","0,07","6.573.056,45","104.832,00","62,70",Vereinigtes Königreich,London Stock Exchange,GBP,GB0001826634
+FME,FRESENIUS MEDICAL CARE AG,Gesundheitsversorgung,Aktien,"6.568.492,46","0,07","6.568.492,46","164.459,00","39,94",Deutschland,Xetra,EUR,DE0005785802
+CCH,COCA COLA HBC AG,Nichtzyklische Konsumgüter,Aktien,"6.548.600,14","0,07","6.548.600,14","156.806,00","41,76",Vereinigtes Königreich,London Stock Exchange,GBP,CH0198251305
+BEI,BEIERSDORF AG,Nichtzyklische Konsumgüter,Aktien,"6.491.552,34","0,07","6.491.552,34","69.937,00","92,82",Deutschland,Xetra,EUR,DE0005200000
+BEAN,BELIMO N AG,Industrie,Aktien,"6.485.581,45","0,07","6.485.581,45","7.482,00","866,82",Schweiz,SIX Swiss Exchange,CHF,CH1101098163
+EVO,EVOLUTION,Zyklische Konsumgüter ,Aktien,"6.478.187,85","0,07","6.478.187,85","111.803,00","57,94",Schweden,Nasdaq Omx Nordic,SEK,SE0012673267
+PEO,BANK PEKAO SA,Financials,Aktien,"6.472.820,92","0,07","6.472.820,92","134.460,00","48,14",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLPEKAO00016
+WEIR,WEIR GROUP PLC,Industrie,Aktien,"6.431.139,60","0,07","6.431.139,60","194.087,00","33,14",Vereinigtes Königreich,London Stock Exchange,GBP,GB0009465807
+G1A,GEA GROUP AG,Industrie,Aktien,"6.426.567,00","0,07","6.426.567,00","115.794,00","55,50",Deutschland,Xetra,EUR,DE0006602006
+CA,CARREFOUR SA,Nichtzyklische Konsumgüter,Aktien,"6.403.448,93","0,07","6.403.448,93","471.015,00","13,60",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000120172
+ORSTED,ORSTED A/S,Versorger,Aktien,"6.353.074,71","0,07","6.353.074,71","348.286,00","18,24",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060094928
+ITRK,INTERTEK GROUP PLC,Industrie,Aktien,"6.344.184,28","0,07","6.344.184,28","125.051,00","50,73",Vereinigtes Königreich,London Stock Exchange,GBP,GB0031638363
+NESTE,NESTE,Energie,Aktien,"6.343.374,96","0,07","6.343.374,96","332.462,00","19,08",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009013296
+FORTUM,FORTUM,Versorger,Aktien,"6.318.884,50","0,07","6.318.884,50","353.900,00","17,86",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009007132
+STJ,ST JAMESS PLACE PLC,Financials,Aktien,"6.299.640,70","0,07","6.299.640,70","402.473,00","15,65",Vereinigtes Königreich,London Stock Exchange,GBP,GB0007669376
+BNZL,BUNZL,Industrie,Aktien,"6.263.785,65","0,07","6.263.785,65","253.919,00","24,67",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B0744B38
+NHY,NORSK HYDRO,Materialien,Aktien,"6.254.740,65","0,07","6.254.740,65","990.624,00","6,31",Norwegen,Oslo Bors Asa,NOK,NO0005052605
+SVT,SEVERN TRENT PLC,Versorger,Aktien,"6.197.333,84","0,07","6.197.333,84","199.794,00","31,02",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B1FH8J72
+MRO,MELROSE INDUSTRIES PLC,Industrie,Aktien,"6.156.150,84","0,07","6.156.150,84","948.928,00","6,49",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BNGDN821
+SPIE,SPIE SA,Industrie,Aktien,"6.135.564,80","0,07","6.135.564,80","132.232,00","46,40",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0012757854
+ALO,ALSTOM SA,Industrie,Aktien,"6.076.394,55","0,07","6.076.394,55","258.021,00","23,55",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010220475
+SKA B,SKANSKA B,Industrie,Aktien,"6.073.835,01","0,07","6.073.835,01","268.974,00","22,58",Schweden,Nasdaq Omx Nordic,SEK,SE0000113250
+KGH,KGHM POLSKA MIEDZ SA,Materialien,Aktien,"6.035.283,67","0,06","6.035.283,67","105.592,00","57,16",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLKGHM000017
+AGN,AEGON LTD,Financials,Aktien,"6.012.686,84","0,06","6.012.686,84","971.983,00","6,19",Niederlande,Euronext Amsterdam,EUR,BMG0112X1056
+SKF B,SKF B,Industrie,Aktien,"5.994.756,86","0,06","5.994.756,86","263.642,00","22,74",Schweden,Nasdaq Omx Nordic,SEK,SE0000108227
+ASRNL,ASR NEDERLAND NV,Financials,Aktien,"5.985.485,56","0,06","5.985.485,56","102.386,00","58,46",Niederlande,Euronext Amsterdam,EUR,NL0011872643
+TELIA,TELIA COMPANY,Kommunikation,Aktien,"5.974.441,96","0,06","5.974.441,96","1.727.374,00","3,46",Schweden,Nasdaq Omx Nordic,SEK,SE0000667925
+ADDT B,ADDTECH CLASS B,Industrie,Aktien,"5.915.442,87","0,06","5.915.442,87","198.006,00","29,88",Schweden,Nasdaq Omx Nordic,SEK,SE0014781795
+HM B,HENNES & MAURITZ,Zyklische Konsumgüter ,Aktien,"5.910.653,53","0,06","5.910.653,53","368.085,00","16,06",Schweden,Nasdaq Omx Nordic,SEK,SE0000106270
+TEL,TELENOR,Kommunikation,Aktien,"5.849.965,91","0,06","5.849.965,91","482.927,00","12,11",Norwegen,Oslo Bors Asa,NOK,NO0010063308
+TEL2 B,TELE2 B,Kommunikation,Aktien,"5.828.181,42","0,06","5.828.181,42","427.367,00","13,64",Schweden,Nasdaq Omx Nordic,SEK,SE0005190238
+PSON,PEARSON PLC,Zyklische Konsumgüter ,Aktien,"5.790.206,32","0,06","5.790.206,32","493.957,00","11,72",Vereinigtes Königreich,London Stock Exchange,GBP,GB0006776081
+GAW,GAMES WORKSHOP GROUP PLC,Zyklische Konsumgüter ,Aktien,"5.751.844,88","0,06","5.751.844,88","25.557,00","225,06",Vereinigtes Königreich,London Stock Exchange,GBP,GB0003718474
+MKS,MARKS AND SPENCER GROUP PLC,Nichtzyklische Konsumgüter,Aktien,"5.743.455,50","0,06","5.743.455,50","1.562.805,00","3,68",Vereinigtes Königreich,London Stock Exchange,GBP,GB0031274896
+LI,KLEPIERRE REIT SA,Immobilien,Aktien,"5.739.901,60","0,06","5.739.901,60","174.997,00","32,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121964
+RXL,REXEL SA,Industrie,Aktien,"5.715.824,32","0,06","5.715.824,32","173.417,00","32,96",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010451203
+WISE,WISE PLC CLASS A,Financials,Aktien,"5.714.209,81","0,06","5.714.209,81","588.588,00","9,71",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BL9YR756
+RNO,RENAULT SA,Zyklische Konsumgüter ,Aktien,"5.712.950,49","0,06","5.712.950,49","158.649,00","36,01",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000131906
+UNI,UNIPOL ASSICURAZIONI SPA,Financials,Aktien,"5.649.136,49","0,06","5.649.136,49","290.743,00","19,43",Italien,Borsa Italiana,EUR,IT0004810054
+BCP,BANCO COMERCIAL PORTUGUES SA,Financials,Aktien,"5.646.451,77","0,06","5.646.451,77","6.600.949,00","0,86",Portugal,Nyse Euronext - Euronext Lisbon,EUR,PTBCP0AM0015
+IMI,IMI PLC,Industrie,Aktien,"5.611.524,54","0,06","5.611.524,54","201.331,00","27,87",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BGLP8L22
+ABF,ASSOCIATED BRITISH FOODS PLC,Nichtzyklische Konsumgüter,Aktien,"5.585.920,21","0,06","5.585.920,21","229.204,00","24,37",Vereinigtes Königreich,London Stock Exchange,GBP,GB0006731235
+MNG,M&G PLC,Financials,Aktien,"5.544.797,75","0,06","5.544.797,75","1.780.347,00","3,11",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BKFB1C65
+TREL B,TRELLEBORG B,Industrie,Aktien,"5.473.864,04","0,06","5.473.864,04","152.335,00","35,93",Schweden,Nasdaq Omx Nordic,SEK,SE0000114837
+BAB,BABCOCK INTERNATIONAL GROUP PLC,Industrie,Aktien,"5.474.550,94","0,06","5.474.550,94","395.104,00","13,86",Vereinigtes Königreich,London Stock Exchange,GBP,GB0009697037
+ORK,ORKLA,Nichtzyklische Konsumgüter,Aktien,"5.387.161,51","0,06","5.387.161,51","584.258,00","9,22",Norwegen,Oslo Bors Asa,NOK,NO0003733800
+HEIO,HEINEKEN HOLDING NV,Nichtzyklische Konsumgüter,Aktien,"5.384.839,80","0,06","5.384.839,80","89.598,00","60,10",Niederlande,Euronext Amsterdam,EUR,NL0000008977
+LIFCO B,LIFCO CLASS B,Industrie,Aktien,"5.366.825,28","0,06","5.366.825,28","170.287,00","31,52",Schweden,Nasdaq Omx Nordic,SEK,SE0015949201
+SOBI,SWEDISH ORPHAN BIOVITRUM,Gesundheitsversorgung,Aktien,"5.338.270,12","0,06","5.338.270,12","175.544,00","30,41",Schweden,Nasdaq Omx Nordic,SEK,SE0000872095
+PNDORA,PANDORA,Zyklische Konsumgüter ,Aktien,"5.296.470,52","0,06","5.296.470,52","55.973,00","94,63",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060252690
+ACLN,ACCELLERON N AG,Industrie,Aktien,"5.247.327,90","0,06","5.247.327,90","75.436,00","69,56",Schweiz,SIX Swiss Exchange,CHF,CH1169360919
+TRYG,TRYG,Financials,Aktien,"5.230.763,94","0,06","5.230.763,94","244.652,00","21,38",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060636678
+PSPN,PSP SWISS PROPERTY AG,Immobilien,Aktien,"5.215.317,46","0,06","5.215.317,46","34.860,00","149,61",Schweiz,SIX Swiss Exchange,CHF,CH0018294154
+CON,CONTINENTAL AG,Zyklische Konsumgüter ,Aktien,"5.212.603,92","0,06","5.212.603,92","80.268,00","64,94",Deutschland,Xetra,EUR,DE0005439004
+PAH3,PORSCHE AUTOMOBIL HOLDING PREF,Zyklische Konsumgüter ,Aktien,"5.204.072,10","0,06","5.204.072,10","127.770,00","40,73",Deutschland,Xetra,EUR,DE000PAH0038
+ERF,EUROFINS SCIENTIFIC,Gesundheitsversorgung,Aktien,"5.192.890,04","0,06","5.192.890,04","90.374,00","57,46",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0014000MR3
+ICG,ICG PLC,Financials,Aktien,"5.175.709,25","0,06","5.175.709,25","221.959,00","23,32",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BYT1DJ19
+TLX,TALANX AG,Financials,Aktien,"5.156.336,80","0,06","5.156.336,80","47.176,00","109,30",Deutschland,Xetra,EUR,DE000TLX1005
+EXO,EXOR NV,Financials,Aktien,"5.132.859,60","0,06","5.132.859,60","71.588,00","71,70",Niederlande,Euronext Amsterdam,EUR,NL0012059018
+G24,SCOUT24 N,Kommunikation,Aktien,"5.132.450,05","0,06","5.132.450,05","59.369,00","86,45",Deutschland,Xetra,EUR,DE000A12DM80
+OMV,OMV AG,Energie,Aktien,"5.104.226,64","0,05","5.104.226,64","106.962,00","47,72",Österreich,Wiener Boerse Ag,EUR,AT0000743059
+MICC,MAGNUM ICE CREAM COMPANY NPV,Nichtzyklische Konsumgüter,Aktien,"5.068.674,18","0,05","5.068.674,18","394.477,00","12,85",Niederlande,London Stock Exchange,GBP,NL0015002MS2
+HOT,HOCHTIEF AG,Industrie,Aktien,"5.047.826,40","0,05","5.047.826,40","15.186,00","332,40",Deutschland,Xetra,EUR,DE0006070006
+SECU B,SECURITAS B,Industrie,Aktien,"5.033.857,18","0,05","5.033.857,18","386.636,00","13,02",Schweden,Nasdaq Omx Nordic,SEK,SE0000163594
+PHNX,PHOENIX GROUP HOLDINGS PLC,Financials,Aktien,"4.973.748,29","0,05","4.973.748,29","640.208,00","7,77",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BGXQNP29
+ORNBV,ORION CLASS B,Gesundheitsversorgung,Aktien,"4.959.640,95","0,05","4.959.640,95","81.239,00","61,05",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009014377
+SBRY,SAINSBURY(J) PLC,Nichtzyklische Konsumgüter,Aktien,"4.937.654,68","0,05","4.937.654,68","1.361.346,00","3,63",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B019KW72
+GALP,GALP ENERGIA SGPS SA CLASS B,Energie,Aktien,"4.853.855,36","0,05","4.853.855,36","336.256,00","14,44",Portugal,Nyse Euronext - Euronext Lisbon,EUR,PTGAL0AM0009
+KGF,KINGFISHER PLC,Zyklische Konsumgüter ,Aktien,"4.826.285,30","0,05","4.826.285,30","1.395.346,00","3,46",Vereinigtes Königreich,London Stock Exchange,GBP,GB0033195214
+AKRBP,AKER BP,Energie,Aktien,"4.773.984,41","0,05","4.773.984,41","227.838,00","20,95",Norwegen,Oslo Bors Asa,NOK,NO0010345853
+SRT3,SARTORIUS PREF AG,Gesundheitsversorgung,Aktien,"4.756.500,00","0,05","4.756.500,00","18.875,00","252,00",Deutschland,Xetra,EUR,DE0007165631
+STERV,STORA ENSO CLASS R,Materialien,Aktien,"4.740.990,62","0,05","4.740.990,62","459.621,00","10,32",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009005961
+GTT,GAZTRANSPORT & TECHNIGAZ SA,Energie,Aktien,"4.730.182,50","0,05","4.730.182,50","28.825,00","164,10",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0011726835
+GBLB,GROUPE BRUXELLES LAMBERT NV,Financials,Aktien,"4.721.466,75","0,05","4.721.466,75","64.545,00","73,15",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003797140
+KCR,KONECRANES,Industrie,Aktien,"4.668.254,80","0,05","4.668.254,80","52.072,00","89,65",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009005870
+DIM,SARTORIUS STEDIM BIOTECH SA,Gesundheitsversorgung,Aktien,"4.578.832,00","0,05","4.578.832,00","21.856,00","209,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013154002
+NKT,NKT,Industrie,Aktien,"4.568.826,57","0,05","4.568.826,57","43.253,00","105,63",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010287663
+TEN,TENARIS SA,Energie,Aktien,"4.565.669,20","0,05","4.565.669,20","264.830,00","17,24",Italien,Borsa Italiana,EUR,LU2598331598
+SCA B,SVENSKA CELLULOSA B,Materialien,Aktien,"4.559.152,72","0,05","4.559.152,72","411.183,00","11,09",Schweden,Nasdaq Omx Nordic,SEK,SE0000112724
+BNR,BRENNTAG,Industrie,Aktien,"4.551.485,91","0,05","4.551.485,91","95.439,00","47,69",Deutschland,Xetra,EUR,DE000A1DAHH0
+KBX,KNORR BREMSE AG,Industrie,Aktien,"4.545.130,20","0,05","4.545.130,20","50.167,00","90,60",Deutschland,Xetra,EUR,DE000KBX1006
+IG,ITALGAS,Versorger,Aktien,"4.538.361,25","0,05","4.538.361,25","490.899,00","9,24",Italien,Borsa Italiana,EUR,IT0005211237
+AUTO,AUTO TRADER GROUP PLC,Kommunikation,Aktien,"4.538.622,25","0,05","4.538.622,25","662.002,00","6,86",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BVYVFW23
+STB,STOREBRAND,Financials,Aktien,"4.537.245,66","0,05","4.537.245,66","324.482,00","13,98",Norwegen,Oslo Bors Asa,NOK,NO0003053605
+BTRW,BARRATT REDROW PLC,Zyklische Konsumgüter ,Aktien,"4.530.144,18","0,05","4.530.144,18","1.093.731,00","4,14",Vereinigtes Königreich,London Stock Exchange,GBP,GB0000811801
+ELISA,ELISA,Kommunikation,Aktien,"4.509.265,80","0,05","4.509.265,80","120.055,00","37,56",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009007884
+TIT,TELECOM ITALIA,Kommunikation,Aktien,"4.493.624,88","0,05","4.493.624,88","9.238.538,00","0,49",Italien,Borsa Italiana,EUR,IT0003497168
+NEM,NEMETSCHEK,IT,Aktien,"4.489.337,35","0,05","4.489.337,35","49.037,00","91,55",Deutschland,Xetra,EUR,DE0006452907
+INDU C,INDUSTRIVARDEN SERIES,Financials,Aktien,"4.481.548,45","0,05","4.481.548,45","121.904,00","36,76",Schweden,Nasdaq Omx Nordic,SEK,SE0000107203
+DCC,DCC PLC,Industrie,Aktien,"4.381.899,19","0,05","4.381.899,19","76.138,00","57,55",Vereinigtes Königreich,London Stock Exchange,GBP,IE0002424939
+BEIJ B,BEIJER REF CLASS B,Industrie,Aktien,"4.374.513,49","0,05","4.374.513,49","315.022,00","13,89",Schweden,Nasdaq Omx Nordic,SEK,SE0015949748
+INDT,INDUTRADE,Industrie,Aktien,"4.359.776,78","0,05","4.359.776,78","201.031,00","21,69",Schweden,Nasdaq Omx Nordic,SEK,SE0001515552
+FRES,FRESNILLO PLC,Materialien,Aktien,"4.345.289,32","0,05","4.345.289,32","136.905,00","31,74",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B2QPKJ12
+JMT,JERONIMO MARTINS SA,Nichtzyklische Konsumgüter,Aktien,"4.333.034,94","0,05","4.333.034,94","218.179,00","19,86",Portugal,Nyse Euronext - Euronext Lisbon,EUR,PTJMT0AE0001
+ZAL,ZALANDO,Zyklische Konsumgüter ,Aktien,"4.285.851,08","0,05","4.285.851,08","184.417,00","23,24",Deutschland,Xetra,EUR,DE000ZAL1111
+ALE,ALLEGRO SA,Zyklische Konsumgüter ,Aktien,"4.267.446,62","0,05","4.267.446,62","577.915,00","7,38",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,LU2237380790
+LTMC,LOTTOMATICA GROUP,Zyklische Konsumgüter ,Aktien,"4.256.944,56","0,05","4.256.944,56","195.452,00","21,78",Italien,Borsa Italiana,EUR,IT0005541336
+SQN,SWISSQUOTE GROUP HOLDING SA,Financials,Aktien,"4.229.212,69","0,05","4.229.212,69","8.292,00","510,03",Schweiz,SIX Swiss Exchange,CHF,CH0010675863
+BEZ,BEAZLEY PLC,Financials,Aktien,"4.208.425,41","0,05","4.208.425,41","469.748,00","8,96",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BYQ0JC66
+ABVX,ABIVAX SA,Gesundheitsversorgung,Aktien,"4.132.410,00","0,04","4.132.410,00","35.934,00","115,00",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0012333284
+AVOL,AVOLTA AG,Zyklische Konsumgüter ,Aktien,"4.130.892,63","0,04","4.130.892,63","82.375,00","50,15",Schweiz,SIX Swiss Exchange,CHF,CH0023405456
+YAR,YARA INTERNATIONAL,Materialien,Aktien,"4.121.642,68","0,04","4.121.642,68","126.885,00","32,48",Norwegen,Oslo Bors Asa,NOK,NO0010208051
+SPX,SPIRAX GROUP PLC,Industrie,Aktien,"4.116.396,80","0,04","4.116.396,80","53.181,00","77,40",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BWFGQN14
+HSX,HISCOX LTD,Financials,Aktien,"4.087.623,32","0,04","4.087.623,32","271.264,00","15,07",Vereinigtes Königreich,London Stock Exchange,GBP,BMG4593F1389
+ENT,ENTAIN PLC,Zyklische Konsumgüter ,Aktien,"4.026.702,28","0,04","4.026.702,28","463.188,00","8,69",Vereinigtes Königreich,London Stock Exchange,GBP,IM00B5VQMV65
+REC,RECORDATI INDUSTRIA CHIMICA E FARM,Gesundheitsversorgung,Aktien,"4.016.154,80","0,04","4.016.154,80","84.980,00","47,26",Italien,Borsa Italiana,EUR,IT0003828271
+AM,DASSAULT AVIATION SA,Industrie,Aktien,"3.982.572,00","0,04","3.982.572,00","14.685,00","271,20",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0014004L86
+IGG,IG GROUP HOLDINGS PLC,Financials,Aktien,"3.923.253,73","0,04","3.923.253,73","299.205,00","13,11",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B06QFB75
+FHZN,FLUGHAFEN ZUERICH AG,Industrie,Aktien,"3.912.450,16","0,04","3.912.450,16","15.170,00","257,91",Schweiz,SIX Swiss Exchange,CHF,CH0319416936
+KESKOB,KESKO CLASS B,Nichtzyklische Konsumgüter,Aktien,"3.910.792,50","0,04","3.910.792,50","214.290,00","18,25",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009000202
+GALE,GALENICA AG,Gesundheitsversorgung,Aktien,"3.906.747,04","0,04","3.906.747,04","39.789,00","98,19",Schweiz,SIX Swiss Exchange,CHF,CH0360674466
+LPP,LPP SA,Zyklische Konsumgüter ,Aktien,"3.888.131,74","0,04","3.888.131,74","977,00","3.979,67",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLLPP0000011
+BIM,BIOMERIEUX SA,Gesundheitsversorgung,Aktien,"3.874.337,50","0,04","3.874.337,50","37.075,00","104,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013280286
+LAND,LAND SECURITIES GROUP REIT PLC,Immobilien,Aktien,"3.872.495,76","0,04","3.872.495,76","577.072,00","6,71",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BYW0PQ60
+RILBA,RINGKJOBING LANDBOBANK,Financials,Aktien,"3.836.711,92","0,04","3.836.711,92","19.737,00","194,39",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060854669
+HWDN,HOWDEN JOINERY GROUP PLC,Industrie,Aktien,"3.830.041,01","0,04","3.830.041,01","413.262,00","9,27",Vereinigtes Königreich,London Stock Exchange,GBP,GB0005576813
+KGX,KION GROUP AG,Industrie,Aktien,"3.828.213,60","0,04","3.828.213,60","57.828,00","66,20",Deutschland,Xetra,EUR,DE000KGX8881
+SYENS,SYENSQO NV,Materialien,Aktien,"3.818.923,68","0,04","3.818.923,68","55.637,00","68,64",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0974464977
+BRBY,BURBERRY GROUP PLC,Zyklische Konsumgüter ,Aktien,"3.817.654,90","0,04","3.817.654,90","279.330,00","13,67",Vereinigtes Königreich,London Stock Exchange,GBP,GB0031743007
+LHA,DEUTSCHE LUFTHANSA AG,Industrie,Aktien,"3.796.682,22","0,04","3.796.682,22","477.090,00","7,96",Deutschland,Xetra,EUR,DE0008232125
+DHER,DELIVERY HERO,Zyklische Konsumgüter ,Aktien,"3.795.754,95","0,04","3.795.754,95","167.583,00","22,65",Deutschland,Xetra,EUR,DE000A2E4K43
+P911,DR ING HC F PORSCHE PRF AG,Zyklische Konsumgüter ,Aktien,"3.791.700,00","0,04","3.791.700,00","82.500,00","45,96",Deutschland,Xetra,EUR,DE000PAG9113
+ELI,ELIA GROUP SA,Versorger,Aktien,"3.790.342,10","0,04","3.790.342,10","37.417,00","101,30",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003822393
+JDEP,JDE PEETS NV,Nichtzyklische Konsumgüter,Aktien,"3.783.795,84","0,04","3.783.795,84","119.438,00","31,68",Niederlande,Euronext Amsterdam,EUR,NL0014332678
+GJF,GJENSIDIGE FORSIKRING,Financials,Aktien,"3.728.004,85","0,04","3.728.004,85","152.072,00","24,51",Norwegen,Oslo Bors Asa,NOK,NO0010582521
+UHR,THE SWATCH GROUP AG,Zyklische Konsumgüter ,Aktien,"3.668.161,39","0,04","3.668.161,39","21.113,00","173,74",Schweiz,SIX Swiss Exchange,CHF,CH0012255151
+PSN,PERSIMMON PLC,Zyklische Konsumgüter ,Aktien,"3.651.385,89","0,04","3.651.385,89","244.730,00","14,92",Vereinigtes Königreich,London Stock Exchange,GBP,GB0006825383
+RMV,RIGHTMOVE PLC,Kommunikation,Aktien,"3.643.816,62","0,04","3.643.816,62","598.621,00","6,09",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BGDT3G23
+R3NK,RENK GROUP AG,Industrie,Aktien,"3.626.248,34","0,04","3.626.248,34","64.766,00","55,99",Deutschland,Xetra,EUR,DE000RENK730
+BBY,BALFOUR BEATTY PLC,Industrie,Aktien,"3.624.114,04","0,04","3.624.114,04","449.921,00","8,06",Vereinigtes Königreich,London Stock Exchange,GBP,GB0000961622
+EVD,CTS EVENTIM AG,Kommunikation,Aktien,"3.607.718,40","0,04","3.607.718,40","45.552,00","79,20",Deutschland,Xetra,EUR,DE0005470306
+ACKB,ACKERMANS & VAN HAAREN NV,Industrie,Aktien,"3.552.726,40","0,04","3.552.726,40","15.637,00","227,20",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003764785
+NIBE B,NIBE INDUSTRIER CLASS B,Industrie,Aktien,"3.542.965,29","0,04","3.542.965,29","1.104.139,00","3,21",Schweden,Nasdaq Omx Nordic,SEK,SE0015988019
+WTB,WHITBREAD PLC,Zyklische Konsumgüter ,Aktien,"3.532.003,52","0,04","3.532.003,52","132.203,00","26,72",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B1KJJ408
+JYSK,JYSKE BANK,Financials,Aktien,"3.517.567,63","0,04","3.517.567,63","32.278,00","108,98",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010307958
+NEX,NEXANS SA,Industrie,Aktien,"3.495.532,10","0,04","3.495.532,10","27.373,00","127,70",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000044448
+MRL,MERLIN PROPERTIES REIT SA,Immobilien,Aktien,"3.490.909,80","0,04","3.490.909,80","286.610,00","12,18",Spanien,Bolsa De Madrid,EUR,ES0105025003
+IPN,IPSEN SA,Gesundheitsversorgung,Aktien,"3.489.237,00","0,04","3.489.237,00","28.718,00","121,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010259150
+DNP,DINO POLSKA SA,Nichtzyklische Konsumgüter,Aktien,"3.474.571,05","0,04","3.474.571,05","364.742,00","9,53",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLDINPL00011
+RBI,RAIFFEISEN BANK INTERNATIONAL AG,Financials,Aktien,"3.472.165,48","0,04","3.472.165,48","94.661,00","36,68",Österreich,Wiener Boerse Ag,EUR,AT0000606306
+GET,GETLINK,Industrie,Aktien,"3.449.231,49","0,04","3.449.231,49","227.973,00","15,13",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010533075
+BLND,BRITISH LAND REIT PLC,Immobilien,Aktien,"3.439.230,56","0,04","3.439.230,56","788.525,00","4,36",Vereinigtes Königreich,London Stock Exchange,GBP,GB0001367019
+EDEN,EDENRED,Financials,Aktien,"3.426.430,11","0,04","3.426.430,11","189.201,00","18,11",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010908533
+LEG,LEG IMMOBILIEN N,Immobilien,Aktien,"3.417.370,50","0,04","3.417.370,50","55.567,00","61,50",Deutschland,Xetra,EUR,DE000LEG1110
+AAK,AAK,Nichtzyklische Konsumgüter,Aktien,"3.416.511,87","0,04","3.416.511,87","142.182,00","24,03",Schweden,Nasdaq Omx Nordic,SEK,SE0011337708
+ISS,ISS A S,Industrie,Aktien,"3.412.351,30","0,04","3.412.351,30","124.455,00","27,42",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060542181
+TUB,FINANCIERE DE TUBIZE SA,Gesundheitsversorgung,Aktien,"3.407.616,00","0,04","3.407.616,00","15.776,00","216,00",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003823409
+BARN,BARRY CALLEBAUT AG,Nichtzyklische Konsumgüter,Aktien,"3.399.407,73","0,04","3.399.407,73","2.692,00","1.262,77",Schweiz,SIX Swiss Exchange,CHF,CH0009002962
+SPL,SANTANDER BANK POLSKA SA,Financials,Aktien,"3.384.581,17","0,04","3.384.581,17","28.745,00","117,75",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLBZ00000044
+RED,REDEIA CORPORACION SA,Versorger,Aktien,"3.328.940,79","0,04","3.328.940,79","223.269,00","14,91",Spanien,Bolsa De Madrid,EUR,ES0173093024
+VOE,VOESTALPINE AG,Materialien,Aktien,"3.322.982,40","0,04","3.322.982,40","86.536,00","38,40",Österreich,Wiener Boerse Ag,EUR,AT0000937503
+BZU,BUZZI,Materialien,Aktien,"3.321.115,20","0,04","3.321.115,20","65.312,00","50,85",Italien,Borsa Italiana,EUR,IT0001347308
+ANA,ACCIONA SA,Versorger,Aktien,"3.320.304,00","0,04","3.320.304,00","18.780,00","176,80",Spanien,Bolsa De Madrid,EUR,ES0125220311
+TKA,THYSSENKRUPP AG,Materialien,Aktien,"3.316.521,63","0,04","3.316.521,63","371.391,00","8,93",Deutschland,Xetra,EUR,DE0007500001
+IMCD,IMCD NV,Industrie,Aktien,"3.315.612,60","0,04","3.315.612,60","44.927,00","73,80",Niederlande,Euronext Amsterdam,EUR,NL0010801007
+CTEC,CONVATEC GROUP PLC,Gesundheitsversorgung,Aktien,"3.296.341,39","0,04","3.296.341,39","1.274.767,00","2,59",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BD3VFW73
+TEMN,TEMENOS AG,IT,Aktien,"3.286.224,41","0,04","3.286.224,41","40.619,00","80,90",Schweiz,SIX Swiss Exchange,CHF,CH0012453913
+ZEAL,ZEALAND PHARMA,Gesundheitsversorgung,Aktien,"3.286.569,60","0,04","3.286.569,60","47.947,00","68,55",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060257814
+SAVE,NORDNET,Financials,Aktien,"3.276.423,14","0,04","3.276.423,14","135.520,00","24,18",Schweden,Nasdaq Omx Nordic,SEK,SE0015192067
+IDR,INDRA SISTEMAS SA,IT,Aktien,"3.273.778,48","0,04","3.273.778,48","66.244,00","49,42",Spanien,Bolsa De Madrid,EUR,ES0118594417
+HAG,HENSOLDT AG,Industrie,Aktien,"3.264.457,50","0,04","3.264.457,50","45.027,00","72,50",Deutschland,Xetra,EUR,DE000HAG0005
+BKG,BERKELEY GROUP HOLDINGS (THE) PLC,Zyklische Konsumgüter ,Aktien,"3.257.333,60","0,04","3.257.333,60","77.026,00","42,29",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BP0RGD03
+AZA,AVANZA BANK HOLDING,Financials,Aktien,"3.228.057,65","0,03","3.228.057,65","99.854,00","32,33",Schweden,Nasdaq Omx Nordic,SEK,SE0012454072
+TE,TECHNIP ENERGIES NV,Energie,Aktien,"3.224.572,24","0,03","3.224.572,24","100.894,00","31,96",Frankreich,Nyse Euronext - Euronext Paris,EUR,NL0014559478
+SCR,SCOR,Financials,Aktien,"3.212.966,34","0,03","3.212.966,34","119.619,00","26,86",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010411983
+SDR,SCHRODERS PLC,Financials,Aktien,"3.205.233,73","0,03","3.205.233,73","724.611,00","4,42",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BP9LHF23
+AMUN,AMUNDI SA,Financials,Aktien,"3.185.371,20","0,03","3.185.371,20","47.472,00","67,10",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0004125920
+GETI B,GETINGE B,Gesundheitsversorgung,Aktien,"3.176.263,00","0,03","3.176.263,00","166.814,00","19,04",Schweden,Nasdaq Omx Nordic,SEK,SE0000202624
+SUBC,SUBSEA SA,Energie,Aktien,"3.174.618,51","0,03","3.174.618,51","190.211,00","16,69",Norwegen,Oslo Bors Asa,NOK,LU0075646355
+CAST,CASTELLUM,Immobilien,Aktien,"3.175.241,81","0,03","3.175.241,81","330.480,00","9,61",Schweden,Nasdaq Omx Nordic,SEK,SE0000379190
+VER,VERBUND AG,Versorger,Aktien,"3.171.318,30","0,03","3.171.318,30","51.399,00","61,70",Österreich,Wiener Boerse Ag,EUR,AT0000746409
+ALSYDB,AL SYDBANK,Financials,Aktien,"3.168.998,82","0,03","3.168.998,82","41.895,00","75,64",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010311471
+SSAB B,SSAB CLASS B,Materialien,Aktien,"3.166.896,97","0,03","3.166.896,97","489.113,00","6,47",Schweden,Nasdaq Omx Nordic,SEK,SE0000120669
+GF,GEORG FISCHER AG,Industrie,Aktien,"3.164.207,51","0,03","3.164.207,51","56.266,00","56,24",Schweiz,SIX Swiss Exchange,CHF,CH1169151003
+SOF,SOFINA SA,Financials,Aktien,"3.134.966,40","0,03","3.134.966,40","13.128,00","238,80",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003717312
+BALD B,FASTIGHETS BALDER CLASS B,Immobilien,Aktien,"3.131.803,95","0,03","3.131.803,95","518.232,00","6,04",Schweden,Nasdaq Omx Nordic,SEK,SE0017832488
+VEND,VEND MARKETPLACES ASA,Kommunikation,Aktien,"3.121.666,42","0,03","3.121.666,42","130.306,00","23,96",Norwegen,Oslo Bors Asa,NOK,NO0010736879
+BMED,BANCA MEDIOLANUM,Financials,Aktien,"3.115.184,10","0,03","3.115.184,10","167.034,00","18,65",Italien,Borsa Italiana,EUR,IT0004776628
+SAGA B,SAGAX CLASS B,Immobilien,Aktien,"3.093.372,51","0,03","3.093.372,51","169.950,00","18,20",Schweden,Nasdaq Omx Nordic,SEK,SE0005127818
+TW.,TAYLOR WIMPEY PLC,Zyklische Konsumgüter ,Aktien,"3.093.398,21","0,03","3.093.398,21","2.713.371,00","1,14",Vereinigtes Königreich,London Stock Exchange,GBP,GB0008782301
+ELIS,ELIS SA,Industrie,Aktien,"3.085.636,14","0,03","3.085.636,14","132.887,00","23,22",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0012435121
+LMP,LONDONMETRIC PROPERTY REIT PLC,Immobilien,Aktien,"3.066.015,49","0,03","3.066.015,49","1.480.481,00","2,07",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B4WFW713
+WDP,WAREHOUSES DE PAUW NV,Immobilien,Aktien,"3.061.124,28","0,03","3.061.124,28","147.453,00","20,76",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0974349814
+ANDR,ANDRITZ AG,Industrie,Aktien,"3.048.123,60","0,03","3.048.123,60","48.537,00","62,80",Österreich,Wiener Boerse Ag,EUR,AT0000730007
+ABDN,ABERDEEN GROUP PLC,Financials,Aktien,"3.048.540,31","0,03","3.048.540,31","1.360.775,00","2,24",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BF8Q6K64
+VALMT,VALMET,Industrie,Aktien,"3.040.677,36","0,03","3.040.677,36","114.916,00","26,46",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI4000074984
+EMSN,EMS-CHEMIE HOLDING AG,Materialien,Aktien,"3.009.983,05","0,03","3.009.983,05","5.228,00","575,74",Schweiz,SIX Swiss Exchange,CHF,CH0016440353
+ALK B,ALK-ABELLO CLASS B,Gesundheitsversorgung,Aktien,"3.000.054,12","0,03","3.000.054,12","99.506,00","30,15",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0061802139
+IP,INTERPUMP GROUP,Industrie,Aktien,"2.972.352,80","0,03","2.972.352,80","67.096,00","44,30",Italien,Borsa Italiana,EUR,IT0001078911
+CRDA,CRODA INTERNATIONAL PLC,Materialien,Aktien,"2.963.604,36","0,03","2.963.604,36","97.338,00","30,45",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BJFFLV09
+SALM,SALMAR,Nichtzyklische Konsumgüter,Aktien,"2.947.334,41","0,03","2.947.334,41","57.400,00","51,35",Norwegen,Oslo Bors Asa,NOK,NO0010310956
+JMAT,JOHNSON MATTHEY PLC,Materialien,Aktien,"2.941.573,80","0,03","2.941.573,80","128.161,00","22,95",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BZ4BQC70
+CDR,CD PROJEKT SA,Kommunikation,Aktien,"2.927.795,86","0,03","2.927.795,86","50.410,00","58,08",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLOPTTC00011
+SECT B,SECTRA CLASS B,Gesundheitsversorgung,Aktien,"2.919.880,33","0,03","2.919.880,33","116.165,00","25,14",Schweden,Nasdaq Omx Nordic,SEK,SE0022419784
+AZM,AZIMUT HOLDING,Financials,Aktien,"2.912.936,12","0,03","2.912.936,12","81.572,00","35,71",Italien,Borsa Italiana,EUR,IT0003261697
+WPP,WPP PLC,Kommunikation,Aktien,"2.903.510,59","0,03","2.903.510,59","797.750,00","3,64",Vereinigtes Königreich,London Stock Exchange,GBP,JE00B8KF9B49
+A2A,A2A,Versorger,Aktien,"2.883.561,62","0,03","2.883.561,62","1.268.057,00","2,27",Italien,Borsa Italiana,EUR,IT0001233417
+MNDI,MONDI PLC,Materialien,Aktien,"2.876.793,05","0,03","2.876.793,05","290.401,00","9,91",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BMWC6P49
+SW,SODEXO SA,Zyklische Konsumgüter ,Aktien,"2.874.057,12","0,03","2.874.057,12","64.383,00","44,64",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121220
+BGEO,LION FINANCE GROUP PLC,Financials,Aktien,"2.860.911,36","0,03","2.860.911,36","26.771,00","106,87",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BF4HYT85
+ADEN,ADECCO GROUP AG,Industrie,Aktien,"2.846.657,37","0,03","2.846.657,37","126.428,00","22,52",Schweiz,SIX Swiss Exchange,CHF,CH0012138605
+MAP,MAPFRE SA,Financials,Aktien,"2.837.460,47","0,03","2.837.460,47","701.647,00","4,04",Spanien,Bolsa De Madrid,EUR,ES0124244E34
+SB1NO,SPAREBANK SR-NORGE,Financials,Aktien,"2.837.000,97","0,03","2.837.000,97","181.088,00","15,67",Norwegen,Oslo Bors Asa,NOK,NO0010631567
+GFC,GECINA SA,Immobilien,Aktien,"2.829.944,40","0,03","2.829.944,40","35.913,00","78,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010040865
+BC8,BECHTLE AG,IT,Aktien,"2.820.648,46","0,03","2.820.648,46","65.627,00","42,98",Deutschland,Xetra,EUR,DE0005158703
+BKW,BKW N AG,Versorger,Aktien,"2.814.316,88","0,03","2.814.316,88","15.871,00","177,32",Schweiz,SIX Swiss Exchange,CHF,CH0130293662
+EDPR,EDP RENOVAVEIS SA,Versorger,Aktien,"2.807.259,98","0,03","2.807.259,98","240.142,00","11,69",Portugal,Nyse Euronext - Euronext Lisbon,EUR,ES0127797019
+LUND B,LUNDBERGFORETAGEN CLASS B,Financials,Aktien,"2.780.618,03","0,03","2.780.618,03","60.971,00","45,61",Schweden,Nasdaq Omx Nordic,SEK,SE0000108847
+CVC,CVC CAPITAL PARTNERS PLC,Financials,Aktien,"2.774.809,71","0,03","2.774.809,71","200.637,00","13,83",Niederlande,Euronext Amsterdam,EUR,JE00BRX98089
+LAGR B,LAGERCRANTZ GROUP CLASS B,IT,Aktien,"2.767.365,24","0,03","2.767.365,24","144.291,00","19,18",Schweden,Nasdaq Omx Nordic,SEK,SE0014990966
+FNTN,FREENET AG,Kommunikation,Aktien,"2.750.765,20","0,03","2.750.765,20","97.892,00","28,10",Deutschland,Xetra,EUR,DE000A0Z2ZZ5
+ITV,ITV PLC,Kommunikation,Aktien,"2.749.155,18","0,03","2.749.155,18","2.917.714,00","0,94",Vereinigtes Königreich,London Stock Exchange,GBP,GB0033986497
+TUI1,TUI N AG,Zyklische Konsumgüter ,Aktien,"2.719.796,36","0,03","2.719.796,36","338.199,00","8,04",Vereinigtes Königreich,Xetra,EUR,DE000TUAG505
+IVG,IVECO GROUP NV,Industrie,Aktien,"2.718.016,88","0,03","2.718.016,88","145.232,00","18,72",Italien,Borsa Italiana,EUR,NL0015000LU4
+ALLN,ALLREAL HOLDING AG,Immobilien,Aktien,"2.713.595,18","0,03","2.713.595,18","12.977,00","209,11",Schweiz,SIX Swiss Exchange,CHF,CH0008837566
+BBOX,TRITAX BIG BOX REIT PLC,Immobilien,Aktien,"2.705.957,38","0,03","2.705.957,38","1.645.778,00","1,64",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BG49KP99
+NDX1,NORDEX,Industrie,Aktien,"2.680.596,00","0,03","2.680.596,00","94.056,00","28,50",Deutschland,Xetra,EUR,DE000A0D6554
+MSIFT,CASH COLLATERAL EUR MSIFT,Cash und/oder Derivate,Cash Collateral and Margins,"2.667.000,00","0,03","2.667.000,00","2.667.000,00","100,00",Europäische Union,-,EUR,
+INCH,INCHCAPE PLC,Zyklische Konsumgüter ,Aktien,"2.665.134,50","0,03","2.665.134,50","307.702,00","8,66",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B61TVQ02
+NTGY,NATURGY ENERGY GROUP SA,Versorger,Aktien,"2.647.130,40","0,03","2.647.130,40","101.190,00","26,16",Spanien,Bolsa De Madrid,EUR,ES0116870314
+ZEG,ZEGONA COMMUNICATIONS PLC,Kommunikation,Aktien,"2.611.889,52","0,03","2.611.889,52","168.470,00","15,50",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BVGBY890
+HER,HERA,Versorger,Aktien,"2.604.927,84","0,03","2.604.927,84","657.478,00","3,96",Italien,Borsa Italiana,EUR,IT0001250932
+AG1,AUTO1 GROUP,Zyklische Konsumgüter ,Aktien,"2.603.300,64","0,03","2.603.300,64","102.331,00","25,44",Deutschland,Xetra,EUR,DE000A2LQ884
+BC,BRUNELLO CUCINELLI,Zyklische Konsumgüter ,Aktien,"2.588.617,82","0,03","2.588.617,82","27.757,00","93,26",Italien,Borsa Italiana,EUR,IT0004764699
+BWY,BELLWAY PLC,Zyklische Konsumgüter ,Aktien,"2.585.378,75","0,03","2.585.378,75","85.851,00","30,11",Vereinigtes Königreich,London Stock Exchange,GBP,GB0000904986
+RAA,RATIONAL AG,Industrie,Aktien,"2.576.496,00","0,03","2.576.496,00","4.129,00","624,00",Deutschland,Xetra,EUR,DE0007010803
+CPR,DAVIDE CAMPARI MILANO NV,Nichtzyklische Konsumgüter,Aktien,"2.574.048,86","0,03","2.574.048,86","449.537,00","5,73",Italien,Borsa Italiana,EUR,NL0015435975
+BOL,BOLLORE,Kommunikation,Aktien,"2.561.858,01","0,03","2.561.858,01","558.139,00","4,59",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000039299
+GBF,BILFINGER,Industrie,Aktien,"2.551.731,20","0,03","2.551.731,20","24.256,00","105,20",Deutschland,Xetra,EUR,DE0005909006
+SRP,SERCO GROUP PLC,Industrie,Aktien,"2.551.130,67","0,03","2.551.130,67","864.882,00","2,95",Vereinigtes Königreich,London Stock Exchange,GBP,GB0007973794
+INVP,INVESTEC PLC,Financials,Aktien,"2.548.586,36","0,03","2.548.586,36","419.086,00","6,08",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B17BBQ50
+GRF,GRIFOLS SA CLASS A,Gesundheitsversorgung,Aktien,"2.537.459,67","0,03","2.537.459,67","237.035,00","10,71",Spanien,Bolsa De Madrid,EUR,ES0171996087
+NDA,AURUBIS AG,Materialien,Aktien,"2.524.909,80","0,03","2.524.909,80","21.729,00","116,20",Deutschland,Xetra,EUR,DE0006766504
+SBMO,SBM OFFSHORE NV,Energie,Aktien,"2.504.295,42","0,03","2.504.295,42","102.551,00","24,42",Niederlande,Euronext Amsterdam,EUR,NL0000360618
+SPM,SAIPEM,Energie,Aktien,"2.502.685,21","0,03","2.502.685,21","1.045.399,00","2,39",Italien,Borsa Italiana,EUR,IT0005495657
+RAND,RANDSTAD HOLDING,Industrie,Aktien,"2.481.754,41","0,03","2.481.754,41","79.467,00","31,23",Niederlande,Euronext Amsterdam,EUR,NL0000379121
+DRX,DRAX GROUP PLC,Versorger,Aktien,"2.481.006,83","0,03","2.481.006,83","284.938,00","8,71",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B1VNSX38
+TEP,TELEPERFORMANCE,Industrie,Aktien,"2.479.730,76","0,03","2.479.730,76","42.201,00","58,76",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000051807
+BGN,BANCA GENERALI,Financials,Aktien,"2.473.351,35","0,03","2.473.351,35","44.049,00","56,15",Italien,Borsa Italiana,EUR,IT0001031084
+LOTB,LOTUS BAKERIES NV,Nichtzyklische Konsumgüter,Aktien,"2.463.300,00","0,03","2.463.300,00","322,00","7.650,00",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003604155
+SWEC B,SWECO CLASS B,Industrie,Aktien,"2.456.154,29","0,03","2.456.154,29","169.019,00","14,53",Schweden,Nasdaq Omx Nordic,SEK,SE0014960373
+ENG,ENAGAS SA,Versorger,Aktien,"2.430.590,00","0,03","2.430.590,00","178.000,00","13,65",Spanien,Bolsa De Madrid,EUR,ES0130960018
+AKE,ARKEMA SA,Materialien,Aktien,"2.384.407,35","0,03","2.384.407,35","46.891,00","50,85",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010313833
+EVK,EVONIK INDUSTRIES AG,Materialien,Aktien,"2.371.959,08","0,03","2.371.959,08","184.876,00","12,83",Deutschland,Xetra,EUR,DE000EVNK013
+PNN,PENNON GROUP PLC,Versorger,Aktien,"2.361.855,02","0,03","2.361.855,02","396.588,00","5,96",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BNNTLN49
+AYV,AYVENS SA,Industrie,Aktien,"2.346.052,80","0,03","2.346.052,80","214.840,00","10,92",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013258662
+RS1,RS GROUP PLC,Industrie,Aktien,"2.339.865,34","0,03","2.339.865,34","337.741,00","6,93",Vereinigtes Königreich,London Stock Exchange,GBP,GB0003096442
+SFZN,SIEGFRIED HOLDING AG,Gesundheitsversorgung,Aktien,"2.330.674,57","0,03","2.330.674,57","29.875,00","78,01",Schweiz,SIX Swiss Exchange,CHF,CH1429326825
+EMG,MAN GROUP PLC,Financials,Aktien,"2.316.148,77","0,02","2.316.148,77","937.173,00","2,47",Vereinigtes Königreich,London Stock Exchange,GBP,JE00BJ1DLW90
+AED,AEDIFICA NV,Immobilien,Aktien,"2.307.316,20","0,02","2.307.316,20","36.393,00","63,40",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003851681
+SIGN,SIG GROUP N AG,Materialien,Aktien,"2.281.526,26","0,02","2.281.526,26","223.242,00","10,22",Schweiz,SIX Swiss Exchange,CHF,CH0435377954
+CWK,CRANSWICK PLC,Nichtzyklische Konsumgüter,Aktien,"2.281.554,28","0,02","2.281.554,28","39.176,00","58,24",Vereinigtes Königreich,London Stock Exchange,GBP,GB0002318888
+DIE,DIETEREN (D) SA,Zyklische Konsumgüter ,Aktien,"2.270.120,00","0,02","2.270.120,00","15.656,00","145,00",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0974259880
+COFB,COFINIMMO REIT SA,Immobilien,Aktien,"2.266.008,90","0,02","2.266.008,90","30.274,00","74,85",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003593044
+MANTA,MANDATUM,Financials,Aktien,"2.256.844,36","0,02","2.256.844,36","341.739,00","6,60",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI4000552526
+WIE,WIENERBERGER AG,Materialien,Aktien,"2.247.845,60","0,02","2.247.845,60","78.596,00","28,60",Österreich,Wiener Boerse Ag,EUR,AT0000831706
+MYCR,MYCRONIC,IT,Aktien,"2.246.270,06","0,02","2.246.270,06","112.367,00","19,99",Schweden,Nasdaq Omx Nordic,SEK,SE0025158629
+ROR,ROTORK PLC,Industrie,Aktien,"2.243.870,19","0,02","2.243.870,19","604.166,00","3,71",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BVFNZH21
+HUH1V,HUHTAMAKI,Materialien,Aktien,"2.219.955,36","0,02","2.219.955,36","77.784,00","28,54",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009000459
+ALLFG,ALLFUNDS GROUP PLC,Financials,Aktien,"2.213.733,48","0,02","2.213.733,48","282.184,00","7,84",Niederlande,Euronext Amsterdam,EUR,GB00BNTJ3546
+COV,COVIVIO SA,Immobilien,Aktien,"2.200.258,60","0,02","2.200.258,60","40.897,00","53,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000064578
+FTK,FLATEXDEGIRO N AG,Financials,Aktien,"2.181.013,52","0,02","2.181.013,52","63.847,00","34,16",Deutschland,Xetra,EUR,DE000FTG1111
+LATO B,LATOUR INVESTMENT CLASS B,Industrie,Aktien,"2.178.426,97","0,02","2.178.426,97","107.437,00","20,28",Schweden,Nasdaq Omx Nordic,SEK,SE0010100958
+PLUS,PLUS500 LTD,Financials,Aktien,"2.175.894,50","0,02","2.175.894,50","55.867,00","38,95",Vereinigtes Königreich,London Stock Exchange,GBP,IL0011284465
+RUI,RUBIS,Versorger,Aktien,"2.161.656,12","0,02","2.161.656,12","67.594,00","31,98",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013269123
+REY,REPLY,IT,Aktien,"2.160.512,20","0,02","2.160.512,20","18.403,00","117,40",Italien,Borsa Italiana,EUR,IT0005282865
+SUNN,SUNRISE N CLASS A AG,Kommunikation,Aktien,"2.148.798,72","0,02","2.148.798,72","49.335,00","43,56",Schweiz,SIX Swiss Exchange,CHF,CH1386220409
+RBREW,ROYAL UNIBREW,Nichtzyklische Konsumgüter,Aktien,"2.141.184,45","0,02","2.141.184,45","29.132,00","73,50",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060634707
+MBK,MBANK SA,Financials,Aktien,"2.115.744,65","0,02","2.115.744,65","8.851,00","239,04",Polen,Warsaw Stock Exchange/Equities/Main Market,PLN,PLBRE0000012
+KBCA,KBC ANCORA NV,Financials,Aktien,"2.112.153,10","0,02","2.112.153,10","29.053,00","72,70",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0003867844
+CMBN,CEMBRA MONEY BANK LTD,Financials,Aktien,"2.111.301,50","0,02","2.111.301,50","21.033,00","100,38",Schweiz,SIX Swiss Exchange,CHF,CH0225173167
+CCL,CARNIVAL PLC,Zyklische Konsumgüter ,Aktien,"2.108.281,74","0,02","2.108.281,74","101.943,00","20,68",Vereinigtes Königreich,London Stock Exchange,GBP,GB0031215220
+UMI,UMICORE SA,Materialien,Aktien,"2.106.733,38","0,02","2.106.733,38","133.422,00","15,79",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0974320526
+BCVN,BC VAUD N,Financials,Aktien,"2.092.069,55","0,02","2.092.069,55","19.989,00","104,66",Schweiz,SIX Swiss Exchange,CHF,CH0531751755
+TEG,TAG IMMOBILIEN AG,Immobilien,Aktien,"2.068.859,00","0,02","2.068.859,00","159.143,00","13,00",Deutschland,Xetra,EUR,DE0008303504
+MOBN,MOBIMO HOLDING AG,Immobilien,Aktien,"2.069.035,34","0,02","2.069.035,34","5.524,00","374,55",Schweiz,SIX Swiss Exchange,CHF,CH0011108872
+AALB,AALBERTS NV,Industrie,Aktien,"2.063.435,56","0,02","2.063.435,56","73.589,00","28,04",Niederlande,Euronext Amsterdam,EUR,NL0000852564
+ARCAD,ARCADIS NV,Industrie,Aktien,"2.062.003,32","0,02","2.062.003,32","57.954,00","35,58",Niederlande,Euronext Amsterdam,EUR,NL0006237562
+FDJU,FDJ UNITED,Zyklische Konsumgüter ,Aktien,"2.059.243,66","0,02","2.059.243,66","90.397,00","22,78",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013451333
+HOLM B,HOLMEN CLASS B,Materialien,Aktien,"2.052.592,94","0,02","2.052.592,94","65.166,00","31,50",Schweden,Nasdaq Omx Nordic,SEK,SE0011090018
+GL9,GLANBIA PLC,Nichtzyklische Konsumgüter,Aktien,"2.049.914,49","0,02","2.049.914,49","140.309,00","14,61",Irland,Irish Stock Exchange - All Market,EUR,IE0000669501
+NEXI,NEXI,Financials,Aktien,"2.047.617,55","0,02","2.047.617,55","509.738,00","4,02",Italien,Borsa Italiana,EUR,IT0005366767
+HIK,HIKMA PHARMACEUTICALS PLC,Gesundheitsversorgung,Aktien,"2.044.093,54","0,02","2.044.093,54","116.766,00","17,51",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B0LCW083
+RF,EURAZEO,Financials,Aktien,"2.041.247,10","0,02","2.041.247,10","37.731,00","54,10",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121121
+DEMANT,DEMANT,Gesundheitsversorgung,Aktien,"2.039.358,46","0,02","2.039.358,46","71.315,00","28,60",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060738599
+ROCK B,ROCKWOOL CLASS B,Industrie,Aktien,"2.029.035,63","0,02","2.029.035,63","71.271,00","28,47",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0063855168
+FRO,FRONTLINE,Energie,Aktien,"2.018.599,18","0,02","2.018.599,18","104.068,00","19,40",Norwegen,Oslo Bors Asa,NOK,CY0200352116
+ADP,AEROPORTS DE PARIS SA,Industrie,Aktien,"2.008.531,80","0,02","2.008.531,80","16.017,00","125,40",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0010340141
+QQ.,QINETIQ GROUP PLC,Industrie,Aktien,"1.995.640,60","0,02","1.995.640,60","409.238,00","4,88",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B0WMWD03
+LIGHT,SIGNIFY NV,Industrie,Aktien,"1.989.367,16","0,02","1.989.367,16","101.602,00","19,58",Niederlande,Euronext Amsterdam,EUR,NL0011821392
+SUN,SULZER AG,Industrie,Aktien,"1.967.410,33","0,02","1.967.410,33","12.965,00","151,75",Schweiz,SIX Swiss Exchange,CHF,CH0038388911
+INPST,INPOST SA,Industrie,Aktien,"1.912.399,47","0,02","1.912.399,47","196.043,00","9,76",Niederlande,Euronext Amsterdam,EUR,LU2290522684
+UNI,UNICAJA BANCO SA,Financials,Aktien,"1.896.678,42","0,02","1.896.678,42","713.037,00","2,66",Spanien,Bolsa De Madrid,EUR,ES0180907000
+THULE,THULE GROUP,Zyklische Konsumgüter ,Aktien,"1.888.537,54","0,02","1.888.537,54","84.286,00","22,41",Schweden,Nasdaq Omx Nordic,SEK,SE0006422390
+AXFO,AXFOOD,Nichtzyklische Konsumgüter,Aktien,"1.870.227,44","0,02","1.870.227,44","75.966,00","24,62",Schweden,Nasdaq Omx Nordic,SEK,SE0006993770
+VZN,VZ HOLDING AG,Financials,Aktien,"1.864.481,87","0,02","1.864.481,87","11.772,00","158,38",Schweiz,SIX Swiss Exchange,CHF,CH0528751586
+VAR,VAR ENERGI,Energie,Aktien,"1.860.677,95","0,02","1.860.677,95","693.878,00","2,68",Norwegen,Oslo Bors Asa,NOK,NO0011202772
+TOM,TOMRA SYSTEMS,Industrie,Aktien,"1.857.908,87","0,02","1.857.908,87","167.658,00","11,08",Norwegen,Oslo Bors Asa,NOK,NO0012470089
+VK,VALLOUREC SA,Energie,Aktien,"1.844.976,75","0,02","1.844.976,75","120.390,00","15,32",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013506730
+FR,VALEO,Zyklische Konsumgüter ,Aktien,"1.844.053,75","0,02","1.844.053,75","163.625,00","11,27",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0013176526
+USD,USD CASH,Cash und/oder Derivate,Geldmarkt,"1.838.399,30","0,02","1.838.399,30","2.140.264,00","85,90",Vereinigte Staaten,-,USD,
+LOOMIS,LOOMIS CLASS B,Industrie,Aktien,"1.826.772,86","0,02","1.826.772,86","53.545,00","34,12",Schweden,Nasdaq Omx Nordic,SEK,SE0014504817
+PHP,PRIMARY HEALTH PROPERTIES REIT PLC,Immobilien,Aktien,"1.822.162,12","0,02","1.822.162,12","1.685.242,00","1,08",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BYRJ5J14
+FRA,FRAPORT FRANKFURT AIRPORT SERVICES,Industrie,Aktien,"1.814.562,75","0,02","1.814.562,75","26.587,00","68,25",Deutschland,Xetra,EUR,DE0005773303
+INW,INFRASTRUTTURE WIRELESS ITALIANE,Kommunikation,Aktien,"1.800.015,26","0,02","1.800.015,26","240.483,00","7,49",Italien,Borsa Italiana,EUR,IT0005090300
+FPE3,FUCHS PREF,Materialien,Aktien,"1.797.953,08","0,02","1.797.953,08","47.971,00","37,48",Deutschland,Xetra,EUR,DE000A3E5D64
+VIS,VISCOFAN SA,Nichtzyklische Konsumgüter,Aktien,"1.788.633,00","0,02","1.788.633,00","34.265,00","52,20",Spanien,Bolsa De Madrid,EUR,ES0184262212
+BYG,BIG YELLOW GROUP PLC,Immobilien,Aktien,"1.782.863,84","0,02","1.782.863,84","156.133,00","11,42",Vereinigtes Königreich,London Stock Exchange,GBP,GB0002869419
+SHC,SHAFTESBURY CAPITAL PLC,Immobilien,Aktien,"1.779.588,67","0,02","1.779.588,67","1.136.948,00","1,57",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B62G9D36
+CDI,CHRISTIAN DIOR,Zyklische Konsumgüter ,Aktien,"1.775.382,00","0,02","1.775.382,00","3.093,00","574,00",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000130403
+AMBU B,AMBU CLASS B,Gesundheitsversorgung,Aktien,"1.768.999,70","0,02","1.768.999,70","155.361,00","11,39",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0060946788
+TCAP,TP ICAP GROUP PLC,Financials,Aktien,"1.728.147,21","0,02","1.728.147,21","607.801,00","2,84",Vereinigtes Königreich,London Stock Exchange,GBP,JE00BMDZN391
+KEMIRA,KEMIRA,Materialien,Aktien,"1.716.639,21","0,02","1.716.639,21","90.207,00","19,03",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI0009004824
+JD.,JD SPORTS FASHION PLC,Zyklische Konsumgüter ,Aktien,"1.705.039,49","0,02","1.705.039,49","1.888.228,00","0,90",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BM8Q5M07
+VID,VIDRALA SA,Materialien,Aktien,"1.698.592,50","0,02","1.698.592,50","20.589,00","82,50",Spanien,Bolsa De Madrid,EUR,ES0183746314
+AMV0,AUMOVIO N,Zyklische Konsumgüter ,Aktien,"1.687.392,00","0,02","1.687.392,00","40.176,00","42,00",Deutschland,Xetra,EUR,DE000AUM0V10
+FLS,FLSMIDTH AND CO CLASS B,Industrie,Aktien,"1.688.051,10","0,02","1.688.051,10","30.107,00","56,07",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0010234467
+CAMX,CAMURUS,Gesundheitsversorgung,Aktien,"1.686.014,45","0,02","1.686.014,45","30.783,00","54,77",Schweden,Nasdaq Omx Nordic,SEK,SE0007692850
+VTY,VISTRY GROUP PLC,Zyklische Konsumgüter ,Aktien,"1.665.507,93","0,02","1.665.507,93","233.725,00","7,13",Vereinigtes Königreich,London Stock Exchange,GBP,GB0001859296
+BUCN,BUCHER INDUSTRIES AG,Industrie,Aktien,"1.664.299,97","0,02","1.664.299,97","4.326,00","384,72",Schweiz,SIX Swiss Exchange,CHF,CH0002432174
+UTG,UNITE GROUP PLC,Immobilien,Aktien,"1.657.327,18","0,02","1.657.327,18","280.715,00","5,90",Vereinigtes Königreich,London Stock Exchange,GBP,GB0006928617
+BPT,BRIDGEPOINT GROUP PLC,Financials,Aktien,"1.637.732,03","0,02","1.637.732,03","512.299,00","3,20",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BND88V85
+TBCG,TBC BANK GROUP PLC,Financials,Aktien,"1.613.686,13","0,02","1.613.686,13","35.705,00","45,20",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BYT18307
+VPK,KONINKLIJKE VOPAK NV,Energie,Aktien,"1.609.278,82","0,02","1.609.278,82","42.551,00","37,82",Niederlande,Euronext Amsterdam,EUR,NL0009432491
+PUM,PUMA,Zyklische Konsumgüter ,Aktien,"1.608.476,82","0,02","1.608.476,82","79.746,00","20,17",Deutschland,Xetra,EUR,DE0006969603
+GFTU,GRAFTON GROUP PLC,Industrie,Aktien,"1.601.840,21","0,02","1.601.840,21","153.189,00","10,46",Vereinigtes Königreich,London Stock Exchange,GBP,IE00B00MZ448
+WIHL,WIHLBORGS FASTIGHETER,Immobilien,Aktien,"1.561.855,60","0,02","1.561.855,60","189.788,00","8,23",Schweden,Nasdaq Omx Nordic,SEK,SE0018012635
+SCT,SOFTCAT PLC,IT,Aktien,"1.551.787,36","0,02","1.551.787,36","94.644,00","16,40",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BYZDVK82
+GRG,GREGGS PLC,Zyklische Konsumgüter ,Aktien,"1.546.526,43","0,02","1.546.526,43","82.468,00","18,75",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B63QSB39
+EZJ,EASYJET PLC,Industrie,Aktien,"1.525.536,43","0,02","1.525.536,43","279.871,00","5,45",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B7KR2P84
+ATE,ALTEN SA,IT,Aktien,"1.524.618,60","0,02","1.524.618,60","22.487,00","67,80",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000071946
+PUIG,PUIG BRANDS SA CLASS B,Nichtzyklische Konsumgüter,Aktien,"1.504.022,85","0,02","1.504.022,85","101.281,00","14,85",Spanien,Bolsa De Madrid,EUR,ES0105777017
+BAVA,BAVARIAN NORDIC,Gesundheitsversorgung,Aktien,"1.492.262,60","0,02","1.492.262,60","58.851,00","25,36",Dänemark,Omx Nordic Exchange Copenhagen A/S,DKK,DK0015998017
+MF,WENDEL,Financials,Aktien,"1.477.615,00","0,02","1.477.615,00","19.066,00","77,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121204
+SOP,SOPRA STERIA GROUP,IT,Aktien,"1.471.197,00","0,02","1.471.197,00","10.778,00","136,50",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000050809
+SFSN,SFS GROUP AG,Industrie,Aktien,"1.464.580,38","0,02","1.464.580,38","13.034,00","112,37",Schweiz,SIX Swiss Exchange,CHF,CH0239229302
+DKSH,DKSH HOLDING AG,Industrie,Aktien,"1.459.748,63","0,02","1.459.748,63","24.801,00","58,86",Schweiz,SIX Swiss Exchange,CHF,CH0126673539
+SDF,K+S AG,Materialien,Aktien,"1.459.755,27","0,02","1.459.755,27","123.813,00","11,79",Deutschland,Xetra,EUR,DE000KSAG888
+HIAB,HIAB CORPORATION CLASS B,Industrie,Aktien,"1.459.125,90","0,02","1.459.125,90","29.241,00","49,90",Finnland,Nasdaq Omx Helsinki Ltd.,EUR,FI4000571013
+NOD,NORDIC SEMICONDUCTOR,IT,Aktien,"1.458.436,23","0,02","1.458.436,23","132.724,00","10,99",Norwegen,Oslo Bors Asa,NOK,NO0003055501
+HPOL B,HEXPOL CLASS B,Materialien,Aktien,"1.440.985,38","0,02","1.440.985,38","181.086,00","7,96",Schweden,Nasdaq Omx Nordic,SEK,SE0007074281
+BAKKA,BAKKAFROST,Nichtzyklische Konsumgüter,Aktien,"1.413.436,82","0,02","1.413.436,82","34.637,00","40,81",Norwegen,Oslo Bors Asa,NOK,FO0000000179
+WALL B,WALLENSTAM CLASS B,Immobilien,Aktien,"1.399.450,95","0,02","1.399.450,95","364.663,00","3,84",Schweden,Nasdaq Omx Nordic,SEK,SE0017780133
+AMP,AMPLIFON,Gesundheitsversorgung,Aktien,"1.396.317,03","0,02","1.396.317,03","103.854,00","13,45",Italien,Borsa Italiana,EUR,IT0004056880
+TECN,TECAN GROUP AG,Gesundheitsversorgung,Aktien,"1.384.539,08","0,01","1.384.539,08","10.006,00","138,37",Schweiz,SIX Swiss Exchange,CHF,CH0012100191
+DLN,DERWENT LONDON REIT PLC,Immobilien,Aktien,"1.332.721,59","0,01","1.332.721,59","72.437,00","18,40",Vereinigtes Königreich,London Stock Exchange,GBP,GB0002652740
+BME,B&M EUROPEAN VALUE RETAIL SA,Zyklische Konsumgüter ,Aktien,"1.324.398,29","0,01","1.324.398,29","740.571,00","1,79",Vereinigtes Königreich,London Stock Exchange,GBP,LU1072616219
+AZE,AZELIS GROUP NV,Industrie,Aktien,"1.301.663,49","0,01","1.301.663,49","149.017,00","8,73",Belgien,Nyse Euronext - Euronext Brussels,EUR,BE0974400328
+KINV B,KINNEVIK CLASS B,Financials,Aktien,"1.292.504,73","0,01","1.292.504,73","169.867,00","7,61",Schweden,Nasdaq Omx Nordic,SEK,SE0022060521
+LXS,LANXESS AG,Materialien,Aktien,"1.229.883,91","0,01","1.229.883,91","71.881,00","17,11",Deutschland,Xetra,EUR,DE0005470405
+OCDO,OCADO GROUP PLC,Nichtzyklische Konsumgüter,Aktien,"1.198.979,90","0,01","1.198.979,90","445.914,00","2,69",Vereinigtes Königreich,London Stock Exchange,GBP,GB00B3MBS747
+TATE,TATE AND LYLE PLC,Nichtzyklische Konsumgüter,Aktien,"1.175.238,48","0,01","1.175.238,48","280.795,00","4,19",Vereinigtes Königreich,London Stock Exchange,GBP,GB00BP92CJ43
+DIA,DIASORIN,Gesundheitsversorgung,Aktien,"1.105.933,16","0,01","1.105.933,16","18.059,00","61,24",Italien,Borsa Italiana,EUR,IT0003492391
+SK,SEB SA,Zyklische Konsumgüter ,Aktien,"1.099.278,06","0,01","1.099.278,06","22.591,00","48,66",Frankreich,Nyse Euronext - Euronext Paris,EUR,FR0000121709
+HEM,HEMNET GROUP,Kommunikation,Aktien,"1.073.413,76","0,01","1.073.413,76","64.495,00","16,64",Schweden,Nasdaq Omx Nordic,SEK,SE0015671995
+MTO,MITIE GROUP PLC,Industrie,Aktien,"881.775,45","0,01","881.775,45","472.800,00","1,87",Vereinigtes Königreich,London Stock Exchange,GBP,GB0004657408
+CHF,CHF CASH,Cash und/oder Derivate,Geldmarkt,"740.999,92","0,01","740.999,92","692.424,00","107,01",Schweiz,-,CHF,
+DKK,DKK CASH,Cash und/oder Derivate,Geldmarkt,"502.599,59","0,01","502.599,59","3.754.142,00","13,39",Dänemark,-,DKK,
+SEK,SEK CASH,Cash und/oder Derivate,Geldmarkt,"418.763,06","0,00","418.763,06","4.541.554,00","9,22",Schweden,-,SEK,
+PLN,PLN CASH,Cash und/oder Derivate,Geldmarkt,"266.738,24","0,00","266.738,24","1.127.031,00","23,67",Polen,-,PLN,
+NOK,NOK CASH,Cash und/oder Derivate,Geldmarkt,"258.476,45","0,00","258.476,45","3.055.569,00","8,46",Norwegen,-,NOK,
+ETD_EUR,ETD EUR BALANCE WITH R84910,Cash und/oder Derivate,Geldmarkt,"0,00","0,00","0,00","0,00","100,00",Europäische Union,-,EUR,
+SXS,SPECTRIS PLC,IT,Aktien,"0,00","0,00","0,00","0,00","0,00",Vereinigtes Königreich,London Stock Exchange,GBP,GB0003308607
+SXOZ5,STOXX EUROPE 600 DEC 25,Cash und/oder Derivate,Futures,"0,00","0,00","38.899.400,00","1.346,00","578,00",Europäische Union,Eurex Deutschland,EUR,
+ ,,,,,,,,,,,,

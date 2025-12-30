@@ -1,0 +1,4 @@
+Live Kurse in Watchlist hinzufügen ...Kursdatum keine eigene spalte (in klammern unter Kurs ?)
+In Modal PE fiskaljahr hinzufügen und Monat bei Berrechungsquartal‚
+Filtereinstellung im screener speichern
+Nächster Veröffentlichungstermin Quartalszahlen einfügen.

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Aktien{% endblock %}
+
+{% block content %}
+<div class="home">
+    <h1>Aktien-Tool</h1>
+    <p>Willkommen zum Aktien-Screener und Watchlist-Tool.</p>
+
+    <div class="home-links">
+        <a href="/watchlist" class="home-card">
+            <h2>Watchlist</h2>
+            <p>Deine Favoriten und beobachteten Aktien</p>
+        </a>
+
+        <a href="/screener" class="home-card">
+            <h2>Screener</h2>
+            <p>Alle Aktien durchsuchen und filtern</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

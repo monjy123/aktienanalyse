@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Watchlist - Aktien{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Watchlist</h1>
+    <div class="header-buttons">
+        <button id="favorites-btn" class="btn btn-settings">Favoriten</button>
+        <button id="settings-btn" class="btn btn-settings">Spalten</button>
+    </div>
+</div>
+
+{% if stocks %}
+<div class="table-container">
+    <table class="stock-table">
+        <thead>
+            <tr>
+                <th class="sortable" data-column="favorite" data-type="number">Fav</th>
+                {% for col in columns %}
+                <th class="sortable {{ 'num' if col.format_type != 'text' else '' }}" data-column="{{ col.column_key }}" data-type="{{ 'text' if col.format_type == 'text' else 'number' }}">{{ col.display_name | replace('/', '/<wbr>') | safe }}</th>
+                {% endfor %}
+                <th>Notizen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr data-isin="{{ stock.isin }}">
+                <td data-column="favorite" data-value="{{ stock.favorite or 0 }}">
+                    <select class="favorite-select" data-isin="{{ stock.isin }}">
+                        <option value="0" {% if stock.favorite == 0 %}selected{% endif %}>-</option>
+                        {% for i in range(1, 10) %}
+                        <option value="{{ i }}" {% if stock.favorite == i %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                {% for col in columns %}
+                {% set value = stock[col.column_key] %}
+                <td class="{{ 'num' if col.format_type != 'text' else '' }} {{ 'name' if col.column_key == 'company_name' else '' }}" data-column="{{ col.column_key }}" data-value="{{ value if value is not none else '' }}">
+                    {% if value is none %}
+                        -
+                    {% elif col.format_type == 'percent' %}
+                        {{ value|de_percent }}
+                    {% elif col.format_type == 'billions' %}
+                        {{ value|de_billions }}
+                    {% elif col.format_type == 'currency' %}
+                        {{ value|de(2) }}
+                    {% elif col.format_type == 'number' %}
+                        {{ value|de }}
+                    {% else %}
+                        {{ value }}
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td>
+                    <button class="note-btn" data-isin="{{ stock.isin }}" data-notes="{{ stock.notes or '' }}">
+                        {% if stock.notes %}📝{% else %}+{% endif %}
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>Keine Favoriten vorhanden.</p>
+    <p>Gehe zum <a href="/screener">Screener</a> und setze Favoriten.</p>
+</div>
+{% endif %}
+
+<!-- Modal für Notizen -->
+<div id="note-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Notizen</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <textarea id="note-text" rows="6" placeholder="Notizen eingeben..."></textarea>
+        <div class="modal-footer">
+            <button id="note-save" class="btn btn-primary">Speichern</button>
+            <button class="modal-close btn">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Spalten-Einstellungen -->
+<div id="columns-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3>Spalten konfigurieren</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="columns-body">
+            <p class="loading">Lade Spalten...</p>
+        </div>
+        <div class="modal-footer">
+            <button id="columns-save" class="btn btn-primary">Speichern</button>
+            <button class="modal-close btn">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Favoriten-Einstellungen -->
+<div id="favorites-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3>Favoriten konfigurieren</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="favorites-body">
+            <div class="favorites-config-split">
+                <!-- Linke Seite: Namen -->
+                <div class="favorites-labels">
+                    <h4>Favoriten benennen</h4>
+                    <p class="hint">Namen für die Favoriten-Stufen 1-9</p>
+                    <div class="label-list" id="label-list">
+                        <!-- Wird per JavaScript gefüllt -->
+                    </div>
+                </div>
+                <!-- Rechte Seite: Filter -->
+                <div class="favorites-filter">
+                    <h4>Anzeige filtern</h4>
+                    <p class="hint">Welche Favoriten in der Watchlist anzeigen?</p>
+                    <div class="filter-list" id="filter-list">
+                        <!-- Wird per JavaScript gefüllt -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="favorites-save" class="btn btn-primary">Speichern</button>
+            <button class="modal-close btn">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Stock-Details -->
+<div id="stock-detail-modal" class="modal hidden">
+    <div class="modal-content modal-xlarge">
+        <div class="modal-header">
+            <div class="detail-header-left">
+                <div class="detail-header-info">
+                    <h3 id="detail-company-name">-</h3>
+                    <span class="detail-meta" id="detail-meta">-</span>
+                </div>
+                <div class="detail-tabs">
+                    <button class="detail-tab active" data-tab="pe">KGV</button>
+                    <button class="detail-tab" data-tab="ev_ebit">EV/EBIT</button>
+                    <button class="detail-tab" data-tab="growth">Wachstum</button>
+                    <button class="detail-tab" data-tab="margins">Margen</button>
+                </div>
+            </div>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body detail-body" id="detail-body">
+            <div class="detail-loading">Lade Daten...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Unternehmensinformationen -->
+<div id="company-info-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <div class="detail-header-info">
+                <h3 id="info-company-name">-</h3>
+                <span class="detail-meta" id="info-meta">-</span>
+            </div>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="info-body">
+            <div class="detail-loading">Lade Daten...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}

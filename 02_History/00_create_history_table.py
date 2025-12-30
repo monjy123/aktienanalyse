@@ -5,6 +5,10 @@ create_historie_table.py
 Erstellt die SQL-Tabelle `yf_prices` im Schema `raw_data`.
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from mysql.connector import Error as MySQLError
 from db import get_connection
 

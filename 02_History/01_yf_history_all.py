@@ -7,6 +7,10 @@ Lädt historische Kursdaten über yfinance in raw_data.yf_prices
 - Struktur passt exakt zur Tabelle yf_prices
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import time
 import pandas as pd
 import yfinance as yf
@@ -115,6 +119,13 @@ def load_history():
                 df["isin"] = isin
                 df["ticker_yf"] = ticker
                 df["stock_index"] = stock_index
+
+                # UK-Aktien (.L Suffix): Pence → Pfund umrechnen
+                # Yahoo Finance liefert LSE-Kurse in GBp (Pence), nicht GBP
+                if ticker.endswith('.L'):
+                    for col in ['open', 'high', 'low', 'close', 'adj_close']:
+                        if col in df.columns:
+                            df[col] = df[col] / 100.0
 
                 all_rows.append(df)
 
