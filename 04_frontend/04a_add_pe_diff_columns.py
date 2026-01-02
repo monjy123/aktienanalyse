@@ -21,18 +21,18 @@ from db import get_connection
 NEW_COLUMNS = [
     # === YF TTM PE vs. historische Durchschnitte ===
     # view_name, source_table, column_key, display_name, sort_order, is_visible, column_group, format_type
-    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_5y', 'TTM PE vs Ø5J', 135, False, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_10y', 'TTM PE vs Ø10J', 136, True, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_15y', 'TTM PE vs Ø15J', 137, False, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_20y', 'TTM PE vs Ø20J', 138, False, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_10y_2019', 'TTM PE vs Ø10-19', 139, False, 'PE Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_5y', 'TTM PE vs Ø5J', 135, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_10y', 'TTM PE vs Ø10J', 136, True, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_15y', 'TTM PE vs Ø15J', 137, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_20y', 'TTM PE vs Ø20J', 138, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_10y_2019', 'TTM PE vs Ø10-19', 139, False, 'KGV Abweichung', 'percent'),
 
     # === YF Forward PE vs. historische Durchschnitte ===
-    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_5y', 'Fwd PE vs Ø5J', 140, False, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_10y', 'Fwd PE vs Ø10J', 141, True, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_15y', 'Fwd PE vs Ø15J', 142, False, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_20y', 'Fwd PE vs Ø20J', 143, False, 'PE Abweichung', 'percent'),
-    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_10y_2019', 'Fwd PE vs Ø10-19', 144, False, 'PE Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_5y', 'Fwd PE vs Ø5J', 140, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_10y', 'Fwd PE vs Ø10J', 141, True, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_15y', 'Fwd PE vs Ø15J', 142, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_20y', 'Fwd PE vs Ø20J', 143, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_10y_2019', 'Fwd PE vs Ø10-19', 144, False, 'KGV Abweichung', 'percent'),
 
     # === TTM EV/EBIT vs. historische Durchschnitte ===
     ('watchlist', 'live_metrics', 'ev_ebit_vs_avg_5y', 'EV/EBIT vs Ø5J', 150, False, 'EV/EBIT Abweichung', 'percent'),
@@ -97,7 +97,7 @@ def main():
             SELECT column_group, COUNT(*) as cnt
             FROM analytics.user_column_settings
             WHERE view_name = 'screener'
-              AND column_group IN ('PE Abweichung', 'EV/EBIT Abweichung')
+              AND column_group IN ('KGV Abweichung', 'EV/EBIT Abweichung')
             GROUP BY column_group
         """)
 
@@ -108,10 +108,10 @@ def main():
         print("""
 Neue Spalten fuer Filter verfuegbar:
 ------------------------------------
-PE Abweichung (YF TTM PE vs. historische Durchschnitte):
+KGV Abweichung (YF TTM PE vs. historische Durchschnitte):
   - yf_ttm_pe_vs_avg_5y, _10y, _15y, _20y, _10y_2019
 
-PE Abweichung (YF Forward PE vs. historische Durchschnitte):
+KGV Abweichung (YF Forward PE vs. historische Durchschnitte):
   - yf_fwd_pe_vs_avg_5y, _10y, _15y, _20y, _10y_2019
 
 EV/EBIT Abweichung (TTM EV/EBIT vs. historische Durchschnitte):
