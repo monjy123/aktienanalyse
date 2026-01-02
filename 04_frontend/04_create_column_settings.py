@@ -55,6 +55,7 @@ DEFAULT_COLUMNS = [
     ('watchlist', 'company_info', 'country', 'Land', 5, False, 'Stammdaten', 'text'),
     ('watchlist', 'company_info', 'stock_index', 'Index', 6, False, 'Stammdaten', 'text'),
     ('watchlist', 'company_info', 'currency', 'Währung', 7, False, 'Stammdaten', 'text'),
+    ('watchlist', 'live_metrics', 'yf_payout_ratio', 'Ausschüttungs<br>quote', 8, False, 'Stammdaten', 'percent'),
 
     # === KURSDATEN (live_metrics) ===
     ('watchlist', 'live_metrics', 'price', 'Kurs', 10, True, 'Kursdaten', 'currency'),
@@ -68,6 +69,8 @@ DEFAULT_COLUMNS = [
     # === BEWERTUNG TTM (live_metrics) ===
     ('watchlist', 'live_metrics', 'ttm_pe', 'KGV (TTM)', 25, True, 'Bewertung', 'number'),
     ('watchlist', 'live_metrics', 'ttm_ev_ebit', 'EV/EBIT (TTM)', 26, True, 'Bewertung', 'number'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe', 'KGV TTM (YF)', 27, False, 'Bewertung', 'number'),
+    ('watchlist', 'live_metrics', 'yf_forward_pe', 'KGV Forward (YF)', 28, False, 'Bewertung', 'number'),
 
     # === PE DURCHSCHNITTE (live_metrics) ===
     ('watchlist', 'live_metrics', 'pe_avg_5y', 'KGV Ø5J', 30, False, 'Durchschnitte', 'number'),
@@ -103,16 +106,39 @@ DEFAULT_COLUMNS = [
     ('watchlist', 'live_metrics', 'net_debt_ebitda', 'NetDebt/EBITDA', 71, True, 'Bilanz', 'number'),
 
     # === MARGEN (live_metrics) ===
-    ('watchlist', 'live_metrics', 'profit_margin', 'Gewinnmarge', 80, False, 'Margen', 'percent'),
+    ('watchlist', 'live_metrics', 'profit_margin', 'Gewinn<br>marge', 80, False, 'Margen', 'percent'),
     ('watchlist', 'live_metrics', 'operating_margin', 'Op. Marge', 81, False, 'Margen', 'percent'),
-    ('watchlist', 'live_metrics', 'profit_margin_avg_3y', 'Gewinnmarge Ø3J', 82, False, 'Margen', 'percent'),
-    ('watchlist', 'live_metrics', 'profit_margin_avg_5y', 'Gewinnmarge Ø5J', 83, True, 'Margen', 'percent'),
-    ('watchlist', 'live_metrics', 'profit_margin_avg_10y', 'Gewinnmarge Ø10J', 84, False, 'Margen', 'percent'),
-    ('watchlist', 'live_metrics', 'profit_margin_avg_5y_2019', 'Gewinnmarge Ø15-19', 85, False, 'Margen', 'percent'),
+    ('watchlist', 'live_metrics', 'profit_margin_avg_3y', 'Gewinn<br>marge Ø3J', 82, False, 'Margen', 'percent'),
+    ('watchlist', 'live_metrics', 'profit_margin_avg_5y', 'Gewinn<br>marge Ø5J', 83, True, 'Margen', 'percent'),
+    ('watchlist', 'live_metrics', 'profit_margin_avg_10y', 'Gewinn<br>marge Ø10J', 84, False, 'Margen', 'percent'),
+    ('watchlist', 'live_metrics', 'profit_margin_avg_5y_2019', 'Gewinn<br>marge Ø15-19', 85, False, 'Margen', 'percent'),
     ('watchlist', 'live_metrics', 'operating_margin_avg_3y', 'Op. Marge Ø3J', 86, False, 'Margen', 'percent'),
     ('watchlist', 'live_metrics', 'operating_margin_avg_5y', 'Op. Marge Ø5J', 87, True, 'Margen', 'percent'),
     ('watchlist', 'live_metrics', 'operating_margin_avg_10y', 'Op. Marge Ø10J', 88, False, 'Margen', 'percent'),
     ('watchlist', 'live_metrics', 'operating_margin_avg_5y_2019', 'Op. Marge Ø15-19', 89, False, 'Margen', 'percent'),
+
+    # === YFINANCE METRIKEN - MARGEN (live_metrics) ===
+    ('watchlist', 'live_metrics', 'yf_profit_margin', 'Gewinn<br>marge (YF)', 90, False, 'Margen', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_operating_margin', 'Op. Marge (YF)', 91, False, 'Margen', 'percent'),
+
+    # === KGV ABWEICHUNGEN (live_metrics) ===
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_5y', 'KGV Abw. Ø5J', 100, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_10y', 'KGV Abw. Ø10J', 101, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_15y', 'KGV Abw. Ø15J', 102, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_20y', 'KGV Abw. Ø20J', 103, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_ttm_pe_vs_avg_10y_2019', 'KGV Abw. Ø10-19', 104, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_5y', 'Fwd KGV Abw. Ø5J', 105, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_10y', 'Fwd KGV Abw. Ø10J', 106, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_15y', 'Fwd KGV Abw. Ø15J', 107, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_20y', 'Fwd KGV Abw. Ø20J', 108, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'yf_fwd_pe_vs_avg_10y_2019', 'Fwd KGV Abw. Ø10-19', 109, False, 'KGV Abweichung', 'percent'),
+
+    # === EV/EBIT ABWEICHUNGEN (live_metrics) ===
+    ('watchlist', 'live_metrics', 'ev_ebit_vs_avg_5y', 'EV/EBIT Abw. Ø5J', 110, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'ev_ebit_vs_avg_10y', 'EV/EBIT Abw. Ø10J', 111, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'ev_ebit_vs_avg_15y', 'EV/EBIT Abw. Ø15J', 112, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'ev_ebit_vs_avg_20y', 'EV/EBIT Abw. Ø20J', 113, False, 'KGV Abweichung', 'percent'),
+    ('watchlist', 'live_metrics', 'ev_ebit_vs_avg_10y_2019', 'EV/EBIT Abw. Ø10-19', 114, False, 'KGV Abweichung', 'percent'),
 ]
 
 
@@ -144,6 +170,7 @@ def main():
         ON DUPLICATE KEY UPDATE
             display_name = VALUES(display_name),
             sort_order = VALUES(sort_order),
+            is_visible = VALUES(is_visible),
             column_group = VALUES(column_group),
             format_type = VALUES(format_type)
         """

@@ -1,0 +1,71 @@
+# =============================================================================
+# CRONTAB KONFIGURATION FÜR AKTIENANALYSE
+# =============================================================================
+# Installation:
+#   1. Öffne Crontab-Editor: crontab -e
+#   2. Kopiere die gewünschten Einträge unten
+#   3. Speichern und beenden (meist: Ctrl+O, Enter, Ctrl+X)
+#   4. Prüfen mit: crontab -l
+#
+# Hinweis: Logs werden in /home/monjy/aktienanalyse/logs/ gespeichert
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# EMPFOHLENE KONFIGURATION (täglich Updates um 2:00 Uhr nachts)
+# -----------------------------------------------------------------------------
+
+# 1. Täglich um 2:00 Uhr: Kursdaten + Berechnungen + Live Metrics aktualisieren
+0 2 * * * /home/monjy/aktienanalyse/run_daily_update.sh
+
+# 2. Täglich um 3:00 Uhr: Website neu starten (nach Daten-Update)
+0 3 * * * /home/monjy/aktienanalyse/restart_website.sh
+
+# -----------------------------------------------------------------------------
+# ALTERNATIVE: Wochenendliche Aktualisierung von Stammdaten
+# -----------------------------------------------------------------------------
+# Falls du auch gelegentlich die Stammdaten (Sektor, Industrie, Beschreibung)
+# von yfinance aktualisieren möchtest (empfohlen: 1x pro Monat)
+
+# Jeden ersten Sonntag im Monat um 1:00 Uhr: Company Info aktualisieren
+0 1 1-7 * 0 cd /home/monjy/aktienanalyse/04_frontend && ../venv/bin/python 01_load_company_info.py >> /home/monjy/aktienanalyse/logs/company_info.log 2>&1
+
+# -----------------------------------------------------------------------------
+# OPTIONAL: E-Mail-Benachrichtigung bei Fehlern
+# -----------------------------------------------------------------------------
+# Wenn du E-Mail-Benachrichtigungen möchtest, installiere postfix:
+# sudo apt-get install postfix
+# Dann füge MAILTO am Anfang der Crontab hinzu:
+# MAILTO=deine@email.de
+
+# -----------------------------------------------------------------------------
+# DEBUGGING: Testen der Skripte
+# -----------------------------------------------------------------------------
+# Um die Skripte manuell zu testen (NICHT in crontab einfügen):
+#
+# Daily Update testen:
+#   cd /home/monjy/aktienanalyse
+#   ./run_daily_update.sh
+#
+# Website Neustart testen:
+#   cd /home/monjy/aktienanalyse
+#   ./restart_website.sh
+#
+# Cron-Logs anzeigen:
+#   grep CRON /var/log/syslog | tail -20
+#
+# Eigene Logs anzeigen:
+#   tail -f /home/monjy/aktienanalyse/logs/daily_update_*.log
+
+# =============================================================================
+# ZUSAMMENFASSUNG
+# =============================================================================
+# Was wird täglich aktualisiert:
+#   ✓ Kursdaten von yfinance (02_history)
+#   ✓ Live Metrics von yfinance (TTM PE, Forward PE, Margins)
+#   ✓ Berechnungen auf Basis der Daten (03_analytics)
+#   ✓ Website wird neu gestartet
+#
+# Was wird NICHT aktualisiert (weil FMP API abgelaufen):
+#   ✗ FMP Fundamentaldaten (01_load_fundamentals)
+#   ✗ Company Info (nur bei Bedarf/monatlich)
+# =============================================================================

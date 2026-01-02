@@ -1,0 +1,352 @@
+==================================================
+Starte Aktien-Webserver...
+Öffne: http://localhost:5001
+Beenden mit: Ctrl+C
+==================================================
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://49.13.232.35:5001
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 141-527-802
+78.153.94.29 - - [31/Dec/2025 13:49:46] "GET /screener HTTP/1.1" 200 -
+78.153.94.29 - - [31/Dec/2025 13:49:46] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+78.153.94.29 - - [31/Dec/2025 13:49:47] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+78.153.94.29 - - [31/Dec/2025 15:21:24] "GET / HTTP/1.1" 200 -
+78.153.94.29 - - [31/Dec/2025 15:21:24] "GET /static/style.css HTTP/1.1" 200 -
+78.153.94.29 - - [31/Dec/2025 15:21:24] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+78.153.94.29 - - [31/Dec/2025 15:21:28] "GET /screener HTTP/1.1" 200 -
+78.153.94.29 - - [31/Dec/2025 15:21:28] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+78.153.94.29 - - [31/Dec/2025 15:21:28] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+66.132.153.135 - - [31/Dec/2025 15:36:11] code 400, message Bad request version ('À\x14À')
+66.132.153.135 - - [31/Dec/2025 15:36:11] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03PXÐ8p7\x80\x84Ú*@\x00\x80\x12\x18\x8cÌ\x8ba£\x9aPäN\x9c®fu_\x19Ïî Ø\x96¶9é!\x08ÿ|ãý\x10z³90Ë³\x8d\x91ñ\x8aùZ\x80æ\x11Ãåí/!\x00&Ì¨Ì©À/À0À+À,À\x13À\x09À\x14À[0m" 400 -
+66.132.153.135 - - [31/Dec/2025 15:36:14] "GET / HTTP/1.1" 200 -
+66.132.153.135 - - [31/Dec/2025 15:36:17] code 400, message Bad request version ('À\x14À')
+66.132.153.135 - - [31/Dec/2025 15:36:17] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03éH)k§\x8c\x80Ìy\x80[\x93pnmò!\x0bð>i \x08Ð\x1fàNò¢©]\x11 Ål¦\x13Ý\x13\x0eXþ/\x09\x0f¦ºð\x02m\x84"@\x08à\x92zÞæ¶\x15ð\x13ßû\x00&Ì¨Ì©À/À0À+À,À\x13À\x09À\x14À[0m" 400 -
+66.132.153.135 - - [31/Dec/2025 15:36:18] "GET / HTTP/1.1" 200 -
+66.132.153.135 - - [31/Dec/2025 15:36:18] code 505, message Invalid HTTP version (2.0)
+66.132.153.135 - - [31/Dec/2025 15:36:18] "[35m[1mPRI * HTTP/2.0[0m" 505 -
+66.132.153.135 - - [31/Dec/2025 15:36:19] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+66.132.153.135 - - [31/Dec/2025 15:36:22] code 400, message Bad request version ('À\x14À')
+66.132.153.135 - - [31/Dec/2025 15:36:22] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03Í\x18 ¡Â\x0dÈ¤a½>wò\x89õ©gUúÄu\x0e\x9d_½¨½"&6©ý \x18\x1b\x83\x8dt\x1aÿ\x16\x9e\x1aäª&!E­,G\x94\x7fh\x8fÍ\x10`)ûr\x95\x09éw\x00&Ì¨Ì©À/À0À+À,À\x13À\x09À\x14À[0m" 400 -
+66.132.153.135 - - [31/Dec/2025 15:36:22] "[33mGET /wiki HTTP/1.1[0m" 404 -
+95.214.55.246 - - [31/Dec/2025 17:36:21] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+95.214.55.246 - - [31/Dec/2025 17:36:21] "[33mPOST /_next HTTP/1.1[0m" 404 -
+95.214.55.246 - - [31/Dec/2025 17:36:21] "[33mPOST /api HTTP/1.1[0m" 404 -
+95.214.55.246 - - [31/Dec/2025 17:36:21] "[33mPOST /_next/server HTTP/1.1[0m" 404 -
+95.214.55.246 - - [31/Dec/2025 17:36:21] "[33mPOST /app HTTP/1.1[0m" 404 -
+95.214.55.246 - - [31/Dec/2025 17:36:21] "[33mPOST /api/route HTTP/1.1[0m" 404 -
+82.23.183.43 - - [31/Dec/2025 19:07:26] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+82.23.183.43 - - [31/Dec/2025 19:08:03] "[33mPOST /_next/server HTTP/1.1[0m" 404 -
+82.23.183.43 - - [31/Dec/2025 19:08:16] "[33mPOST /app HTTP/1.1[0m" 404 -
+82.23.183.43 - - [31/Dec/2025 19:08:28] "[33mPOST /api/route HTTP/1.1[0m" 404 -
+64.62.156.202 - - [01/Jan/2026 00:53:31] code 400, message Bad request version ('À\x14À')
+64.62.156.202 - - [01/Jan/2026 00:53:31] "[31m[1m\x16\x03\x01\x00{\x01\x00\x00w\x03\x03¿\x95\x1b+î+9\x85r;\x10\x80ÔeÏ\x14\x1b\x08Ák9?zz\x9a\x1dPC\x05q\x10â\x00\x00\x1aÀ/À+À\x11À\x07À\x13À\x09À\x14À[0m" 400 -
+205.210.31.193 - - [01/Jan/2026 02:55:31] code 400, message Bad request version ('ÁÊ6«')
+205.210.31.193 - - [01/Jan/2026 02:55:31] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03\x13Ñ%|x\x83\x0d9V\x8a\x0cÁÊ6«[0m" 400 -
+205.210.31.193 - - [01/Jan/2026 02:55:31] code 400, message Bad request version ('À(À$À\x14À')
+205.210.31.193 - - [01/Jan/2026 02:55:31] "[31m[1m\x16\x03\x01\x00Ê\x01\x00\x00Æ\x03\x03Q¬-¢Ê[Ã^nF\x8f¨ñ­\x03M\x0dÃÈ\x8b¬,b$lj²\x88jç\x15\x80\x00\x00hÌ\x14Ì\x13À/À+À0À,À\x11À\x07À'À#À\x13À\x09À(À$À\x14À[0m" 400 -
+62.77.113.8 - - [01/Jan/2026 03:16:14] code 400, message Bad request version ('\x84Y}io\x1bþnù\x08Öa±È,\x82\x11Oâòh\x98\x00\x01\x14Ì¨Ì©ÌªÀ,À0\x00\x9fÀ\xadÀ\x9fÀ$À(\x00kÀ')
+62.77.113.8 - - [01/Jan/2026 03:16:14] "[31m[1m\x16\x03\x01\x01\x89\x01\x00\x01\x85\x03\x03iUÞÚ\x81è\x8aY3\x09\x84Y}io\x1bþnù\x08Öa±È,\x82\x11Oâòh\x98\x00\x01\x14Ì¨Ì©ÌªÀ,À0\x00\x9fÀ­À\x9fÀ$À(\x00kÀ[0m" 400 -
+66.132.153.127 - - [01/Jan/2026 05:03:37] code 400, message Bad request version ('À\x14À')
+66.132.153.127 - - [01/Jan/2026 05:03:37] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03\x8d\x88ëüþMieé\x7f\x96Òz`\x94Y½ÁN)Â®:\x92»ë×\x12\x17\x9a\x17\x14 ËÑÝÁ¼Ã¯÷Õ\x19ë³\x06-\x09:ä\x0cáa\x8d1t7®:\x8b¬L÷ÅI\x00&Ì¨Ì©À/À0À+À,À\x13À\x09À\x14À[0m" 400 -
+66.132.153.127 - - [01/Jan/2026 05:03:42] "GET / HTTP/1.1" 200 -
+66.132.153.127 - - [01/Jan/2026 05:03:47] code 400, message Bad request version ('\x1a!r¶ÀB6øÓ\x82§10\x94§§º\x11c"\x03f-')
+66.132.153.127 - - [01/Jan/2026 05:03:47] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03\x1c\x9e$\x82 k­ù\x1c\x1a!r¶ÀB6øÓ\x82§10\x94§§º\x11c"\x03f- [0m" 400 -
+66.132.153.127 - - [01/Jan/2026 05:03:51] "GET / HTTP/1.1" 200 -
+66.132.153.127 - - [01/Jan/2026 05:03:51] code 505, message Invalid HTTP version (2.0)
+66.132.153.127 - - [01/Jan/2026 05:03:51] "[35m[1mPRI * HTTP/2.0[0m" 505 -
+66.132.153.127 - - [01/Jan/2026 05:03:52] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+66.132.153.127 - - [01/Jan/2026 05:03:59] code 400, message Bad request syntax ('\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03±\\>e')
+66.132.153.127 - - [01/Jan/2026 05:03:59] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03±\\>e[0m" 400 -
+66.132.153.127 - - [01/Jan/2026 05:03:59] "[33mGET /sitemap.xml HTTP/1.1[0m" 404 -
+20.169.53.154 - - [01/Jan/2026 05:34:31] "[33mGET /v2/ HTTP/1.1[0m" 404 -
+147.185.132.85 - - [01/Jan/2026 07:01:32] "GET / HTTP/1.1" 200 -
+78.153.93.187 - - [01/Jan/2026 09:39:14] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:14] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:14] "GET /screener HTTP/1.1" 200 -
+78.153.93.187 - - [01/Jan/2026 09:39:14] "GET /screener HTTP/1.1" 200 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon-120x120-precomposed.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon-120x120.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon-120x120-precomposed.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon-120x120.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:15] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 09:39:16] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+3.134.148.59 - - [01/Jan/2026 11:59:24] "GET / HTTP/1.1" 200 -
+3.134.148.59 - - [01/Jan/2026 12:01:08] "GET / HTTP/1.1" 200 -
+3.134.148.59 - - [01/Jan/2026 12:03:14] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x00{\x01\x00\x00w\x03\x03Ký#Å§q{ÿßwv\x9f\x87\x9cÌ\x888\x80w\x1aB\x08ç!Vù¹\x83\x8a\x8eR\x8a\x00\x00\x1aÀ/À+À\x11À\x07À\x13À')
+3.134.148.59 - - [01/Jan/2026 12:03:14] "[31m[1m\x16\x03\x01\x00{\x01\x00\x00w\x03\x03Ký#Å§q{ÿßwv\x9f\x87\x9cÌ\x888\x80w\x1aB\x08ç!Vù¹\x83\x8a\x8eR\x8a\x00\x00\x1aÀ/À+À\x11À\x07À\x13À\x09À\x14À[0m" 400 -
+3.134.148.59 - - [01/Jan/2026 12:04:29] code 400, message Bad request syntax ('SSH-2.0-Go')
+3.134.148.59 - - [01/Jan/2026 12:04:29] "[31m[1mSSH-2.0-Go[0m" 400 -
+3.134.148.59 - - [01/Jan/2026 12:05:32] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x00{\x01\x00\x00w\x03\x031\x9fv\x94F!áÇ(Ëûí@ä\x03Í_³ê-\x98ÌÇ\x06ÍM"Ýô\x8c/=\x00\x00\x1aÀ/À+À\x11À\x07À\x13À')
+3.134.148.59 - - [01/Jan/2026 12:05:32] "[31m[1m\x16\x03\x01\x00{\x01\x00\x00w\x03\x031\x9fv\x94F!áÇ(Ëûí@ä\x03Í_³ê-\x98ÌÇ\x06ÍM"Ýô\x8c/=\x00\x00\x1aÀ/À+À\x11À\x07À\x13À\x09À\x14À[0m" 400 -
+78.153.93.187 - - [01/Jan/2026 12:15:21] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 12:15:21] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 12:15:21] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+78.153.93.187 - - [01/Jan/2026 12:15:25] "GET /screener HTTP/1.1" 200 -
+78.153.93.187 - - [01/Jan/2026 12:15:25] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+78.153.93.187 - - [01/Jan/2026 12:15:25] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+185.242.226.33 - - [01/Jan/2026 21:10:10] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x00\x8a\x01\x00\x00\x86\x03\x03¿ìo÷')
+185.242.226.33 - - [01/Jan/2026 21:10:10] "[31m[1m\x16\x03\x01\x00\x8a\x01\x00\x00\x86\x03\x03¿ìo÷\x0b¯qó\x9f¦\x01È\x82\x12¾ôØ&á[0m" 400 -
+185.242.226.33 - - [01/Jan/2026 23:29:02] "GET / HTTP/1.1" 200 -
+167.94.138.55 - - [01/Jan/2026 23:30:03] code 400, message Bad request version ('À\x14À')
+167.94.138.55 - - [01/Jan/2026 23:30:03] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03\x8bÂOÒù\x07¿®íÜ\x00,y\x8b5\x10XÂÝ\x82>\x8c¨ù¾\x82¶\x01òbG\x05 \x86\x80\x1fGï»"Ò\x98í\x15\\F\x80\x1aÀ\x9a^Â\x9a¼Ã\x8e}0WèUÁ}\x93£\x00&Ì¨Ì©À/À0À+À,À\x13À\x09À\x14À[0m" 400 -
+167.94.138.55 - - [01/Jan/2026 23:30:13] "GET / HTTP/1.1" 200 -
+167.94.138.55 - - [01/Jan/2026 23:30:19] code 400, message Bad request version ('\x17!e\x81\x04MbUU')
+167.94.138.55 - - [01/Jan/2026 23:30:19] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03\x98º­ f¢Æ\x9dô\x08ãã\x88\x1bÅµù\x92 \x17!e\x81\x04MbUU[0m" 400 -
+167.94.138.55 - - [01/Jan/2026 23:30:22] "GET / HTTP/1.1" 200 -
+167.94.138.55 - - [01/Jan/2026 23:30:23] code 505, message Invalid HTTP version (2.0)
+167.94.138.55 - - [01/Jan/2026 23:30:23] "[35m[1mPRI * HTTP/2.0[0m" 505 -
+167.94.138.55 - - [01/Jan/2026 23:30:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+167.94.138.55 - - [01/Jan/2026 23:30:33] code 400, message Bad request version ('v\x86òìaýð¬\x1aó')
+167.94.138.55 - - [01/Jan/2026 23:30:33] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03SØ\x09/\x9a³ó)kÏ~Øß\x98\x00ÕI\x1cv\x86òìaýð¬\x1aó[0m" 400 -
+167.94.138.55 - - [01/Jan/2026 23:30:38] "[33mGET /sitemap.xml HTTP/1.1[0m" 404 -
+91.230.168.15 - - [02/Jan/2026 03:20:36] code 400, message Bad request version ('À#À¬À®À+À')
+91.230.168.15 - - [02/Jan/2026 03:20:36] "[31m[1m\x16\x03\x03\x01¥\x01\x00\x01¡\x03\x03\x7f²\\¯sá20ÇEèsÑÏ¯ð\x1aùjmÓ5º\x04&¨Û/>1\x1b\x7f +Ði*âÞÑÿ\x0d;·\x00L12\x07\x09;Òêãa\x89\x1c¸:;qåòj\\\x00\x8a\x00\x16\x003\x00gÀ\x9eÀ¢\x00\x9e\x009\x00kÀ\x9fÀ£\x00\x9f\x00E\x00¾\x00\x88\x00Ä\x00\x9aÀ\x08À\x09À#À¬À®À+À[0m" 400 -
+91.230.168.5 - - [02/Jan/2026 03:20:40] "GET / HTTP/1.1" 200 -
+195.184.76.120 - - [02/Jan/2026 03:23:11] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+147.185.132.67 - - [02/Jan/2026 03:29:18] "GET / HTTP/1.1" 200 -
+64.62.197.197 - - [02/Jan/2026 04:10:39] code 400, message Bad request version ('À\x14À')
+64.62.197.197 - - [02/Jan/2026 04:10:39] "[31m[1m\x16\x03\x01\x00{\x01\x00\x00w\x03\x03\x8aï\x0eb\x08~ë\x05\x8d®I\x1fÚ\x14¢Uû\x8fß\x0d/'\x85à\x0bC\x8a`ôc}½\x00\x00\x1aÀ/À+À\x11À\x07À\x13À\x09À\x14À[0m" 400 -
+147.185.132.82 - - [02/Jan/2026 05:24:49] code 400, message Bad request version ('À\x13À')
+147.185.132.82 - - [02/Jan/2026 05:24:49] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03\x96\x0c@mVv_Çq»\x7firVAeòH\x14Ô/ST\x81\x8bVì`\x06´½f klý\x8fB²»ÅÞ\x08¤[X¼®@sÆÊ\x89W©ãÙ6\x99Å{Ð|*£\x00&À+À/À,À0Ì©Ì¨À\x09À\x13À[0m" 400 -
+147.185.132.82 - - [02/Jan/2026 05:24:49] code 400, message Bad request version ('À(À$À\x14À')
+147.185.132.82 - - [02/Jan/2026 05:24:49] "[31m[1m\x16\x03\x01\x00Ê\x01\x00\x00Æ\x03\x03Û~KQ¸aÔÓà¯Ç:\x1a.¢\x7fs+È±÷ïÙ\x00^\x80¬ üæÛo\x00\x00hÌ\x14Ì\x13À/À+À0À,À\x11À\x07À'À#À\x13À\x09À(À$À\x14À[0m" 400 -
+80.252.173.88 - - [02/Jan/2026 06:02:41] code 400, message Bad request version ('¢\x14úsÙM.¸\x00\x01\x14Ì¨Ì©ÌªÀ,À0\x00\x9fÀ\xadÀ\x9fÀ$À(\x00kÀ')
+80.252.173.88 - - [02/Jan/2026 06:02:41] "[31m[1m\x16\x03\x01\x01\x89\x01\x00\x01\x85\x03\x03iWQé#\x1f¦\\ðh\x8a¼qµµ\x1eØ\x98\x95 ©dL\x09¢\x14úsÙM.¸\x00\x01\x14Ì¨Ì©ÌªÀ,À0\x00\x9fÀ­À\x9fÀ$À(\x00kÀ[0m" 400 -
+95.214.55.246 - - [02/Jan/2026 07:01:39] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+95.214.55.246 - - [02/Jan/2026 07:01:39] "[33mPOST /_next HTTP/1.1[0m" 404 -
+95.214.55.246 - - [02/Jan/2026 07:01:39] "[33mPOST /api HTTP/1.1[0m" 404 -
+95.214.55.246 - - [02/Jan/2026 07:01:39] "[33mPOST /_next/server HTTP/1.1[0m" 404 -
+95.214.55.246 - - [02/Jan/2026 07:01:40] "[33mPOST /app HTTP/1.1[0m" 404 -
+95.214.55.246 - - [02/Jan/2026 07:01:40] "[33mPOST /api/route HTTP/1.1[0m" 404 -
+80.187.122.129 - - [02/Jan/2026 08:10:55] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+80.187.122.129 - - [02/Jan/2026 08:10:55] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+80.187.122.129 - - [02/Jan/2026 08:10:55] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+3.134.148.59 - - [02/Jan/2026 08:30:54] "GET / HTTP/1.1" 200 -
+3.134.148.59 - - [02/Jan/2026 08:32:42] "GET / HTTP/1.1" 200 -
+192.159.99.113 - - [02/Jan/2026 09:49:57] "[33mGET /..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1[0m" 404 -
+167.94.138.164 - - [02/Jan/2026 11:50:36] code 400, message Bad request version ('À\x14À')
+167.94.138.164 - - [02/Jan/2026 11:50:36] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03!T\x9eH\x8ea©`\x13\x8d\x83\x12y\x92\x12Óñ%\x8dØ²\x94\x90¯\x94]Ù\x8býPXÛ z£ =\x0c¢ä{yL·{\x84ÛÇàµ}\x81\x01S)ªÏd*ëgÿ¨\x9cR\x00&Ì¨Ì©À/À0À+À,À\x13À\x09À\x14À[0m" 400 -
+167.94.138.164 - - [02/Jan/2026 11:50:43] "GET / HTTP/1.1" 200 -
+167.94.138.164 - - [02/Jan/2026 11:50:54] code 505, message Invalid HTTP version (2.0)
+167.94.138.164 - - [02/Jan/2026 11:50:54] "[35m[1mPRI * HTTP/2.0[0m" 505 -
+167.94.138.164 - - [02/Jan/2026 11:51:42] code 400, message Bad request version ('Áñ]·úó¬ëGO¡\x95¡dy')
+167.94.138.164 - - [02/Jan/2026 11:51:42] "[31m[1m\x16\x03\x01\x00î\x01\x00\x00ê\x03\x03Óôu 8Ær·Á\x98c(YCswé\x7f#\x95\x9dbÊ¤¬ÿ\x19\x08\x1cO5_ Áñ]·úó¬ëGO¡\x95¡dy[0m" 400 -
+167.94.138.164 - - [02/Jan/2026 11:51:47] "[33mGET /robots.txt HTTP/1.1[0m" 404 -
+80.187.122.129 - - [02/Jan/2026 12:24:01] "GET / HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:24:01] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:24:01] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:24:09] "GET /screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:24:09] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:24:09] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:24:09] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:24:09] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:25:42] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:25:45] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:25:52] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:25:54] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:07] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:16] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:18] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:25] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:30] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:32] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:40] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:43] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:50] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:53] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:26:54] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:27:02] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:27:04] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:06] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:12] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:21] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:29] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:32] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:40] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:42] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:51] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:53] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:28:59] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:03] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:13] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:16] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:22] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:24] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:31] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:33] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:39] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:42] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:29:58] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:00] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:18] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:20] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:27] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:30] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:35] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:39] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:48] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:51] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:56] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:30:59] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:07] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:09] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:12] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:15] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:15] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:31:15] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:31:21] "GET /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:28] "POST /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:28] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:28] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:31:29] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:31:33] "GET /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:35] "POST /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:35] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:31:36] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:31:36] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:32:00] "GET /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:36:24] "GET /screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 12:36:25] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:36:25] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 12:36:29] "GET /api/columns/screener HTTP/1.1" 200 -
+ * Detected change in '/home/monjy/aktienanalyse/04_frontend/04a_add_pe_diff_columns.py', reloading
+==================================================
+Starte Aktien-Webserver...
+Öffne: http://localhost:5001
+Beenden mit: Ctrl+C
+==================================================
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 141-527-802
+80.187.122.129 - - [02/Jan/2026 13:01:29] "GET /screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:01:30] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:01:30] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:01:30] "[33mGET /apple-touch-icon-precomposed.png HTTP/1.1[0m" 404 -
+80.187.122.129 - - [02/Jan/2026 13:01:30] "[33mGET /apple-touch-icon.png HTTP/1.1[0m" 404 -
+80.187.122.129 - - [02/Jan/2026 13:01:32] "GET /api/columns/screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:03:26] "POST /api/columns/screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:03:26] "GET /screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:03:26] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:03:27] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:03:39] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:03:39] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:03:40] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:03:43] "GET /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:04:30] "POST /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:04:31] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:04:31] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:04:31] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:04:36] "GET /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:05:25] "POST /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:05:25] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:05:25] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:05:25] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:05:49] "GET /api/stock/DE000SYM9999/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:08:35] "GET /api/stock/DE0006219934/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:23:44] "GET /api/stock/DE0005557508/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:35:20] "GET / HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:35:20] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:35:20] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:35:23] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:35:23] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:35:23] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:35:25] "GET /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:35:27] "POST /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:35:27] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:35:27] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:35:27] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:36:57] "GET /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:37:15] "POST /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:37:16] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:37:16] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:37:16] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 13:37:27] "GET /api/stock/DE0005200000/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:40:23] "GET /api/stock/US02079K3059/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:41:14] "GET /api/stock/DK0060448595/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:42:05] "GET /api/stock/DE0005810055/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:42:31] "GET /api/stock/DE0006335003/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:43:01] "GET /api/stock/US2546871060/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:45:58] "GET /api/stock/CH0038863350/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 13:58:02] "GET /api/stock/FR0000121014/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:14:39] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:14:40] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:14:40] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:15:07] "GET /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:16:19] "GET /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:16:22] "GET /api/columns/watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:17:46] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:17:47] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:17:47] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:17:49] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:17:52] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:17:52] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:17:53] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:17:54] "GET /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:17:56] "POST /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:17:57] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:17:57] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:17:57] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:18:01] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:18:02] "GET /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:18:04] "POST /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:18:05] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:18:05] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:18:05] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:18:46] "GET /api/stock/US02079K3059/info HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:18:49] "GET /api/stock/US02079K3059/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:20:20] "GET /api/stock/JP3347200002/info HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:20:25] "GET /api/stock/US7427181091/info HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:20:28] "GET /api/stock/JP3347200002/info HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:20:32] "GET /api/stock/DE000SYM9999/info HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:21:22] "GET /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:21:28] "POST /api/favorite-settings HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:21:28] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:21:28] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:21:28] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:21:33] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:21:45] "POST /api/favorite HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:21:52] "GET /watchlist HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:21:52] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:21:52] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:22:20] "GET /screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:22:20] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:22:20] "[36mGET /static/app.js HTTP/1.1[0m" 304 -
+80.187.122.129 - - [02/Jan/2026 14:22:24] "GET /api/filter-options HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:22:40] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:22:43] "GET /api/columns/screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:22:57] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:23:36] "GET /api/stock/DE0005772206/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:24:44] "GET /api/columns/screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:24:54] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:24:58] "GET /api/stock/DE000A0WMPJ6/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:25:27] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:25:39] "GET /api/columns/screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:25:56] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:26:04] "GET /api/stock/US0079031078/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:26:27] "GET /api/stock/US0527691069/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:26:58] "GET /api/stock/US5128073062/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:27:17] "GET /api/stock/US5949181045/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:27:38] "GET /api/stock/US81762P1021/details HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:27:55] "GET /api/columns/screener HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:28:06] "POST /api/screener/filter HTTP/1.1" 200 -
+80.187.122.129 - - [02/Jan/2026 14:30:10] "GET /api/stock/US6092071058/details HTTP/1.1" 200 -
+ * Detected change in '/home/monjy/aktienanalyse/04_frontend/04_create_column_settings.py', reloading
+==================================================
+Starte Aktien-Webserver...
+Öffne: http://localhost:5001
+Beenden mit: Ctrl+C
+==================================================
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 141-527-802

@@ -46,7 +46,7 @@ def calculate_average_filtered(values, max_reasonable_value=None):
     - Ignoriert None-Werte
     - Ignoriert negative Werte
     - Ignoriert Werte > max_reasonable_value (falls angegeben)
-    - Ignoriert Werte > 3 Standardabweichungen vom Mittelwert
+    - Ignoriert Werte > 2 Standardabweichungen vom Mittelwert
 
     Args:
         values: Liste von Werten
@@ -70,9 +70,9 @@ def calculate_average_filtered(values, max_reasonable_value=None):
     variance = sum((x - mean) ** 2 for x in valid) / len(valid)
     std_dev = variance ** 0.5
 
-    # Schritt 4: Werte außerhalb 3σ entfernen
+    # Schritt 4: Werte außerhalb 2σ entfernen
     if std_dev > 0:
-        upper_bound = mean + 3 * std_dev
+        upper_bound = mean + 2 * std_dev
         filtered = [v for v in valid if v <= upper_bound]
     else:
         filtered = valid

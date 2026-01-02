@@ -40,12 +40,12 @@ NAME_UPDATES = {
     'ev_ebit_avg_10y_2019': 'EV/EBIT Ø 10-19',
 
     # Margen - konsistent deutsch
-    'profit_margin': 'Gewinnmarge',
+    'profit_margin': 'Gewinn<br>marge',
     'operating_margin': 'Op. Marge',
-    'profit_margin_avg_3y': 'Gewinnmarge Ø 3J',
-    'profit_margin_avg_5y': 'Gewinnmarge Ø 5J',
-    'profit_margin_avg_10y': 'Gewinnmarge Ø 10J',
-    'profit_margin_avg_5y_2019': 'Gewinnmarge Ø 15-19',
+    'profit_margin_avg_3y': 'Gewinn<br>marge Ø 3J',
+    'profit_margin_avg_5y': 'Gewinn<br>marge Ø 5J',
+    'profit_margin_avg_10y': 'Gewinn<br>marge Ø 10J',
+    'profit_margin_avg_5y_2019': 'Gewinn<br>marge Ø 15-19',
     'operating_margin_avg_3y': 'Op. Marge Ø 3J',
     'operating_margin_avg_5y': 'Op. Marge Ø 5J',
     'operating_margin_avg_10y': 'Op. Marge Ø 10J',
@@ -64,9 +64,9 @@ NEW_YF_COLUMNS = [
     # column_key, display_name, sort_order, is_visible, column_group, format_type
     ('yf_ttm_pe', 'TTM KGV (YF)', 27, False, 'Bewertung', 'number'),
     ('yf_forward_pe', 'Forward KGV (YF)', 28, False, 'Bewertung', 'number'),
-    ('yf_profit_margin', 'Gewinnmarge (YF)', 90, False, 'Margen', 'percent'),
+    ('yf_profit_margin', 'Gewinn<br>marge (YF)', 90, False, 'Margen', 'percent'),
     ('yf_operating_margin', 'Op. Marge (YF)', 91, False, 'Margen', 'percent'),
-    ('yf_payout_ratio', 'Ausschüttungsquote (YF)', 92, False, 'Margen', 'percent'),
+    ('yf_payout_ratio', 'Ausschüttungs<br>quote (YF)', 92, False, 'Margen', 'percent'),
 ]
 
 

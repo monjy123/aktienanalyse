@@ -617,6 +617,26 @@ document.addEventListener('DOMContentLoaded', function() {
     let numericFilterCount = 0;
     let currentFilters = {}; // Aktuelle Filter speichern
 
+    // Filter aus localStorage beim Seitenladen wiederherstellen
+    if (filterBtn) {
+        try {
+            const savedFilters = localStorage.getItem('screenerFilters');
+            if (savedFilters) {
+                currentFilters = JSON.parse(savedFilters);
+
+                // Suchfeld wiederherstellen falls vorhanden
+                if (currentFilters.search && searchInput) {
+                    searchInput.value = currentFilters.search;
+                }
+
+                // Filter automatisch anwenden
+                applyFilters();
+            }
+        } catch (e) {
+            console.error('Fehler beim Laden der gespeicherten Filter:', e);
+        }
+    }
+
     if (filterBtn && filterModal) {
         filterBtn.addEventListener('click', async function() {
             filterModal.classList.remove('hidden');
@@ -685,8 +705,8 @@ document.addEventListener('DOMContentLoaded', function() {
         numericFilterCount = 0;
         document.getElementById('add-numeric-filter').addEventListener('click', addNumericFilter);
 
-        // Einen leeren numerischen Filter hinzufügen
-        addNumericFilter();
+        // Gespeicherte Filter wiederherstellen
+        restoreSavedFilters();
     }
 
     function addNumericFilter() {
@@ -741,6 +761,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function restoreSavedFilters() {
+        // Kategorische Filter wiederherstellen
+        for (const field of ['stock_index', 'sector', 'industry', 'country']) {
+            const select = document.getElementById(`filter-${field}`);
+            if (select && currentFilters[field]) {
+                select.value = currentFilters[field];
+            }
+        }
+
+        // Numerische Filter wiederherstellen
+        const container = document.getElementById('numeric-filters');
+        if (container && currentFilters.numeric && currentFilters.numeric.length > 0) {
+            // Vorhandene Filter entfernen (der eine leere Filter wurde bereits hinzugefügt)
+            container.innerHTML = '';
+            numericFilterCount = 0;
+
+            // Gespeicherte Filter wiederherstellen
+            currentFilters.numeric.forEach(filter => {
+                addNumericFilter();
+                const lastRow = container.lastElementChild;
+                if (lastRow) {
+                    lastRow.querySelector('.filter-column').value = filter.column;
+                    lastRow.querySelector('.filter-operator').value = filter.operator;
+                    lastRow.querySelector('.filter-value').value = filter.value;
+                }
+            });
+        } else {
+            // Wenn keine gespeicherten numerischen Filter vorhanden sind, einen leeren hinzufügen
+            addNumericFilter();
+        }
+    }
+
     // Gemeinsame Filter-Funktion
     async function applyFilters(additionalFilters = {}) {
         const filters = { ...currentFilters, ...additionalFilters };
@@ -777,6 +829,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Aktuelle Filter speichern
         currentFilters = filters;
+
+        // Filter in localStorage speichern für Persistenz
+        try {
+            localStorage.setItem('screenerFilters', JSON.stringify(filters));
+        } catch (e) {
+            console.error('Fehler beim Speichern der Filter:', e);
+        }
 
         // UI-Feedback
         if (searchBtn) {
@@ -848,6 +907,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Gespeicherte Filter leeren
             currentFilters = {};
+
+            // Auch aus localStorage entfernen
+            try {
+                localStorage.removeItem('screenerFilters');
+            } catch (e) {
+                console.error('Fehler beim Löschen der Filter:', e);
+            }
+
+            // Ungefilterte Daten laden
+            applyFilters();
         });
     }
 
