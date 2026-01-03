@@ -8,15 +8,41 @@ Starten mit: python app.py
 """
 
 import sys
+import os
 from pathlib import Path
 
 # Parent-Ordner für db.py Import
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from functools import wraps
 from db import get_connection
+from auth import User
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Flask-Login Setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Bitte melden Sie sich an, um diese Seite zu sehen.'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get_by_id(int(user_id))
+
+
+def admin_required(f):
+    """Decorator: Erfordert Admin-Rechte."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin():
+            flash('Sie benötigen Admin-Rechte für diese Aktion.', 'error')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 # =============================================================================
@@ -72,8 +98,8 @@ app.jinja_env.filters['de_billions'] = format_de_billions
 # Helper: Spalten-Konfiguration
 # =============================================================================
 
-def get_column_config(view_name: str) -> list[dict]:
-    """Holt alle Spalten-Konfigurationen für eine View."""
+def get_column_config(view_name: str, user_id: int) -> list[dict]:
+    """Holt alle Spalten-Konfigurationen für eine View und User."""
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
@@ -81,9 +107,9 @@ def get_column_config(view_name: str) -> list[dict]:
         SELECT column_key, source_table, display_name,
                sort_order, is_visible, column_group, format_type
         FROM analytics.user_column_settings
-        WHERE view_name = %s
+        WHERE view_name = %s AND user_id = %s
         ORDER BY sort_order
-    """, (view_name,))
+    """, (view_name, user_id))
 
     columns = cur.fetchall()
     cur.close()
@@ -91,14 +117,14 @@ def get_column_config(view_name: str) -> list[dict]:
     return columns
 
 
-def get_visible_columns(view_name: str) -> list[dict]:
-    """Holt nur sichtbare Spalten für eine View."""
-    return [c for c in get_column_config(view_name) if c['is_visible']]
+def get_visible_columns(view_name: str, user_id: int) -> list[dict]:
+    """Holt nur sichtbare Spalten für eine View und User."""
+    return [c for c in get_column_config(view_name, user_id) if c['is_visible']]
 
 
-def build_dynamic_query(view_name: str, where_clause: str = "", order_by: str = "ci.company_name"):
+def build_dynamic_query(view_name: str, user_id: int, where_clause: str = "", order_by: str = "ci.company_name"):
     """Baut dynamisch eine SQL-Query basierend auf konfigurierten Spalten."""
-    columns = get_visible_columns(view_name)
+    columns = get_visible_columns(view_name, user_id)
 
     # Immer ISIN dabei
     select_parts = ['ci.isin']
@@ -119,7 +145,7 @@ def build_dynamic_query(view_name: str, where_clause: str = "", order_by: str = 
     query = f"""
         SELECT {select_clause}
         FROM analytics.company_info ci
-        LEFT JOIN analytics.user_watchlist uw ON ci.isin = uw.isin
+        LEFT JOIN analytics.user_watchlist uw ON (ci.isin = uw.isin AND uw.user_id = %s)
     """
 
     if needs_live_metrics:
@@ -138,22 +164,23 @@ def build_dynamic_query(view_name: str, where_clause: str = "", order_by: str = 
 # =============================================================================
 
 @app.route("/")
+@login_required
 def home():
     """Startseite - Weiterleitung zur Watchlist."""
     return render_template("home.html")
 
 
-def get_visible_favorites() -> list[int]:
-    """Holt die sichtbaren Favoriten-IDs aus dem Filter."""
+def get_visible_favorites(user_id: int) -> list[int]:
+    """Holt die sichtbaren Favoriten-IDs aus dem Filter für einen User."""
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
     cur.execute("""
         SELECT favorite_id
         FROM analytics.user_favorite_filter
-        WHERE is_visible = TRUE
+        WHERE user_id = %s AND is_visible = TRUE
         ORDER BY favorite_id
-    """)
+    """, (user_id,))
     visible = [row['favorite_id'] for row in cur.fetchall()]
 
     cur.close()
@@ -161,16 +188,17 @@ def get_visible_favorites() -> list[int]:
     return visible if visible else [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
-def get_favorite_labels() -> dict:
-    """Holt die Favoriten-Labels."""
+def get_favorite_labels(user_id: int) -> dict:
+    """Holt die Favoriten-Labels für einen User."""
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
     cur.execute("""
         SELECT favorite_id, label
         FROM analytics.user_favorite_labels
+        WHERE user_id = %s
         ORDER BY favorite_id
-    """)
+    """, (user_id,))
     labels = {row['favorite_id']: row['label'] for row in cur.fetchall()}
 
     cur.close()
@@ -179,31 +207,36 @@ def get_favorite_labels() -> dict:
 
 
 @app.route("/watchlist")
+@login_required
 def watchlist():
     """Watchlist-Seite mit Favoriten."""
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
+    user_id = current_user.id
+
     # Sichtbare Favoriten aus Filter holen
-    visible_favorites = get_visible_favorites()
+    visible_favorites = get_visible_favorites(user_id)
     placeholders = ','.join(['%s'] * len(visible_favorites))
     where_clause = f'uw.favorite IN ({placeholders})'
 
     # Dynamische Query basierend auf Spalten-Konfiguration
     query, columns = build_dynamic_query(
         view_name='watchlist',
+        user_id=user_id,
         where_clause=where_clause,
         order_by='uw.favorite ASC, ci.company_name ASC'
     )
 
-    cur.execute(query, visible_favorites)
+    # user_id ist bereits im JOIN eingebaut, daher als erstes Param übergeben
+    cur.execute(query, [user_id] + visible_favorites)
     stocks = cur.fetchall()
 
     cur.close()
     conn.close()
 
     # Labels für die Legende
-    favorite_labels = get_favorite_labels()
+    favorite_labels = get_favorite_labels(user_id)
 
     return render_template("watchlist.html",
                            stocks=stocks,
@@ -213,19 +246,23 @@ def watchlist():
 
 
 @app.route("/screener")
+@login_required
 def screener():
     """Aktien-Screener mit allen Aktien."""
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
+    user_id = current_user.id
+
     # Dynamische Query basierend auf Spalten-Konfiguration
     query, columns = build_dynamic_query(
         view_name='screener',
+        user_id=user_id,
         order_by='ci.company_name ASC'
     )
     query += " LIMIT 100"
 
-    cur.execute(query)
+    cur.execute(query, [user_id])
     stocks = cur.fetchall()
 
     cur.close()
@@ -235,6 +272,7 @@ def screener():
 
 
 @app.route("/api/note", methods=["POST"])
+@login_required
 def update_note():
     """API: Notiz aktualisieren."""
     data = request.json
@@ -244,14 +282,16 @@ def update_note():
     if not isin:
         return jsonify({"error": "ISIN fehlt"}), 400
 
+    user_id = current_user.id
     conn = get_connection()
     cur = conn.cursor()
 
+    # INSERT ON DUPLICATE KEY UPDATE für User-spezifische Daten
     cur.execute("""
-        UPDATE analytics.user_watchlist
-        SET notes = %s, updated_at = NOW()
-        WHERE isin = %s
-    """, (notes, isin))
+        INSERT INTO analytics.user_watchlist (user_id, isin, notes)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE notes = %s, updated_at = NOW()
+    """, (user_id, isin, notes, notes))
 
     conn.commit()
     cur.close()
@@ -261,6 +301,7 @@ def update_note():
 
 
 @app.route("/api/favorite", methods=["POST"])
+@login_required
 def update_favorite():
     """API: Favoriten-Status aktualisieren."""
     data = request.json
@@ -270,14 +311,16 @@ def update_favorite():
     if not isin:
         return jsonify({"error": "ISIN fehlt"}), 400
 
+    user_id = current_user.id
     conn = get_connection()
     cur = conn.cursor()
 
+    # INSERT ON DUPLICATE KEY UPDATE für User-spezifische Daten
     cur.execute("""
-        UPDATE analytics.user_watchlist
-        SET favorite = %s, updated_at = NOW()
-        WHERE isin = %s
-    """, (favorite, isin))
+        INSERT INTO analytics.user_watchlist (user_id, isin, favorite)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE favorite = %s, updated_at = NOW()
+    """, (user_id, isin, favorite, favorite))
 
     conn.commit()
     cur.close()
@@ -287,8 +330,10 @@ def update_favorite():
 
 
 @app.route("/api/favorite-settings")
+@login_required
 def get_favorite_settings():
     """API: Favoriten-Labels und Filter abrufen."""
+    user_id = current_user.id
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
@@ -296,16 +341,18 @@ def get_favorite_settings():
     cur.execute("""
         SELECT favorite_id, label
         FROM analytics.user_favorite_labels
+        WHERE user_id = %s
         ORDER BY favorite_id
-    """)
+    """, (user_id,))
     labels = {row['favorite_id']: row['label'] for row in cur.fetchall()}
 
     # Filter abrufen
     cur.execute("""
         SELECT favorite_id, is_visible
         FROM analytics.user_favorite_filter
+        WHERE user_id = %s
         ORDER BY favorite_id
-    """)
+    """, (user_id,))
     filters = {row['favorite_id']: bool(row['is_visible']) for row in cur.fetchall()}
 
     cur.close()
@@ -318,8 +365,10 @@ def get_favorite_settings():
 
 
 @app.route("/api/favorite-settings", methods=["POST"])
+@login_required
 def update_favorite_settings():
     """API: Favoriten-Labels und Filter aktualisieren."""
+    user_id = current_user.id
     data = request.json
     labels = data.get("labels", {})
     filters = data.get("filters", {})
@@ -333,16 +382,16 @@ def update_favorite_settings():
             cur.execute("""
                 UPDATE analytics.user_favorite_labels
                 SET label = %s, updated_at = NOW()
-                WHERE favorite_id = %s
-            """, (label, int(fav_id)))
+                WHERE user_id = %s AND favorite_id = %s
+            """, (label, user_id, int(fav_id)))
 
         # Filter aktualisieren
         for fav_id, is_visible in filters.items():
             cur.execute("""
                 UPDATE analytics.user_favorite_filter
                 SET is_visible = %s, updated_at = NOW()
-                WHERE favorite_id = %s
-            """, (is_visible, int(fav_id)))
+                WHERE user_id = %s AND favorite_id = %s
+            """, (is_visible, user_id, int(fav_id)))
 
         conn.commit()
         return jsonify({"success": True})
@@ -357,8 +406,10 @@ def update_favorite_settings():
 
 
 @app.route("/api/filter-options")
+@login_required
 def get_filter_options():
     """API: Filter-Optionen für den Screener."""
+    user_id = current_user.id
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
 
@@ -378,10 +429,11 @@ def get_filter_options():
         SELECT column_key, display_name, column_group, format_type
         FROM analytics.user_column_settings
         WHERE view_name = 'screener'
+          AND user_id = %s
           AND source_table = 'live_metrics'
           AND column_key NOT IN ('isin', 'ticker', 'price_date')
         ORDER BY sort_order
-    """)
+    """, (user_id,))
     numeric_columns = cur.fetchall()
 
     cur.close()
@@ -394,8 +446,10 @@ def get_filter_options():
 
 
 @app.route("/api/screener/filter", methods=["POST"])
+@login_required
 def filter_screener():
     """API: Gefilterte Screener-Daten."""
+    user_id = current_user.id
     data = request.json or {}
     filters = data.get("filters", {})
 
@@ -404,7 +458,7 @@ def filter_screener():
 
     # WHERE-Klauseln aufbauen
     where_parts = []
-    params = []
+    params = [user_id]  # Erstes Param ist user_id für JOIN
 
     # Suchfeld (ticker, isin, company_name)
     search = filters.get("search", "").strip()
@@ -446,6 +500,7 @@ def filter_screener():
     # Query aufbauen
     query, columns = build_dynamic_query(
         view_name='screener',
+        user_id=user_id,
         where_clause=where_clause,
         order_by='ci.company_name ASC'
     )
@@ -478,12 +533,14 @@ def filter_screener():
 
 
 @app.route("/api/columns/<view_name>")
+@login_required
 def get_columns(view_name):
     """API: Alle Spalten für eine View abrufen."""
     if view_name not in ('watchlist', 'screener'):
         return jsonify({"error": "Ungültige View"}), 400
 
-    columns = get_column_config(view_name)
+    user_id = current_user.id
+    columns = get_column_config(view_name, user_id)
 
     # Nach Gruppen sortieren für bessere Darstellung
     groups = {}
@@ -500,6 +557,7 @@ def get_columns(view_name):
 
 
 @app.route("/api/stock/<isin>/details")
+@login_required
 def get_stock_details(isin):
     """
     API: Detaildaten für eine Aktie (Modal-Ansicht).
@@ -797,11 +855,13 @@ def get_stock_details(isin):
 
 
 @app.route("/api/columns/<view_name>", methods=["POST"])
+@login_required
 def update_columns(view_name):
     """API: Spalten-Konfiguration aktualisieren."""
     if view_name not in ('watchlist', 'screener'):
         return jsonify({"error": "Ungültige View"}), 400
 
+    user_id = current_user.id
     data = request.json
     columns = data.get("columns", [])
 
@@ -816,8 +876,8 @@ def update_columns(view_name):
             cur.execute("""
                 UPDATE analytics.user_column_settings
                 SET is_visible = %s, sort_order = %s
-                WHERE view_name = %s AND column_key = %s
-            """, (col['is_visible'], col['sort_order'], view_name, col['column_key']))
+                WHERE user_id = %s AND view_name = %s AND column_key = %s
+            """, (col['is_visible'], col['sort_order'], user_id, view_name, col['column_key']))
 
         conn.commit()
         return jsonify({"success": True})
@@ -832,6 +892,7 @@ def update_columns(view_name):
 
 
 @app.route("/api/stock/<isin>/info")
+@login_required
 def get_stock_info(isin):
     """
     API: Unternehmensinformationen für Modal.
@@ -863,6 +924,173 @@ def get_stock_info(isin):
     finally:
         cur.close()
         conn.close()
+
+
+# =============================================================================
+# Authentifizierungs-Routen
+# =============================================================================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Login-Seite."""
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        user, password_hash = User.get_by_email(email)
+
+        if user and User.verify_password(password, password_hash):
+            if not user.can_login():
+                if not user.is_approved:
+                    flash('Ihr Account wurde noch nicht freigeschaltet. Bitte warten Sie auf die Admin-Freigabe.', 'warning')
+                else:
+                    flash('Ihr Account wurde deaktiviert. Bitte kontaktieren Sie den Administrator.', 'error')
+                return redirect(url_for('login'))
+
+            login_user(user)
+            user.update_last_login()
+
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('home'))
+        else:
+            flash('Ungültige E-Mail oder Passwort.', 'error')
+
+    return render_template("login.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Registrierungs-Seite."""
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        password_confirm = request.form.get("password_confirm")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+
+        # Validierung
+        if not all([email, password, password_confirm, first_name, last_name]):
+            flash('Bitte füllen Sie alle Felder aus.', 'error')
+            return render_template("register.html")
+
+        if password != password_confirm:
+            flash('Passwörter stimmen nicht überein.', 'error')
+            return render_template("register.html")
+
+        if len(password) < 8:
+            flash('Passwort muss mindestens 8 Zeichen lang sein.', 'error')
+            return render_template("register.html")
+
+        # E-Mail-Duplikat prüfen
+        existing_user, _ = User.get_by_email(email)
+        if existing_user:
+            flash('Diese E-Mail ist bereits registriert.', 'error')
+            return render_template("register.html")
+
+        try:
+            User.create_user(email, password, first_name, last_name)
+            flash('Registrierung erfolgreich! Ihr Account wird vom Administrator geprüft.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            flash(f'Fehler bei der Registrierung: {str(e)}', 'error')
+            return render_template("register.html")
+
+    return render_template("register.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    """Logout."""
+    logout_user()
+    flash('Sie wurden erfolgreich abgemeldet.', 'success')
+    return redirect(url_for('login'))
+
+
+# =============================================================================
+# Admin-Routen
+# =============================================================================
+
+@app.route("/admin/users")
+@login_required
+@admin_required
+def admin_users():
+    """Admin-Panel für Benutzerverwaltung."""
+    conn = get_connection('analytics')
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT id, email, first_name, last_name, role, is_approved, is_active,
+               created_at, last_login
+        FROM users
+        ORDER BY created_at DESC
+    """)
+    users = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template("admin_users.html", users=users)
+
+
+@app.route("/admin/users/<int:user_id>/approve", methods=["POST"])
+@login_required
+@admin_required
+def admin_approve_user(user_id):
+    """User freigeben."""
+    conn = get_connection('analytics')
+    cur = conn.cursor()
+
+    cur.execute("UPDATE users SET is_approved = TRUE WHERE id = %s", (user_id,))
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    flash('Benutzer wurde freigeschaltet.', 'success')
+    return redirect(url_for('admin_users'))
+
+
+@app.route("/admin/users/<int:user_id>/toggle-active", methods=["POST"])
+@login_required
+@admin_required
+def admin_toggle_active(user_id):
+    """User aktiv/inaktiv setzen."""
+    conn = get_connection('analytics')
+    cur = conn.cursor()
+
+    cur.execute("UPDATE users SET is_active = NOT is_active WHERE id = %s", (user_id,))
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    flash('Benutzer-Status wurde geändert.', 'success')
+    return redirect(url_for('admin_users'))
+
+
+@app.route("/admin/users/<int:user_id>/make-admin", methods=["POST"])
+@login_required
+@admin_required
+def admin_make_admin(user_id):
+    """User zum Admin machen."""
+    conn = get_connection('analytics')
+    cur = conn.cursor()
+
+    cur.execute("UPDATE users SET role = 'admin' WHERE id = %s", (user_id,))
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    flash('Benutzer wurde zum Administrator gemacht.', 'success')
+    return redirect(url_for('admin_users'))
 
 
 # =============================================================================
