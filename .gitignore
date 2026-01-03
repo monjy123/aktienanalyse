@@ -34,3 +34,6 @@ env/
 # Datenbank Backups (zu gross fuer GitHub)
 backups/
 *.sql
+
+# Datenbank-Dateien
+aktien.db
