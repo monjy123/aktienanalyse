@@ -1095,6 +1095,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const PE_COLUMNS = [
         'ttm_pe', 'fy_pe',
         'pe_avg_5y', 'pe_avg_10y', 'pe_avg_15y', 'pe_avg_20y', 'pe_avg_10y_2019',
+        'pe_avg_5y_count', 'pe_avg_10y_count', 'pe_avg_15y_count', 'pe_avg_20y_count',
         'yf_ttm_pe', 'yf_forward_pe',
         'yf_ttm_pe_vs_avg_5y', 'yf_ttm_pe_vs_avg_10y', 'yf_ttm_pe_vs_avg_15y', 'yf_ttm_pe_vs_avg_20y', 'yf_ttm_pe_vs_avg_10y_2019',
         'yf_fwd_pe_vs_avg_5y', 'yf_fwd_pe_vs_avg_10y', 'yf_fwd_pe_vs_avg_15y', 'yf_fwd_pe_vs_avg_20y', 'yf_fwd_pe_vs_avg_10y_2019'
@@ -1104,6 +1105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const EV_EBIT_COLUMNS = [
         'ttm_ev_ebit', 'fy_ev_ebit',
         'ev_ebit_avg_5y', 'ev_ebit_avg_10y', 'ev_ebit_avg_15y', 'ev_ebit_avg_20y', 'ev_ebit_avg_10y_2019',
+        'ev_ebit_avg_5y_count', 'ev_ebit_avg_10y_count', 'ev_ebit_avg_15y_count', 'ev_ebit_avg_20y_count',
         'ev_ebit_vs_avg_5y', 'ev_ebit_vs_avg_10y', 'ev_ebit_vs_avg_15y', 'ev_ebit_vs_avg_20y', 'ev_ebit_vs_avg_10y_2019'
     ];
 
@@ -1246,6 +1248,24 @@ document.addEventListener('DOMContentLoaded', function() {
             return val.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
         };
 
+        const formatPEAverage = (val, years, count) => {
+            if (val === null || val === undefined) {
+                return `<span class="pe-unavailable" title="Zu wenig Datenjahre für ${years}-Jahres-Durchschnitt verfügbar">n.v.</span>`;
+            }
+            const countText = count ? `${count} von ${years} Jahren` : `${years} Jahre`;
+            const tooltip = `Durchschnitt über ${countText} (nach Filterung: Negativwerte und Ausreißer >2σ ausgeschlossen)`;
+            return `<span class="pe-value-with-tooltip" title="${tooltip}">${val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>`;
+        };
+
+        const formatEVEBITAverage = (val, years, count) => {
+            if (val === null || val === undefined) {
+                return `<span class="pe-unavailable" title="Zu wenig Datenjahre für ${years}-Jahres-Durchschnitt verfügbar">n.v.</span>`;
+            }
+            const countText = count ? `${count} von ${years} Jahren` : `${years} Jahre`;
+            const tooltip = `Durchschnitt über ${countText} (nach Filterung: Negativwerte und Ausreißer >2σ ausgeschlossen)`;
+            return `<span class="pe-value-with-tooltip" title="${tooltip}">${val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>`;
+        };
+
         // TTM Berechnung HTML
         const ttm = data.ttm_calculation;
         let quartersHtml = '';
@@ -1313,25 +1333,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 5J</td>
-                        <td class="pe-value">${formatNumber(pe.pe_avg_5y)}</td>
+                        <td class="pe-value">${formatPEAverage(pe.pe_avg_5y, 5, pe.pe_avg_5y_count)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_ttm_pe_vs_avg_5y)}">${formatDiff(pe.yf_ttm_pe_vs_avg_5y)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_fwd_pe_vs_avg_5y)}">${formatDiff(pe.yf_fwd_pe_vs_avg_5y)}</td>
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 10J</td>
-                        <td class="pe-value">${formatNumber(pe.pe_avg_10y)}</td>
+                        <td class="pe-value">${formatPEAverage(pe.pe_avg_10y, 10, pe.pe_avg_10y_count)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_ttm_pe_vs_avg_10y)}">${formatDiff(pe.yf_ttm_pe_vs_avg_10y)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_fwd_pe_vs_avg_10y)}">${formatDiff(pe.yf_fwd_pe_vs_avg_10y)}</td>
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 15J</td>
-                        <td class="pe-value">${formatNumber(pe.pe_avg_15y)}</td>
+                        <td class="pe-value">${formatPEAverage(pe.pe_avg_15y, 15, pe.pe_avg_15y_count)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_ttm_pe_vs_avg_15y)}">${formatDiff(pe.yf_ttm_pe_vs_avg_15y)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_fwd_pe_vs_avg_15y)}">${formatDiff(pe.yf_fwd_pe_vs_avg_15y)}</td>
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 20J</td>
-                        <td class="pe-value">${formatNumber(pe.pe_avg_20y)}</td>
+                        <td class="pe-value">${formatPEAverage(pe.pe_avg_20y, 20, pe.pe_avg_20y_count)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_ttm_pe_vs_avg_20y)}">${formatDiff(pe.yf_ttm_pe_vs_avg_20y)}</td>
                         <td class="pe-diff ${getDiffClass(pe.yf_fwd_pe_vs_avg_20y)}">${formatDiff(pe.yf_fwd_pe_vs_avg_20y)}</td>
                     </tr>
@@ -1644,22 +1664,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 5J</td>
-                        <td class="pe-value">${formatNumber(evEbit.ev_ebit_avg_5y)}</td>
+                        <td class="pe-value">${formatEVEBITAverage(evEbit.ev_ebit_avg_5y, 5, evEbit.ev_ebit_avg_5y_count)}</td>
                         <td class="pe-diff ${getDiffClass(evEbit.ev_ebit_vs_avg_5y)}">${formatDiff(evEbit.ev_ebit_vs_avg_5y)}</td>
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 10J</td>
-                        <td class="pe-value">${formatNumber(evEbit.ev_ebit_avg_10y)}</td>
+                        <td class="pe-value">${formatEVEBITAverage(evEbit.ev_ebit_avg_10y, 10, evEbit.ev_ebit_avg_10y_count)}</td>
                         <td class="pe-diff ${getDiffClass(evEbit.ev_ebit_vs_avg_10y)}">${formatDiff(evEbit.ev_ebit_vs_avg_10y)}</td>
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 15J</td>
-                        <td class="pe-value">${formatNumber(evEbit.ev_ebit_avg_15y)}</td>
+                        <td class="pe-value">${formatEVEBITAverage(evEbit.ev_ebit_avg_15y, 15, evEbit.ev_ebit_avg_15y_count)}</td>
                         <td class="pe-diff ${getDiffClass(evEbit.ev_ebit_vs_avg_15y)}">${formatDiff(evEbit.ev_ebit_vs_avg_15y)}</td>
                     </tr>
                     <tr>
                         <td class="pe-label">Ø 20J</td>
-                        <td class="pe-value">${formatNumber(evEbit.ev_ebit_avg_20y)}</td>
+                        <td class="pe-value">${formatEVEBITAverage(evEbit.ev_ebit_avg_20y, 20, evEbit.ev_ebit_avg_20y_count)}</td>
                         <td class="pe-diff ${getDiffClass(evEbit.ev_ebit_vs_avg_20y)}">${formatDiff(evEbit.ev_ebit_vs_avg_20y)}</td>
                     </tr>
                     <tr>

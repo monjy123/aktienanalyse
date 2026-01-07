@@ -51,6 +51,9 @@ def calculate_average_filtered(values, max_reasonable_value=None):
     Args:
         values: Liste von Werten
         max_reasonable_value: Absoluter Maximalwert (z.B. 200 für PE, 100 für EV/EBIT)
+
+    Returns:
+        Tuple (Durchschnittswert, Anzahl verwendeter Werte) oder (None, 0) falls nicht genug Daten
     """
     # Schritt 1: Nur positive, valide Werte behalten
     valid = [v for v in values if v is not None and not np.isnan(v) and not np.isinf(v) and v > 0]
@@ -60,10 +63,10 @@ def calculate_average_filtered(values, max_reasonable_value=None):
         valid = [v for v in valid if v <= max_reasonable_value]
 
     if not valid:
-        return None
+        return None, 0
 
     if len(valid) == 1:
-        return valid[0]
+        return valid[0], 1
 
     # Schritt 3: Mittelwert und Standardabweichung berechnen
     mean = sum(valid) / len(valid)
@@ -78,9 +81,9 @@ def calculate_average_filtered(values, max_reasonable_value=None):
         filtered = valid
 
     if not filtered:
-        return None
+        return None, 0
 
-    return sum(filtered) / len(filtered)
+    return sum(filtered) / len(filtered), len(filtered)
 
 
 def get_value_n_years_ago(data_by_year, current_year, n_years, field_idx):
@@ -221,6 +224,7 @@ def process_ticker(rows):
 
         if row['period'] == 'FY':
             # PE Durchschnitte (max_reasonable_value=200, da PE > 200 für Durchschnitte unrealistisch)
+            # Nur berechnen wenn mindestens 50% der angeforderten Jahre verfügbar sind
             for n_years, col_name in [(5, 'pe_avg_5y'), (10, 'pe_avg_10y'),
                                        (15, 'pe_avg_15y'), (20, 'pe_avg_20y')]:
                 pe_values = []
@@ -231,9 +235,19 @@ def process_ticker(rows):
                             pe_values.append(fy_row['price'] / fy_row['eps'])
                         elif fy_row['market_cap'] and fy_row['net_income'] and fy_row['net_income'] > 0:
                             pe_values.append(fy_row['market_cap'] / fy_row['net_income'])
-                result[col_name] = calculate_average_filtered(pe_values, max_reasonable_value=200) if pe_values else None
+
+                # Nur berechnen wenn mindestens 50% der Jahre verfügbar sind
+                min_required_years = max(3, int(n_years * 0.5))  # Mindestens 3 Jahre, oder 50% der angeforderten Jahre
+                if len(pe_values) >= min_required_years:
+                    avg_value, count = calculate_average_filtered(pe_values, max_reasonable_value=200)
+                    result[col_name] = avg_value
+                    result[col_name + '_count'] = count
+                else:
+                    result[col_name] = None
+                    result[col_name + '_count'] = None
 
             # EV/EBIT Durchschnitte (max_reasonable_value=100, da EV/EBIT > 100 unrealistisch)
+            # Nur berechnen wenn mindestens 50% der angeforderten Jahre verfügbar sind
             for n_years, col_name in [(5, 'ev_ebit_avg_5y'), (10, 'ev_ebit_avg_10y'),
                                        (15, 'ev_ebit_avg_15y'), (20, 'ev_ebit_avg_20y')]:
                 ev_ebit_values = []
@@ -251,7 +265,16 @@ def process_ticker(rows):
                         fy_ebit = fy_row['operating_income']
                         if fy_ev is not None and fy_ebit is not None and fy_ebit > 0:
                             ev_ebit_values.append(fy_ev / fy_ebit)
-                result[col_name] = calculate_average_filtered(ev_ebit_values, max_reasonable_value=100) if ev_ebit_values else None
+
+                # Nur berechnen wenn mindestens 50% der Jahre verfügbar sind
+                min_required_years = max(3, int(n_years * 0.5))  # Mindestens 3 Jahre, oder 50% der angeforderten Jahre
+                if len(ev_ebit_values) >= min_required_years:
+                    avg_value, count = calculate_average_filtered(ev_ebit_values, max_reasonable_value=100)
+                    result[col_name] = avg_value
+                    result[col_name + '_count'] = count
+                else:
+                    result[col_name] = None
+                    result[col_name + '_count'] = None
 
             # === CAGR Berechnungen ===
 
@@ -293,10 +316,18 @@ def process_ticker(rows):
             result['pe_avg_10y'] = None
             result['pe_avg_15y'] = None
             result['pe_avg_20y'] = None
+            result['pe_avg_5y_count'] = None
+            result['pe_avg_10y_count'] = None
+            result['pe_avg_15y_count'] = None
+            result['pe_avg_20y_count'] = None
             result['ev_ebit_avg_5y'] = None
             result['ev_ebit_avg_10y'] = None
             result['ev_ebit_avg_15y'] = None
             result['ev_ebit_avg_20y'] = None
+            result['ev_ebit_avg_5y_count'] = None
+            result['ev_ebit_avg_10y_count'] = None
+            result['ev_ebit_avg_15y_count'] = None
+            result['ev_ebit_avg_20y_count'] = None
             result['revenue_cagr_3y'] = None
             result['revenue_cagr_5y'] = None
             result['revenue_cagr_10y'] = None
@@ -346,7 +377,11 @@ def process_ticker(rows):
                         fy_row = fy_data_by_year[year]
                         if fy_row['net_income'] is not None and fy_row['revenue'] is not None and fy_row['revenue'] > 0:
                             margin_values.append((fy_row['net_income'] / fy_row['revenue']) * 100)
-                result[col_name] = calculate_average_filtered(margin_values, max_reasonable_value=100) if margin_values else None
+                if margin_values:
+                    avg_value, _ = calculate_average_filtered(margin_values, max_reasonable_value=100)
+                    result[col_name] = avg_value
+                else:
+                    result[col_name] = None
 
             # Gewinnmarge 5-Jahres-Durchschnitt 2015-2019 (fixer Zeitraum)
             profit_margin_2015_2019 = []
@@ -355,7 +390,11 @@ def process_ticker(rows):
                     fy_row = fy_data_by_year[year]
                     if fy_row['net_income'] is not None and fy_row['revenue'] is not None and fy_row['revenue'] > 0:
                         profit_margin_2015_2019.append((fy_row['net_income'] / fy_row['revenue']) * 100)
-            result['profit_margin_avg_5y_2019'] = calculate_average_filtered(profit_margin_2015_2019, max_reasonable_value=100) if profit_margin_2015_2019 else None
+            if profit_margin_2015_2019:
+                avg_value, _ = calculate_average_filtered(profit_margin_2015_2019, max_reasonable_value=100)
+                result['profit_margin_avg_5y_2019'] = avg_value
+            else:
+                result['profit_margin_avg_5y_2019'] = None
 
             # Operative Marge Durchschnitte (rollierend)
             for n_years, col_name in [(3, 'operating_margin_avg_3y'), (5, 'operating_margin_avg_5y'),
@@ -366,7 +405,11 @@ def process_ticker(rows):
                         fy_row = fy_data_by_year[year]
                         if fy_row['operating_income'] is not None and fy_row['revenue'] is not None and fy_row['revenue'] > 0:
                             margin_values.append((fy_row['operating_income'] / fy_row['revenue']) * 100)
-                result[col_name] = calculate_average_filtered(margin_values, max_reasonable_value=100) if margin_values else None
+                if margin_values:
+                    avg_value, _ = calculate_average_filtered(margin_values, max_reasonable_value=100)
+                    result[col_name] = avg_value
+                else:
+                    result[col_name] = None
 
             # Operative Marge 5-Jahres-Durchschnitt 2015-2019 (fixer Zeitraum)
             operating_margin_2015_2019 = []
@@ -375,7 +418,11 @@ def process_ticker(rows):
                     fy_row = fy_data_by_year[year]
                     if fy_row['operating_income'] is not None and fy_row['revenue'] is not None and fy_row['revenue'] > 0:
                         operating_margin_2015_2019.append((fy_row['operating_income'] / fy_row['revenue']) * 100)
-            result['operating_margin_avg_5y_2019'] = calculate_average_filtered(operating_margin_2015_2019, max_reasonable_value=100) if operating_margin_2015_2019 else None
+            if operating_margin_2015_2019:
+                avg_value, _ = calculate_average_filtered(operating_margin_2015_2019, max_reasonable_value=100)
+                result['operating_margin_avg_5y_2019'] = avg_value
+            else:
+                result['operating_margin_avg_5y_2019'] = None
         else:
             # Für Quartale: Margen-Durchschnitte auf None setzen
             result['profit_margin_avg_3y'] = None
@@ -449,7 +496,9 @@ def main():
                 fy_pe, fy_ev_ebit, ebit, ev,
                 ttm_net_income, ttm_ebit, ttm_pe, ttm_ev_ebit,
                 pe_avg_5y, pe_avg_10y, pe_avg_15y, pe_avg_20y,
+                pe_avg_5y_count, pe_avg_10y_count, pe_avg_15y_count, pe_avg_20y_count,
                 ev_ebit_avg_5y, ev_ebit_avg_10y, ev_ebit_avg_15y, ev_ebit_avg_20y,
+                ev_ebit_avg_5y_count, ev_ebit_avg_10y_count, ev_ebit_avg_15y_count, ev_ebit_avg_20y_count,
                 revenue_cagr_3y, revenue_cagr_5y, revenue_cagr_10y,
                 ebit_cagr_3y, ebit_cagr_5y, ebit_cagr_10y,
                 net_income_cagr_3y, net_income_cagr_5y, net_income_cagr_10y,
@@ -462,7 +511,9 @@ def main():
                 %(fy_pe)s, %(fy_ev_ebit)s, %(ebit)s, %(ev)s,
                 %(ttm_net_income)s, %(ttm_ebit)s, %(ttm_pe)s, %(ttm_ev_ebit)s,
                 %(pe_avg_5y)s, %(pe_avg_10y)s, %(pe_avg_15y)s, %(pe_avg_20y)s,
+                %(pe_avg_5y_count)s, %(pe_avg_10y_count)s, %(pe_avg_15y_count)s, %(pe_avg_20y_count)s,
                 %(ev_ebit_avg_5y)s, %(ev_ebit_avg_10y)s, %(ev_ebit_avg_15y)s, %(ev_ebit_avg_20y)s,
+                %(ev_ebit_avg_5y_count)s, %(ev_ebit_avg_10y_count)s, %(ev_ebit_avg_15y_count)s, %(ev_ebit_avg_20y_count)s,
                 %(revenue_cagr_3y)s, %(revenue_cagr_5y)s, %(revenue_cagr_10y)s,
                 %(ebit_cagr_3y)s, %(ebit_cagr_5y)s, %(ebit_cagr_10y)s,
                 %(net_income_cagr_3y)s, %(net_income_cagr_5y)s, %(net_income_cagr_10y)s,

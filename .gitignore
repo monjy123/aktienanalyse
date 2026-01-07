@@ -37,3 +37,5 @@ backups/
 
 # Datenbank-Dateien
 aktien.db
+.claude-info
+nohup.out

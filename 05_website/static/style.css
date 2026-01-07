@@ -1736,3 +1736,18 @@ h1 {
 .action-buttons form {
     display: inline;
 }
+
+/* =============================================================================
+   KGV nicht verfügbar Styling
+============================================================================= */
+.pe-unavailable {
+    color: #999;
+    font-style: italic;
+    cursor: help;
+    border-bottom: 1px dotted #999;
+}
+
+.pe-value-with-tooltip {
+    cursor: help;
+    border-bottom: 1px dotted #666;
+}
