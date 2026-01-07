@@ -939,11 +939,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Tabelle neu aufbauen
         let html = '<table class="stock-table" id="screener-table"><thead><tr>';
-        html += '<th>Fav</th>';
+        html += '<th class="sortable" data-column="favorite" data-type="number">Fav</th>';
 
         for (const col of data.columns) {
             const numClass = col.format_type !== 'text' ? 'num' : '';
-            html += `<th class="${numClass}">${col.display_name}</th>`;
+            const dataType = col.format_type === 'text' ? 'text' : 'number';
+            html += `<th class="sortable ${numClass}" data-column="${col.column_key}" data-type="${dataType}">${col.display_name}</th>`;
         }
         html += '<th>Notizen</th></tr></thead><tbody>';
 
@@ -953,7 +954,7 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let i = 1; i <= 9; i++) {
                 favOptions += `<option value="${i}" ${stock.favorite == i ? 'selected' : ''}>${i}</option>`;
             }
-            html += `<td>
+            html += `<td data-column="favorite" data-value="${stock.favorite || 0}">
                 <select class="favorite-select" data-isin="${stock.isin}">
                     ${favOptions}
                 </select>
@@ -1016,6 +1017,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Company name clicks
         initializeCompanyNameClicks();
+
+        // Tabellensortierung
+        initTableSorting();
     }
 
     async function handleFavoriteChange() {
