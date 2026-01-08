@@ -135,16 +135,31 @@
                     <span class="detail-meta" id="detail-meta">-</span>
                 </div>
                 <div class="detail-tabs">
-                    <button class="detail-tab active" data-tab="pe">KGV</button>
-                    <button class="detail-tab" data-tab="ev_ebit">EV/EBIT</button>
-                    <button class="detail-tab" data-tab="growth">Wachstum</button>
-                    <button class="detail-tab" data-tab="margins">Margen</button>
+                    <button type="button" class="detail-tab active" data-tab="pe">KGV</button>
+                    <button type="button" class="detail-tab" data-tab="ev_ebit">EV/EBIT</button>
+                    <button type="button" class="detail-tab" data-tab="growth">Wachstum</button>
+                    <button type="button" class="detail-tab" data-tab="margins">Margen</button>
                 </div>
             </div>
             <button class="modal-close">&times;</button>
         </div>
         <div class="modal-body detail-body" id="detail-body">
             <div class="detail-loading">Lade Daten...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Vollbild-Chart-Modal -->
+<div id="chart-fullscreen-modal" class="modal hidden">
+    <div class="modal-content modal-fullscreen">
+        <div class="modal-header">
+            <h3 id="chart-fullscreen-title">Chart</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="chart-fullscreen-wrapper">
+                <canvas id="chart-fullscreen-canvas"></canvas>
+            </div>
         </div>
     </div>
 </div>

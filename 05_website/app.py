@@ -622,7 +622,7 @@ def get_stock_details(isin):
             SELECT period, date, net_income, revenue, gross_profit, operating_income
             FROM analytics.fmp_filtered_numbers
             WHERE isin = %s AND period != 'FY'
-              AND date >= DATE_SUB(CURDATE(), INTERVAL 15 MONTH)
+              AND date >= DATE_SUB(CURDATE(), INTERVAL 18 MONTH)
             ORDER BY date DESC
         """, (isin,))
         all_periods = cur.fetchall()
@@ -911,6 +911,7 @@ def get_stock_info(isin):
     - Stammdaten (Name, Ticker, Sector, Country, etc.)
     - Beschreibung (bereits auf Deutsch übersetzt)
     - Fiskaljahr-Ende
+    - Marktkapitalisierung
     """
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
@@ -926,6 +927,17 @@ def get_stock_info(isin):
 
         if not info:
             return jsonify({"error": "Aktie nicht gefunden"}), 404
+
+        # Marktkapitalisierung aus live_metrics abrufen
+        cur.execute("""
+            SELECT market_cap
+            FROM analytics.live_metrics
+            WHERE isin = %s
+        """, (isin,))
+        metrics = cur.fetchone()
+
+        if metrics:
+            info['market_cap'] = metrics['market_cap']
 
         return jsonify(info)
 

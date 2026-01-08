@@ -13,6 +13,27 @@ function getCurrentView() {
 document.addEventListener('DOMContentLoaded', function() {
 
     // =========================================================================
+    // Stock Detail Modal Variablen (früh deklariert für alle Event-Handler)
+    // =========================================================================
+    let currentDetailData = null;
+    let currentTab = 'pe';
+    let peChart = null;
+    let incomeChart = null;
+    let evEbitChart = null;
+    let ebitChart = null;
+    let growthRevenueChart = null;
+    let growthEbitChart = null;
+    let growthNetIncomeChart = null;
+    let marginsChart = null;
+    let fullscreenChart = null;
+
+    // Daten für Chart-Vollbild-Ansicht
+    let chartData = {
+        pe: null,
+        evEbit: null
+    };
+
+    // =========================================================================
     // Tabellensortierung
     // =========================================================================
     let currentSortColumn = null;
@@ -175,7 +196,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // =========================================================================
     document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', function() {
-            this.closest('.modal').classList.add('hidden');
+            const modal = this.closest('.modal');
+            modal.classList.add('hidden');
+
+            // Reset Detail Modal Zustand
+            if (modal && modal.id === 'stock-detail-modal') {
+                currentDetailData = null;
+                currentTab = 'pe';
+            }
         });
     });
 
@@ -184,6 +212,12 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
                 this.classList.add('hidden');
+
+                // Reset Detail Modal Zustand
+                if (this.id === 'stock-detail-modal') {
+                    currentDetailData = null;
+                    currentTab = 'pe';
+                }
             }
         });
     });
@@ -193,6 +227,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.classList.add('hidden');
+
+                // Reset Detail Modal Zustand
+                if (modal.id === 'stock-detail-modal') {
+                    currentDetailData = null;
+                    currentTab = 'pe';
+                }
             });
         }
     });
@@ -1060,22 +1100,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailCompanyName = document.getElementById('detail-company-name');
     const detailMeta = document.getElementById('detail-meta');
     const detailBody = document.getElementById('detail-body');
-    const detailTabs = document.querySelectorAll('.detail-tab');
+    // Tab-Klicks mit Event Delegation am Modal-Container
+    if (stockDetailModal) {
+        stockDetailModal.addEventListener('click', function(e) {
+            // Prüfe ob ein Tab-Button geklickt wurde
+            const tab = e.target.closest('.detail-tab');
+            if (!tab) return;
 
-    let peChart = null;
-    let incomeChart = null;
-    let currentDetailData = null; // Gecachte Daten für Tab-Wechsel
-    let currentTab = 'pe';
+            e.preventDefault();
+            e.stopPropagation();
 
-    // Tab-Klicks
-    detailTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabType = this.dataset.tab;
-            if (tabType === currentTab || !currentDetailData) return;
+            const tabType = tab.dataset.tab;
+
+            // Wenn keine Daten vorhanden, nichts tun
+            if (!currentDetailData) return;
 
             // Aktiven Tab wechseln
-            detailTabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
+            stockDetailModal.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
             currentTab = tabType;
 
             // Content rendern
@@ -1089,7 +1131,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderStockDetail(currentDetailData);
             }
         });
-    });
+    }
 
     // KGV-relevante Spalten, die das PE-Modal öffnen
     const PE_COLUMNS = [
@@ -1203,7 +1245,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Aktiven Tab setzen
         currentTab = type;
-        detailTabs.forEach(tab => {
+        stockDetailModal.querySelectorAll('.detail-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.tab === type);
         });
 
@@ -1457,7 +1499,65 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof Chart !== 'undefined') {
             renderPEChart(data.pe_history, data.current_ttm_pe);
             renderIncomeChart(data.income_statement, data.ttm_income_statement);
+
+            // Click-Handler für Chart-Zoom hinzufügen
+            setupChartZoomHandlers();
         }
+    }
+
+    // Hilfsfunktion: Berechnet das n-te Perzentil eines Arrays
+    function calculatePercentile(arr, percentile) {
+        const validValues = arr.filter(v => v != null && !isNaN(v) && isFinite(v));
+        if (validValues.length === 0) return null;
+
+        const sorted = [...validValues].sort((a, b) => a - b);
+        const index = (percentile / 100) * (sorted.length - 1);
+        const lower = Math.floor(index);
+        const upper = Math.ceil(index);
+        const weight = index % 1;
+
+        if (lower === upper) return sorted[lower];
+        return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+    }
+
+    function calculateIQR(arr) {
+        const validValues = arr.filter(v => v != null && !isNaN(v) && isFinite(v));
+        if (validValues.length === 0) return null;
+
+        const sorted = [...validValues].sort((a, b) => a - b);
+        const q1 = calculatePercentile(sorted, 25);
+        const q3 = calculatePercentile(sorted, 75);
+
+        if (q1 === null || q3 === null) return null;
+
+        return {
+            q1: q1,
+            q3: q3,
+            iqr: q3 - q1
+        };
+    }
+
+    function calculateRobustYMax(arr) {
+        const validValues = arr.filter(v => v != null && !isNaN(v) && isFinite(v));
+        if (validValues.length === 0) return undefined;
+
+        // Berechne verschiedene statistische Metriken
+        const median = calculatePercentile(validValues, 50);
+        const p85 = calculatePercentile(validValues, 85);
+        const iqrData = calculateIQR(validValues);
+
+        if (!median || !p85 || !iqrData) return undefined;
+
+        // Hybridansatz: Minimum von drei Methoden
+        const medianLimit = median * 4;              // Nicht mehr als 4x Median
+        const percentileLimit = p85 * 1.2;          // Nicht mehr als 85. Perzentil + 20%
+        const iqrLimit = iqrData.q3 + 1.5 * iqrData.iqr;  // IQR-Ausreißergrenze
+
+        // Nimm das Minimum der drei Grenzen (konservativster Ansatz)
+        const yMax = Math.min(medianLimit, percentileLimit, iqrLimit);
+
+        // Füge 10% Puffer hinzu für bessere Darstellung
+        return yMax * 1.1;
     }
 
     function renderPEChart(peHistory, currentTtmPe) {
@@ -1479,17 +1579,31 @@ document.addEventListener('DOMContentLoaded', function() {
             peData.push(currentTtmPe);
         }
 
+        // Daten für Vollbild-Ansicht speichern
+        chartData.pe = { labels, peData, currentTtmPe };
+
+        // Robuste Y-Achsen-Begrenzung mit Hybridansatz berechnen
+        const yMax = calculateRobustYMax(peData);
+
+        // Ausreißer identifizieren und unterschiedlich darstellen
+        const pointStyles = peData.map(val => (yMax && val > yMax) ? 'triangle' : 'circle');
+        const pointRadii = peData.map(val => (yMax && val > yMax) ? 5 : 3);
+
+        // Werte für Anzeige begrenzen, aber echte Werte für Tooltip behalten
+        const displayData = peData.map(val => (yMax && val > yMax) ? yMax : val);
+
         peChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'KGV',
-                    data: peData,
+                    data: displayData,
                     borderColor: '#1a1a2e',
                     backgroundColor: 'rgba(26, 26, 46, 0.1)',
                     borderWidth: 2,
-                    pointRadius: 3,
+                    pointRadius: pointRadii,
+                    pointStyle: pointStyles,
                     pointBackgroundColor: '#1a1a2e',
                     fill: true,
                     tension: 0.1
@@ -1499,7 +1613,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const actualValue = peData[context.dataIndex];
+                                const isOutlier = yMax && actualValue > yMax;
+                                const valueStr = actualValue != null ? actualValue.toFixed(2) : '-';
+                                return `KGV: ${valueStr}${isOutlier ? ' (Ausreißer)' : ''}`;
+                            }
+                        }
+                    }
                 },
                 scales: {
                     x: {
@@ -1508,6 +1632,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     y: {
                         beginAtZero: true,
+                        max: yMax,
                         ticks: { font: { size: 9 } },
                         grid: { color: '#eee' }
                     }
@@ -1576,8 +1701,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // =========================================================================
     // EV/EBIT Detail Modal
     // =========================================================================
-    let evEbitChart = null;
-    let ebitChart = null;
 
     function renderEvEbitDetail(data) {
         // Header
@@ -1594,6 +1717,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const formatNumber = (val, decimals = 1) => {
             if (val === null || val === undefined) return '-';
             return val.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        };
+
+        const formatEVEBITAverage = (val, years, count) => {
+            if (val === null || val === undefined) {
+                return `<span class="pe-unavailable" title="Zu wenig Datenjahre für ${years}-Jahres-Durchschnitt verfügbar">n.v.</span>`;
+            }
+            const countText = count ? `${count} von ${years} Jahren` : `${years} Jahre`;
+            const tooltip = `Durchschnitt über ${countText} (nach Filterung: Negativwerte und Ausreißer >2σ ausgeschlossen)`;
+            return `<span class="pe-value-with-tooltip" title="${tooltip}">${val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>`;
         };
 
         // EV Berechnung HTML
@@ -1788,6 +1920,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof Chart !== 'undefined') {
             renderEvEbitChart(data.ev_ebit_history, data.current_ttm_ev_ebit);
             renderEbitChart(data.income_statement, data.ttm_income_statement);
+
+            // Click-Handler für Chart-Zoom hinzufügen
+            setupChartZoomHandlers();
         }
     }
 
@@ -1807,17 +1942,31 @@ document.addEventListener('DOMContentLoaded', function() {
             evEbitData.push(currentTtmEvEbit);
         }
 
+        // Daten für Vollbild-Ansicht speichern
+        chartData.evEbit = { labels, evEbitData, currentTtmEvEbit };
+
+        // Robuste Y-Achsen-Begrenzung mit Hybridansatz berechnen
+        const yMax = calculateRobustYMax(evEbitData);
+
+        // Ausreißer identifizieren und unterschiedlich darstellen
+        const pointStyles = evEbitData.map(val => (yMax && val > yMax) ? 'triangle' : 'circle');
+        const pointRadii = evEbitData.map(val => (yMax && val > yMax) ? 5 : 3);
+
+        // Werte für Anzeige begrenzen, aber echte Werte für Tooltip behalten
+        const displayData = evEbitData.map(val => (yMax && val > yMax) ? yMax : val);
+
         evEbitChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'EV/EBIT',
-                    data: evEbitData,
+                    data: displayData,
                     borderColor: '#2d5aa3',
                     backgroundColor: 'rgba(45, 90, 163, 0.1)',
                     borderWidth: 2,
-                    pointRadius: 3,
+                    pointRadius: pointRadii,
+                    pointStyle: pointStyles,
                     pointBackgroundColor: '#2d5aa3',
                     fill: true,
                     tension: 0.1
@@ -1827,7 +1976,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const actualValue = evEbitData[context.dataIndex];
+                                const isOutlier = yMax && actualValue > yMax;
+                                const valueStr = actualValue != null ? actualValue.toFixed(2) : '-';
+                                return `EV/EBIT: ${valueStr}${isOutlier ? ' (Ausreißer)' : ''}`;
+                            }
+                        }
+                    }
                 },
                 scales: {
                     x: {
@@ -1836,6 +1995,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     y: {
                         beginAtZero: true,
+                        max: yMax,
                         ticks: { font: { size: 9 } },
                         grid: { color: '#eee' }
                     }
@@ -1893,6 +2053,193 @@ document.addEventListener('DOMContentLoaded', function() {
                         ticks: { font: { size: 9 } },
                         grid: { color: '#eee' }
                     }
+                }
+            }
+        });
+    }
+
+    // =========================================================================
+    // Vollbild-Chart-Funktionalität
+    // =========================================================================
+    const chartFullscreenModal = document.getElementById('chart-fullscreen-modal');
+    const chartFullscreenTitle = document.getElementById('chart-fullscreen-title');
+    const chartFullscreenCanvas = document.getElementById('chart-fullscreen-canvas');
+
+    function setupChartZoomHandlers() {
+        // Click-Handler für P/E Chart
+        const peChartWrapper = document.querySelector('#pe-chart')?.closest('.chart-wrapper');
+        if (peChartWrapper) {
+            peChartWrapper.style.cursor = 'zoom-in';
+            peChartWrapper.onclick = () => openChartFullscreen('pe', 'KGV Verlauf (20 Jahre)');
+        }
+
+        // Click-Handler für EV/EBIT Chart
+        const evEbitChartWrapper = document.querySelector('#ev-ebit-chart')?.closest('.chart-wrapper');
+        if (evEbitChartWrapper) {
+            evEbitChartWrapper.style.cursor = 'zoom-in';
+            evEbitChartWrapper.onclick = () => openChartFullscreen('evEbit', 'EV/EBIT Verlauf (20 Jahre)');
+        }
+    }
+
+    function openChartFullscreen(chartType, title) {
+        const data = chartData[chartType];
+        if (!data) return;
+
+        chartFullscreenTitle.textContent = title;
+        chartFullscreenModal.classList.remove('hidden');
+
+        // Bestehenden Chart zerstören
+        if (fullscreenChart) {
+            fullscreenChart.destroy();
+        }
+
+        // Chart im Vollbild rendern
+        if (chartType === 'pe') {
+            renderFullscreenPEChart(data);
+        } else if (chartType === 'evEbit') {
+            renderFullscreenEvEbitChart(data);
+        }
+    }
+
+    function renderFullscreenPEChart(data) {
+        const { labels, peData } = data;
+
+        // Robuste Y-Achsen-Begrenzung mit Hybridansatz berechnen
+        const yMax = calculateRobustYMax(peData);
+
+        // Ausreißer identifizieren
+        const pointStyles = peData.map(val => (yMax && val > yMax) ? 'triangle' : 'circle');
+        const pointRadii = peData.map(val => (yMax && val > yMax) ? 6 : 4);
+        const displayData = peData.map(val => (yMax && val > yMax) ? yMax : val);
+
+        fullscreenChart = new Chart(chartFullscreenCanvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'KGV',
+                    data: displayData,
+                    borderColor: '#1a1a2e',
+                    backgroundColor: 'rgba(26, 26, 46, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: pointRadii,
+                    pointStyle: pointStyles,
+                    pointBackgroundColor: '#1a1a2e',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const actualValue = peData[context.dataIndex];
+                                const isOutlier = yMax && actualValue > yMax;
+                                const valueStr = actualValue != null ? actualValue.toFixed(2) : '-';
+                                return `KGV: ${valueStr}${isOutlier ? ' (Ausreißer)' : ''}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { font: { size: 14 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: yMax,
+                        ticks: { font: { size: 14 } },
+                        grid: { color: '#eee' }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderFullscreenEvEbitChart(data) {
+        const { labels, evEbitData } = data;
+
+        // Robuste Y-Achsen-Begrenzung mit Hybridansatz berechnen
+        const yMax = calculateRobustYMax(evEbitData);
+
+        // Ausreißer identifizieren
+        const pointStyles = evEbitData.map(val => (yMax && val > yMax) ? 'triangle' : 'circle');
+        const pointRadii = evEbitData.map(val => (yMax && val > yMax) ? 6 : 4);
+        const displayData = evEbitData.map(val => (yMax && val > yMax) ? yMax : val);
+
+        fullscreenChart = new Chart(chartFullscreenCanvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'EV/EBIT',
+                    data: displayData,
+                    borderColor: '#2d5aa3',
+                    backgroundColor: 'rgba(45, 90, 163, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: pointRadii,
+                    pointStyle: pointStyles,
+                    pointBackgroundColor: '#2d5aa3',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const actualValue = evEbitData[context.dataIndex];
+                                const isOutlier = yMax && actualValue > yMax;
+                                const valueStr = actualValue != null ? actualValue.toFixed(2) : '-';
+                                return `EV/EBIT: ${valueStr}${isOutlier ? ' (Ausreißer)' : ''}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { font: { size: 14 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: yMax,
+                        ticks: { font: { size: 14 } },
+                        grid: { color: '#eee' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Modal-Close-Handler für Vollbild-Chart
+    if (chartFullscreenModal) {
+        chartFullscreenModal.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', function() {
+                chartFullscreenModal.classList.add('hidden');
+                if (fullscreenChart) {
+                    fullscreenChart.destroy();
+                    fullscreenChart = null;
+                }
+            });
+        });
+
+        // Schließen beim Klick auf Hintergrund
+        chartFullscreenModal.addEventListener('click', function(e) {
+            if (e.target === chartFullscreenModal) {
+                chartFullscreenModal.classList.add('hidden');
+                if (fullscreenChart) {
+                    fullscreenChart.destroy();
+                    fullscreenChart = null;
                 }
             }
         });
@@ -2588,6 +2935,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (data.currency) {
                 html += `<p><strong>Währung:</strong> ${data.currency}</p>`;
+            }
+            if (data.market_cap) {
+                const marketCapFormatted = (data.market_cap / 1e9).toLocaleString('de-DE', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }) + ' Mrd.';
+                html += `<p><strong>Marktkapitalisierung:</strong> ${marketCapFormatted}</p>`;
             }
             html += '</div>';
 
