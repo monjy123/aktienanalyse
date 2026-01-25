@@ -56,6 +56,7 @@ DEFAULT_COLUMNS = [
     ('watchlist', 'company_info', 'stock_index', 'Index', 6, False, 'Stammdaten', 'text'),
     ('watchlist', 'company_info', 'currency', 'Währung', 7, False, 'Stammdaten', 'text'),
     ('watchlist', 'live_metrics', 'yf_payout_ratio', 'Ausschüttungs<br>quote', 8, False, 'Stammdaten', 'percent'),
+    ('watchlist', 'live_metrics', 'next_earnings_date', 'Nächste<br>Zahlen', 9, False, 'Stammdaten', 'date'),
 
     # === KURSDATEN (live_metrics) ===
     ('watchlist', 'live_metrics', 'price', 'Kurs', 10, True, 'Kursdaten', 'currency'),

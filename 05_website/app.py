@@ -9,6 +9,7 @@ Starten mit: python app.py
 
 import sys
 import os
+import re
 from pathlib import Path
 
 # Parent-Ordner für db.py Import
@@ -88,10 +89,28 @@ def format_de_billions(value, decimals=1):
         return '-'
 
 
+def format_de_date(value):
+    """Formatiert Datum im deutschen Format (TT.MM.JJJJ)."""
+    if value is None:
+        return '-'
+    try:
+        # Falls es ein String ist (YYYY-MM-DD)
+        if isinstance(value, str):
+            from datetime import datetime
+            value = datetime.strptime(value, '%Y-%m-%d').date()
+        # Falls es ein datetime oder date Objekt ist
+        if hasattr(value, 'strftime'):
+            return value.strftime('%d.%m.%Y')
+        return '-'
+    except (ValueError, TypeError):
+        return '-'
+
+
 # Filter registrieren
 app.jinja_env.filters['de'] = format_de
 app.jinja_env.filters['de_percent'] = format_de_percent
 app.jinja_env.filters['de_billions'] = format_de_billions
+app.jinja_env.filters['de_date'] = format_de_date
 
 
 # =============================================================================
@@ -1113,6 +1132,566 @@ def admin_make_admin(user_id):
 
     flash('Benutzer wurde zum Administrator gemacht.', 'success')
     return redirect(url_for('admin_users'))
+
+
+# =============================================================================
+# DCF Modal API Endpoints
+# =============================================================================
+
+@app.route("/api/stock/<isin>/dcf-data")
+@login_required
+def get_dcf_data(isin):
+    """
+    API: DCF-Daten für eine Aktie.
+
+    Liefert:
+    - Historische Daten (10 Jahre): Revenue, EBIT, FCF, Margen
+    - Aktuelle Kennzahlen: Preis, Market Cap, Net Debt, Shares Outstanding
+    - Default-Annahmen basierend auf historischen Werten
+    - Gespeicherte Szenarien des Users
+    """
+    user_id = current_user.id
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # 1. Stammdaten
+        cur.execute("""
+            SELECT isin, ticker, company_name, currency
+            FROM analytics.company_info
+            WHERE isin = %s
+        """, (isin,))
+        company = cur.fetchone()
+
+        if not company:
+            return jsonify({"error": "Aktie nicht gefunden"}), 404
+
+        # 2. Aktuelle Kennzahlen aus live_metrics
+        cur.execute("""
+            SELECT market_cap, price, price_date,
+                   revenue_cagr_3y, revenue_cagr_5y, revenue_cagr_10y,
+                   operating_margin, operating_margin_avg_5y
+            FROM analytics.live_metrics
+            WHERE isin = %s
+        """, (isin,))
+        live = cur.fetchone() or {}
+
+        # 3. Net Debt und Shares Outstanding aus fmp_filtered_numbers
+        cur.execute("""
+            SELECT net_debt, weighted_average_shs_out_dil as shares_outstanding
+            FROM analytics.fmp_filtered_numbers
+            WHERE isin = %s AND period = 'FY'
+            ORDER BY date DESC
+            LIMIT 1
+        """, (isin,))
+        balance = cur.fetchone() or {}
+
+        # 4. Historische Daten (5 Jahre) für Revenue, EBIT, FCF
+        cur.execute("""
+            SELECT YEAR(date) as year, revenue, operating_income,
+                   free_cash_flow, net_income
+            FROM analytics.fmp_filtered_numbers
+            WHERE isin = %s AND period = 'FY'
+            ORDER BY date DESC
+            LIMIT 5
+        """, (isin,))
+        historical_raw = cur.fetchall()
+
+        # In chronologischer Reihenfolge (ältestes zuerst)
+        historical = []
+        for row in reversed(historical_raw):
+            revenue = row['revenue']
+            ebit = row['operating_income']
+            fcf = row['free_cash_flow']
+
+            # Margen berechnen
+            ebit_margin = (ebit / revenue * 100) if revenue and ebit else None
+            fcf_margin = (fcf / revenue * 100) if revenue and fcf else None
+
+            historical.append({
+                "year": row['year'],
+                "revenue": revenue,
+                "ebit": ebit,
+                "fcf": fcf,
+                "ebit_margin": round(ebit_margin, 1) if ebit_margin else None,
+                "fcf_margin": round(fcf_margin, 1) if fcf_margin else None
+            })
+
+        # 4b. Analyst Estimates aus finanzen.net (Revenue, EBIT, FCF)
+        cur.execute("""
+            SELECT period, metric, estimate_value, currency, unit
+            FROM analytics.analyst_estimates
+            WHERE isin = %s
+              AND metric IN ('revenue', 'ebit', 'free_cashflow')
+              AND period_type = 'fiscal_year'
+            ORDER BY period ASC
+        """, (isin,))
+        estimates_raw = cur.fetchall()
+
+        # Estimates nach Jahr gruppieren
+        last_hist_year = historical[-1]['year'] if historical else 0
+        estimates_by_year = {}
+
+        for row in estimates_raw:
+            period = row['period']
+            year_match = re.search(r'(\d{4})', period)
+            if year_match:
+                year = int(year_match.group(1))
+                # Nur zukünftige Jahre (nach letztem historischen Jahr)
+                if year > last_hist_year:
+                    if year not in estimates_by_year:
+                        estimates_by_year[year] = {
+                            "year": year,
+                            "revenue": None,
+                            "ebit": None,
+                            "fcf": None,
+                            "ebit_margin": None,
+                            "is_estimate": True
+                        }
+
+                    # Wert konvertieren (Mio zu absolut)
+                    value = row['estimate_value']
+                    if row['unit'] == 'millions' and value:
+                        value = float(value) * 1_000_000
+
+                    metric = row['metric']
+                    if metric == 'revenue':
+                        estimates_by_year[year]['revenue'] = value
+                    elif metric == 'ebit':
+                        estimates_by_year[year]['ebit'] = value
+                    elif metric == 'free_cashflow':
+                        estimates_by_year[year]['fcf'] = value
+
+        # EBIT-Marge berechnen wo möglich
+        for year_data in estimates_by_year.values():
+            if year_data['revenue'] and year_data['ebit']:
+                year_data['ebit_margin'] = round(
+                    (year_data['ebit'] / year_data['revenue']) * 100, 1
+                )
+
+        # In sortierte Liste umwandeln
+        estimates = [estimates_by_year[y] for y in sorted(estimates_by_year.keys())]
+
+        # 5. CAGR berechnen aus historischen Daten
+        revenue_cagr_3y = None
+        revenue_cagr_5y = None
+        revenue_cagr_10y = None
+
+        if len(historical) >= 4:
+            start_rev = historical[-4]['revenue']
+            end_rev = historical[-1]['revenue']
+            if start_rev and end_rev and start_rev > 0:
+                revenue_cagr_3y = ((end_rev / start_rev) ** (1/3) - 1) * 100
+
+        if len(historical) >= 6:
+            start_rev = historical[-6]['revenue']
+            end_rev = historical[-1]['revenue']
+            if start_rev and end_rev and start_rev > 0:
+                revenue_cagr_5y = ((end_rev / start_rev) ** (1/5) - 1) * 100
+
+        if len(historical) >= 10:
+            start_rev = historical[0]['revenue']
+            end_rev = historical[-1]['revenue']
+            if start_rev and end_rev and start_rev > 0:
+                revenue_cagr_10y = ((end_rev / start_rev) ** (1/10) - 1) * 100
+
+        # Fallback auf live_metrics CAGRs
+        revenue_cagr_3y = revenue_cagr_3y or live.get('revenue_cagr_3y')
+        revenue_cagr_5y = revenue_cagr_5y or live.get('revenue_cagr_5y')
+        revenue_cagr_10y = revenue_cagr_10y or live.get('revenue_cagr_10y')
+
+        # 6. Default-Annahmen berechnen
+        # Letzter Revenue für Berechnungen
+        last_revenue = historical[-1]['revenue'] if historical else None
+
+        # Durchschnittliche EBIT-Marge der letzten 5 Jahre
+        ebit_margins = [h['ebit_margin'] for h in historical[-5:] if h['ebit_margin'] is not None]
+        avg_ebit_margin = sum(ebit_margins) / len(ebit_margins) if ebit_margins else (live.get('operating_margin') or 15.0)
+
+        # Default Wachstum basierend auf historischem CAGR
+        default_growth = revenue_cagr_5y or revenue_cagr_3y or 5.0
+
+        defaults = {
+            "revenue_growth_y1": round(default_growth, 1) if default_growth else 8.0,
+            "revenue_growth_y2": round(default_growth * 0.9, 1) if default_growth else 7.0,
+            "revenue_growth_y3": round(default_growth * 0.8, 1) if default_growth else 6.0,
+            "revenue_growth_y4": round(default_growth * 0.7, 1) if default_growth else 5.0,
+            "revenue_growth_y5": round(default_growth * 0.6, 1) if default_growth else 4.0,
+            "revenue_growth_y6": round(default_growth * 0.5, 1) if default_growth else 3.5,
+            "revenue_growth_y7": round(default_growth * 0.4, 1) if default_growth else 3.0,
+            "revenue_growth_y8": round(default_growth * 0.35, 1) if default_growth else 2.5,
+            "revenue_growth_y9": round(default_growth * 0.3, 1) if default_growth else 2.0,
+            "revenue_growth_y10": round(default_growth * 0.25, 1) if default_growth else 2.0,
+            "ebit_margin": round(avg_ebit_margin, 1),
+            "tax_rate": 25.0,
+            "capex_percent": 3.0,
+            "wc_change_percent": 0.0,
+            "depreciation_percent": 3.0,
+            "terminal_growth": 2.0,
+            "wacc": 9.0
+        }
+
+        # 7. Gespeicherte Szenarien des Users laden
+        cur.execute("""
+            SELECT id, scenario_name, revenue_growth_y1, revenue_growth_y2,
+                   revenue_growth_y3, revenue_growth_y4, revenue_growth_y5,
+                   revenue_growth_y6, revenue_growth_y7, revenue_growth_y8,
+                   revenue_growth_y9, revenue_growth_y10,
+                   ebit_margin, tax_rate, capex_percent, wc_change_percent,
+                   depreciation_percent, terminal_growth, wacc,
+                   fair_value_per_share, created_at, updated_at
+            FROM analytics.user_dcf_scenarios
+            WHERE user_id = %s AND isin = %s
+            ORDER BY updated_at DESC
+        """, (user_id, isin))
+        scenarios = cur.fetchall()
+
+        # Datetime zu String konvertieren
+        for s in scenarios:
+            if s['created_at']:
+                s['created_at'] = s['created_at'].strftime('%Y-%m-%d %H:%M')
+            if s['updated_at']:
+                s['updated_at'] = s['updated_at'].strftime('%Y-%m-%d %H:%M')
+
+        result = {
+            "company": {
+                "isin": company['isin'],
+                "ticker": company['ticker'],
+                "name": company['company_name'],
+                "currency": company['currency']
+            },
+            "current": {
+                "market_cap": live.get('market_cap'),
+                "price": live.get('price'),
+                "price_date": live.get('price_date').strftime('%Y-%m-%d') if live.get('price_date') else None,
+                "net_debt": balance.get('net_debt'),
+                "shares_outstanding": balance.get('shares_outstanding')
+            },
+            "cagr": {
+                "cagr_3y": round(revenue_cagr_3y, 1) if revenue_cagr_3y else None,
+                "cagr_5y": round(revenue_cagr_5y, 1) if revenue_cagr_5y else None,
+                "cagr_10y": round(revenue_cagr_10y, 1) if revenue_cagr_10y else None
+            },
+            "historical": historical,
+            "estimates": estimates,
+            "defaults": defaults,
+            "scenarios": scenarios
+        }
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route("/api/stock/<isin>/dcf-calculate", methods=["POST"])
+@login_required
+def calculate_dcf(isin):
+    """
+    API: DCF-Berechnung durchführen.
+
+    Nimmt Annahmen als JSON und berechnet:
+    - 5-Jahres-Prognose (Revenue, EBIT, NOPAT, FCF, Barwert)
+    - Terminal Value
+    - Enterprise Value
+    - Equity Value
+    - Fair Value per Share
+    - Sensitivitätsmatrix (WACC x Terminal Growth)
+    """
+    data = request.json
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # Aktuelle Daten holen
+        cur.execute("""
+            SELECT market_cap, price
+            FROM analytics.live_metrics
+            WHERE isin = %s
+        """, (isin,))
+        live = cur.fetchone() or {}
+
+        cur.execute("""
+            SELECT revenue, net_debt, weighted_average_shs_out_dil as shares_outstanding
+            FROM analytics.fmp_filtered_numbers
+            WHERE isin = %s AND period = 'FY'
+            ORDER BY date DESC
+            LIMIT 1
+        """, (isin,))
+        latest = cur.fetchone() or {}
+
+        if not latest.get('revenue'):
+            return jsonify({"error": "Keine Revenue-Daten verfügbar"}), 400
+
+        base_revenue = latest['revenue']
+        net_debt = latest.get('net_debt') or 0
+        shares_outstanding = latest.get('shares_outstanding')
+
+        if not shares_outstanding or shares_outstanding <= 0:
+            return jsonify({"error": "Keine Aktienanzahl verfügbar"}), 400
+
+        # Annahmen aus Request
+        growth_rates = [
+            data.get('revenue_growth_y1', 8) / 100,
+            data.get('revenue_growth_y2', 7) / 100,
+            data.get('revenue_growth_y3', 6) / 100,
+            data.get('revenue_growth_y4', 5) / 100,
+            data.get('revenue_growth_y5', 4) / 100,
+            data.get('revenue_growth_y6', 3.5) / 100,
+            data.get('revenue_growth_y7', 3) / 100,
+            data.get('revenue_growth_y8', 2.5) / 100,
+            data.get('revenue_growth_y9', 2) / 100,
+            data.get('revenue_growth_y10', 2) / 100
+        ]
+        ebit_margin = data.get('ebit_margin', 15) / 100
+        tax_rate = data.get('tax_rate', 25) / 100
+        capex_percent = data.get('capex_percent', 3) / 100
+        wc_change_percent = data.get('wc_change_percent', 0) / 100
+        depreciation_percent = data.get('depreciation_percent', 3) / 100
+        terminal_growth = data.get('terminal_growth', 2) / 100
+        wacc = data.get('wacc', 9) / 100
+
+        # Prognose berechnen (10 Jahre)
+        projections = []
+        current_revenue = base_revenue
+
+        for year in range(1, 11):
+            growth = growth_rates[year - 1]
+            projected_revenue = current_revenue * (1 + growth)
+            ebit = projected_revenue * ebit_margin
+            depreciation = projected_revenue * depreciation_percent
+            nopat = ebit * (1 - tax_rate)
+            capex = projected_revenue * capex_percent
+            wc_change = (projected_revenue - current_revenue) * wc_change_percent
+            fcf = nopat + depreciation - capex - wc_change
+            discount_factor = 1 / ((1 + wacc) ** year)
+            pv_fcf = fcf * discount_factor
+
+            projections.append({
+                "year": year,
+                "revenue": projected_revenue,
+                "ebit": ebit,
+                "depreciation": depreciation,
+                "nopat": nopat,
+                "capex": capex,
+                "wc_change": wc_change,
+                "fcf": fcf,
+                "discount_factor": discount_factor,
+                "pv_fcf": pv_fcf
+            })
+
+            current_revenue = projected_revenue
+
+        # Terminal Value (nach Jahr 10)
+        final_fcf = projections[-1]['fcf']
+
+        if wacc <= terminal_growth:
+            return jsonify({"error": "WACC muss größer als Terminal Growth sein"}), 400
+
+        terminal_value = final_fcf * (1 + terminal_growth) / (wacc - terminal_growth)
+        terminal_pv = terminal_value / ((1 + wacc) ** 10)
+
+        # Summe der Barwerte
+        sum_pv_fcf = sum(p['pv_fcf'] for p in projections)
+        enterprise_value = sum_pv_fcf + terminal_pv
+
+        # Equity Value
+        equity_value = enterprise_value - net_debt
+
+        # Fair Value per Share
+        fair_value = equity_value / shares_outstanding
+
+        # Upside/Downside
+        current_price = live.get('price') or 0
+        upside = ((fair_value / current_price) - 1) * 100 if current_price > 0 else None
+
+        # Sensitivitätsmatrix berechnen
+        wacc_values = [wacc - 0.01, wacc - 0.005, wacc, wacc + 0.005, wacc + 0.01]
+        tgr_values = [terminal_growth - 0.005, terminal_growth, terminal_growth + 0.005]
+
+        sensitivity_matrix = []
+        for w in wacc_values:
+            row = []
+            for tg in tgr_values:
+                if w <= tg:
+                    row.append(None)
+                    continue
+
+                # Neu berechnen mit anderem WACC/TGR
+                pv_sum = 0
+                for i, p in enumerate(projections):
+                    df = 1 / ((1 + w) ** (i + 1))
+                    pv_sum += p['fcf'] * df
+
+                tv = final_fcf * (1 + tg) / (w - tg)
+                tv_pv = tv / ((1 + w) ** 10)
+                ev = pv_sum + tv_pv
+                eq = ev - net_debt
+                fv = eq / shares_outstanding
+
+                row.append(round(fv, 2))
+
+            sensitivity_matrix.append({
+                "wacc": round(w * 100, 1),
+                "values": row
+            })
+
+        result = {
+            "projections": projections,
+            "terminal_value": terminal_value,
+            "terminal_pv": terminal_pv,
+            "sum_pv_fcf": sum_pv_fcf,
+            "enterprise_value": enterprise_value,
+            "net_debt": net_debt,
+            "equity_value": equity_value,
+            "shares_outstanding": shares_outstanding,
+            "fair_value": fair_value,
+            "current_price": current_price,
+            "upside": round(upside, 1) if upside else None,
+            "sensitivity": {
+                "terminal_growth_values": [round(tg * 100, 1) for tg in tgr_values],
+                "matrix": sensitivity_matrix
+            }
+        }
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route("/api/stock/<isin>/dcf-save", methods=["POST"])
+@login_required
+def save_dcf_scenario(isin):
+    """
+    API: DCF-Szenario speichern.
+
+    Speichert oder aktualisiert ein Szenario für den aktuellen User.
+    """
+    user_id = current_user.id
+    data = request.json
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        scenario_id = data.get('scenario_id')
+        scenario_name = data.get('scenario_name', 'Standard')
+
+        if scenario_id:
+            # Existierendes Szenario aktualisieren
+            cur.execute("""
+                UPDATE analytics.user_dcf_scenarios
+                SET scenario_name = %s,
+                    revenue_growth_y1 = %s, revenue_growth_y2 = %s,
+                    revenue_growth_y3 = %s, revenue_growth_y4 = %s,
+                    revenue_growth_y5 = %s, revenue_growth_y6 = %s,
+                    revenue_growth_y7 = %s, revenue_growth_y8 = %s,
+                    revenue_growth_y9 = %s, revenue_growth_y10 = %s,
+                    ebit_margin = %s, tax_rate = %s,
+                    capex_percent = %s, wc_change_percent = %s,
+                    depreciation_percent = %s,
+                    terminal_growth = %s, wacc = %s,
+                    fair_value_per_share = %s,
+                    updated_at = NOW()
+                WHERE id = %s AND user_id = %s AND isin = %s
+            """, (
+                scenario_name,
+                data.get('revenue_growth_y1'), data.get('revenue_growth_y2'),
+                data.get('revenue_growth_y3'), data.get('revenue_growth_y4'),
+                data.get('revenue_growth_y5'), data.get('revenue_growth_y6'),
+                data.get('revenue_growth_y7'), data.get('revenue_growth_y8'),
+                data.get('revenue_growth_y9'), data.get('revenue_growth_y10'),
+                data.get('ebit_margin'), data.get('tax_rate'),
+                data.get('capex_percent'), data.get('wc_change_percent'),
+                data.get('depreciation_percent'),
+                data.get('terminal_growth'), data.get('wacc'),
+                data.get('fair_value_per_share'),
+                scenario_id, user_id, isin
+            ))
+
+            if cur.rowcount == 0:
+                return jsonify({"error": "Szenario nicht gefunden"}), 404
+
+        else:
+            # Neues Szenario erstellen
+            cur.execute("""
+                INSERT INTO analytics.user_dcf_scenarios
+                (user_id, isin, scenario_name,
+                 revenue_growth_y1, revenue_growth_y2, revenue_growth_y3,
+                 revenue_growth_y4, revenue_growth_y5, revenue_growth_y6,
+                 revenue_growth_y7, revenue_growth_y8, revenue_growth_y9,
+                 revenue_growth_y10,
+                 ebit_margin, tax_rate, capex_percent, wc_change_percent,
+                 depreciation_percent, terminal_growth, wacc, fair_value_per_share)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                user_id, isin, scenario_name,
+                data.get('revenue_growth_y1'), data.get('revenue_growth_y2'),
+                data.get('revenue_growth_y3'), data.get('revenue_growth_y4'),
+                data.get('revenue_growth_y5'), data.get('revenue_growth_y6'),
+                data.get('revenue_growth_y7'), data.get('revenue_growth_y8'),
+                data.get('revenue_growth_y9'), data.get('revenue_growth_y10'),
+                data.get('ebit_margin'), data.get('tax_rate'),
+                data.get('capex_percent'), data.get('wc_change_percent'),
+                data.get('depreciation_percent'),
+                data.get('terminal_growth'), data.get('wacc'),
+                data.get('fair_value_per_share')
+            ))
+
+            scenario_id = cur.lastrowid
+
+        conn.commit()
+
+        return jsonify({
+            "success": True,
+            "scenario_id": scenario_id
+        })
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route("/api/stock/<isin>/dcf-scenario/<int:scenario_id>", methods=["DELETE"])
+@login_required
+def delete_dcf_scenario(isin, scenario_id):
+    """API: DCF-Szenario löschen."""
+    user_id = current_user.id
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            DELETE FROM analytics.user_dcf_scenarios
+            WHERE id = %s AND user_id = %s AND isin = %s
+        """, (scenario_id, user_id, isin))
+
+        if cur.rowcount == 0:
+            return jsonify({"error": "Szenario nicht gefunden"}), 404
+
+        conn.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
 
 
 # =============================================================================

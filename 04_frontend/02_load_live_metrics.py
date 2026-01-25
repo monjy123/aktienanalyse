@@ -9,6 +9,7 @@ Quellen:
 - raw_data.yf_prices: Aktuellster Schlusskurs
 - fmp_filtered_numbers: SharesOutstanding, Net Debt, Minority Interest für EV-Berechnung
 - yfinance API: TTM PE, Forward PE, Payout Ratio, Profit/Operating Margins
+- earnings_calendar (finanzen.net): Nächste Earnings-Termine (primär), yfinance als Fallback
 
 Update-Frequenz: Täglich (Kurse ändern sich)
 
@@ -84,12 +85,29 @@ def get_yf_metrics(ticker_yf):
                 cleaned = clean_value(val)
                 return cleaned * 100 if cleaned is not None else None
 
+            # Nächstes Earnings Date aus get_earnings_dates() extrahieren
+            # Diese Methode liefert eine Liste aller bekannten Earnings-Dates
+            # Wir wählen das nächste zukünftige Datum aus
+            earnings_date = None
+            try:
+                from datetime import datetime
+                ed = stock.get_earnings_dates(limit=8)  # Hole die nächsten 8
+                if ed is not None and not ed.empty:
+                    today = datetime.now().astimezone()
+                    for dt in ed.index:
+                        if dt > today:
+                            earnings_date = dt.strftime('%Y-%m-%d')
+                            break  # Erstes zukünftiges Datum gefunden
+            except Exception:
+                pass  # Earnings dates nicht verfügbar
+
             result = {
                 "ttm_pe": clean_value(info.get("trailingPE")),
                 "forward_pe": clean_value(info.get("forwardPE")),
                 "payout_ratio": to_percent(info.get("payoutRatio")),
                 "profit_margin": to_percent(info.get("profitMargins")),
                 "operating_margin": to_percent(info.get("operatingMargins")),
+                "next_earnings_date": earnings_date,
             }
 
             # Nur zurückgeben wenn mindestens ein Wert vorhanden ist
@@ -309,7 +327,21 @@ def main():
         print(f"     - {quarterly_count} Quartalsberichterstatter (4 Quartale)")
         print(f"     - {semiannual_count} Halbjahresberichterstatter (2 Halbjahre)")
 
-        # Schritt 4c: yfinance Metriken laden (parallel)
+        # Schritt 4c: Nächste Earnings-Termine aus finanzen.net (earnings_calendar)
+        print("\nLade nächste Earnings-Termine aus earnings_calendar (finanzen.net)...")
+        cur.execute("""
+            SELECT
+                isin,
+                MIN(release_date) as next_earnings_date
+            FROM analytics.earnings_calendar
+            WHERE release_date >= CURDATE()
+              AND event_type = 'earnings'
+            GROUP BY isin
+        """)
+        earnings_dates = {row["isin"]: row["next_earnings_date"] for row in cur.fetchall()}
+        print(f"  -> {len(earnings_dates)} Ticker mit nächstem Earnings-Termin")
+
+        # Schritt 4d: yfinance Metriken laden (parallel)
         print(f"\nLade yfinance Metriken (max {MAX_WORKERS} parallel)...")
 
         # Ticker-Mapping erstellen (ISIN -> yf_ticker)
@@ -375,6 +407,7 @@ def main():
             profit_margin_avg_3y, profit_margin_avg_5y, profit_margin_avg_10y, profit_margin_avg_5y_2019,
             operating_margin_avg_3y, operating_margin_avg_5y, operating_margin_avg_10y, operating_margin_avg_5y_2019,
             yf_ttm_pe, yf_forward_pe, yf_payout_ratio, yf_profit_margin, yf_operating_margin,
+            next_earnings_date,
             yf_ttm_pe_vs_avg_5y, yf_ttm_pe_vs_avg_10y, yf_ttm_pe_vs_avg_15y, yf_ttm_pe_vs_avg_20y, yf_ttm_pe_vs_avg_10y_2019,
             yf_fwd_pe_vs_avg_5y, yf_fwd_pe_vs_avg_10y, yf_fwd_pe_vs_avg_15y, yf_fwd_pe_vs_avg_20y, yf_fwd_pe_vs_avg_10y_2019,
             ev_ebit_vs_avg_5y, ev_ebit_vs_avg_10y, ev_ebit_vs_avg_15y, ev_ebit_vs_avg_20y, ev_ebit_vs_avg_10y_2019
@@ -394,6 +427,7 @@ def main():
             %s, %s, %s, %s,
             %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
+            %s,
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s
@@ -453,6 +487,7 @@ def main():
             yf_payout_ratio = VALUES(yf_payout_ratio),
             yf_profit_margin = VALUES(yf_profit_margin),
             yf_operating_margin = VALUES(yf_operating_margin),
+            next_earnings_date = VALUES(next_earnings_date),
             yf_ttm_pe_vs_avg_5y = VALUES(yf_ttm_pe_vs_avg_5y),
             yf_ttm_pe_vs_avg_10y = VALUES(yf_ttm_pe_vs_avg_10y),
             yf_ttm_pe_vs_avg_15y = VALUES(yf_ttm_pe_vs_avg_15y),
@@ -531,6 +566,11 @@ def main():
             yf_payout_ratio = yf_data.get("payout_ratio")
             yf_profit_margin = yf_data.get("profit_margin")
             yf_operating_margin = yf_data.get("operating_margin")
+
+            # Nächstes Earnings-Datum: Primär aus finanzen.net, Fallback yfinance
+            next_earnings_date = earnings_dates.get(isin)
+            if next_earnings_date is None:
+                next_earnings_date = yf_data.get("next_earnings_date")
 
             # Prozentuale Abweichungen berechnen
             # YF TTM PE vs. historische Durchschnitte
@@ -611,6 +651,7 @@ def main():
                     yf_payout_ratio,
                     yf_profit_margin,
                     yf_operating_margin,
+                    next_earnings_date,
                     # YF TTM PE vs. Durchschnitte
                     yf_ttm_pe_vs_avg_5y,
                     yf_ttm_pe_vs_avg_10y,
@@ -669,6 +710,9 @@ def main():
         cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE yf_profit_margin IS NOT NULL")
         with_yf_profit_margin = cur.fetchone()["cnt"]
 
+        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE next_earnings_date IS NOT NULL")
+        with_next_earnings = cur.fetchone()["cnt"]
+
         cur.execute("SELECT MAX(price_date) as max_date FROM analytics.live_metrics")
         latest_price_date = cur.fetchone()["max_date"]
 
@@ -690,6 +734,9 @@ def main():
         print(f"Mit yf TTM PE:           {with_yf_ttm_pe:,} ({with_yf_ttm_pe*100/total:.1f}%)" if total > 0 else "")
         print(f"Mit yf Forward PE:       {with_yf_forward_pe:,} ({with_yf_forward_pe*100/total:.1f}%)" if total > 0 else "")
         print(f"Mit yf Profit Margin:    {with_yf_profit_margin:,} ({with_yf_profit_margin*100/total:.1f}%)" if total > 0 else "")
+        print(f"\nfinanzen.net Daten:")
+        print(f"Mit nächstem Earnings:   {with_next_earnings:,} ({with_next_earnings*100/total:.1f}%)" if total > 0 else "")
+        print(f"  (Quelle: earnings_calendar, Fallback: yfinance)")
         print(f"\nAktuellstes Kursdatum:   {latest_price_date}")
 
         print("\nNach Index:")

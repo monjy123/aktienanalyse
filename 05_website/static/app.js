@@ -83,6 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         const numA = parseFloat(valA);
                         const numB = parseFloat(valB);
                         comparison = numA - numB;
+                    } else if (type === 'date') {
+                        // Datumsvergleich (Format: YYYY-MM-DD)
+                        // ISO-Format sortiert auch alphabetisch korrekt
+                        comparison = valA.localeCompare(valB);
                     } else {
                         comparison = valA.localeCompare(valB, 'de');
                     }
@@ -983,7 +987,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         for (const col of data.columns) {
             const numClass = col.format_type !== 'text' ? 'num' : '';
-            const dataType = col.format_type === 'text' ? 'text' : 'number';
+            // Korrekter data-type für Sortierung
+            let dataType = 'text';
+            if (col.format_type === 'date') {
+                dataType = 'date';
+            } else if (col.format_type !== 'text') {
+                dataType = 'number';
+            }
             html += `<th class="sortable ${numClass}" data-column="${col.column_key}" data-type="${dataType}">${col.display_name}</th>`;
         }
         html += '<th>Notizen</th></tr></thead><tbody>';
@@ -1015,6 +1025,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         displayValue = parseFloat(value).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     } else if (col.format_type === 'number') {
                         displayValue = parseFloat(value).toLocaleString('de-DE', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                    } else if (col.format_type === 'date') {
+                        // Datum im deutschen Format anzeigen (DD.MM.YYYY)
+                        const date = new Date(value);
+                        if (!isNaN(date)) {
+                            displayValue = date.toLocaleDateString('de-DE');
+                        } else {
+                            displayValue = value;
+                        }
                     } else {
                         displayValue = value;
                     }
@@ -1127,6 +1145,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderGrowthDetail(currentDetailData);
             } else if (tabType === 'margins') {
                 renderMarginsDetail(currentDetailData);
+            } else if (tabType === 'dcf') {
+                loadDcfData(currentDetailData.company.isin);
             } else {
                 renderStockDetail(currentDetailData);
             }
@@ -1170,7 +1190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.stock-table tbody td[data-column]').forEach(cell => {
             const columnKey = cell.dataset.column;
 
-            // company_name überspringen (wird separat behandelt)
+            // company_name wird von initializeCompanyNameClicks() behandelt (öffnet Beschreibungs-Modal)
             if (columnKey === 'company_name') {
                 return;
             }
@@ -1263,6 +1283,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderGrowthDetail(data);
             } else if (type === 'margins') {
                 renderMarginsDetail(data);
+            } else if (type === 'dcf') {
+                loadDcfData(isin);
             } else {
                 renderStockDetail(data);
             }
@@ -2975,5 +2997,620 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial aufrufen
     initializeCompanyNameClicks();
+
+    // =========================================================================
+    // DCF (Discounted Cash Flow) Modal
+    // =========================================================================
+    let dcfData = null;
+    let dcfChart = null;
+    let currentDcfResult = null;
+    let currentScenarioId = null;
+
+    async function loadDcfData(isin) {
+        detailBody.innerHTML = '<div class="detail-loading">Lade DCF-Daten...</div>';
+
+        try {
+            const response = await fetch(`/api/stock/${isin}/dcf-data`);
+            if (!response.ok) throw new Error('Fehler beim Laden');
+
+            dcfData = await response.json();
+            currentScenarioId = null;
+            currentDcfResult = null;
+            renderDcfDetail(dcfData);
+
+        } catch (error) {
+            console.error('Fehler:', error);
+            detailBody.innerHTML = '<div class="detail-loading">Fehler beim Laden der DCF-Daten.</div>';
+        }
+    }
+
+    function renderDcfDetail(data) {
+        // Header aktualisieren
+        detailCompanyName.textContent = data.company.name || '-';
+        detailMeta.textContent = `${data.company.ticker} | DCF-Bewertung`;
+
+        const formatBillions = (val) => {
+            if (val === null || val === undefined) return '-';
+            return (val / 1e9).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Mrd';
+        };
+
+        const formatNumber = (val, decimals = 1) => {
+            if (val === null || val === undefined) return '-';
+            return val.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        };
+
+        const formatPercent = (val) => {
+            if (val === null || val === undefined) return '-';
+            return val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+        };
+
+        // Defaults oder geladenes Szenario verwenden
+        const defaults = data.defaults;
+
+        // Szenarien-Dropdown
+        let scenarioOptions = '<option value="">Neues Szenario</option>';
+        if (data.scenarios && data.scenarios.length > 0) {
+            data.scenarios.forEach(s => {
+                scenarioOptions += `<option value="${s.id}">${s.scenario_name} (${s.updated_at})</option>`;
+            });
+        }
+
+        // Estimates vorbereiten
+        const estimates = data.estimates || [];
+
+        // HTML aufbauen
+        let html = `
+            <!-- Historische Daten + Estimates -->
+            <div class="detail-section">
+                <div class="detail-section-title">Historische Daten & Analystenschätzungen</div>
+                <div class="dcf-data-table-container">
+                    <table class="income-table dcf-full-width-table">
+                        <thead>
+                            <tr>
+                                <th>Jahr</th>
+                                ${data.historical.map(h => `<th class="dcf-historical-col">'${String(h.year).slice(-2)}</th>`).join('')}
+                                ${estimates.map(e => `<th class="dcf-estimate-col">'${String(e.year).slice(-2)}e</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Revenue</td>
+                                ${data.historical.map(h => `<td class="dcf-historical-col">${formatBillions(h.revenue)}</td>`).join('')}
+                                ${estimates.map(e => `<td class="dcf-estimate-col">${formatBillions(e.revenue)}</td>`).join('')}
+                            </tr>
+                            <tr>
+                                <td>EBIT</td>
+                                ${data.historical.map(h => `<td class="dcf-historical-col">${formatBillions(h.ebit)}</td>`).join('')}
+                                ${estimates.map(e => `<td class="dcf-estimate-col">${formatBillions(e.ebit)}</td>`).join('')}
+                            </tr>
+                            <tr>
+                                <td>FCF</td>
+                                ${data.historical.map(h => `<td class="dcf-historical-col">${formatBillions(h.fcf)}</td>`).join('')}
+                                ${estimates.map(e => `<td class="dcf-estimate-col">${formatBillions(e.fcf)}</td>`).join('')}
+                            </tr>
+                            <tr>
+                                <td>EBIT-Marge</td>
+                                ${data.historical.map(h => `<td class="dcf-historical-col">${formatPercent(h.ebit_margin)}</td>`).join('')}
+                                ${estimates.map(e => `<td class="dcf-estimate-col">${formatPercent(e.ebit_margin)}</td>`).join('')}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="dcf-cagr-row">
+                    <div class="dcf-cagr-item">
+                        <span class="dcf-cagr-label">CAGR 3J</span>
+                        <span class="dcf-cagr-value">${formatPercent(data.cagr.cagr_3y)}</span>
+                    </div>
+                    <div class="dcf-cagr-item">
+                        <span class="dcf-cagr-label">CAGR 5J</span>
+                        <span class="dcf-cagr-value">${formatPercent(data.cagr.cagr_5y)}</span>
+                    </div>
+                    <div class="dcf-cagr-item">
+                        <span class="dcf-cagr-label">CAGR 10J</span>
+                        <span class="dcf-cagr-value">${formatPercent(data.cagr.cagr_10y)}</span>
+                    </div>
+                    <div class="dcf-legend">
+                        <span class="dcf-legend-historical">Historisch</span>
+                        <span class="dcf-legend-estimate">Schätzung (finanzen.net)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DCF Annahmen -->
+            <div class="detail-section">
+                <div class="detail-section-title dcf-assumptions-header">
+                    DCF Annahmen
+                    <select id="dcf-scenario-select" class="dcf-scenario-select">
+                        ${scenarioOptions}
+                    </select>
+                </div>
+                <div class="dcf-assumptions-grid">
+                    <div class="dcf-input-group">
+                        <label>Umsatzwachstum pro Jahr (%)</label>
+                        <div class="dcf-growth-inputs">
+                            <input type="number" id="dcf-growth-y1" step="0.1" value="${defaults.revenue_growth_y1}" placeholder="J1">
+                            <input type="number" id="dcf-growth-y2" step="0.1" value="${defaults.revenue_growth_y2}" placeholder="J2">
+                            <input type="number" id="dcf-growth-y3" step="0.1" value="${defaults.revenue_growth_y3}" placeholder="J3">
+                            <input type="number" id="dcf-growth-y4" step="0.1" value="${defaults.revenue_growth_y4}" placeholder="J4">
+                            <input type="number" id="dcf-growth-y5" step="0.1" value="${defaults.revenue_growth_y5}" placeholder="J5">
+                            <input type="number" id="dcf-growth-y6" step="0.1" value="${defaults.revenue_growth_y6}" placeholder="J6">
+                            <input type="number" id="dcf-growth-y7" step="0.1" value="${defaults.revenue_growth_y7}" placeholder="J7">
+                            <input type="number" id="dcf-growth-y8" step="0.1" value="${defaults.revenue_growth_y8}" placeholder="J8">
+                            <input type="number" id="dcf-growth-y9" step="0.1" value="${defaults.revenue_growth_y9}" placeholder="J9">
+                            <input type="number" id="dcf-growth-y10" step="0.1" value="${defaults.revenue_growth_y10}" placeholder="J10">
+                        </div>
+                    </div>
+                    <div class="dcf-params-grid">
+                        <div class="dcf-input-item">
+                            <label>EBIT-Marge (%)</label>
+                            <input type="number" id="dcf-ebit-margin" step="0.1" value="${defaults.ebit_margin}">
+                        </div>
+                        <div class="dcf-input-item">
+                            <label>Steuersatz (%)</label>
+                            <input type="number" id="dcf-tax-rate" step="0.1" value="${defaults.tax_rate}">
+                        </div>
+                        <div class="dcf-input-item">
+                            <label>CapEx (%)</label>
+                            <input type="number" id="dcf-capex" step="0.1" value="${defaults.capex_percent}">
+                        </div>
+                        <div class="dcf-input-item">
+                            <label>D&A (%)</label>
+                            <input type="number" id="dcf-depreciation" step="0.1" value="${defaults.depreciation_percent}">
+                        </div>
+                        <div class="dcf-input-item">
+                            <label>WC-Änderung (%)</label>
+                            <input type="number" id="dcf-wc-change" step="0.1" value="${defaults.wc_change_percent}">
+                        </div>
+                        <div class="dcf-input-item">
+                            <label>Terminal Growth (%)</label>
+                            <input type="number" id="dcf-terminal-growth" step="0.1" value="${defaults.terminal_growth}">
+                        </div>
+                        <div class="dcf-input-item">
+                            <label>WACC (%)</label>
+                            <input type="number" id="dcf-wacc" step="0.1" value="${defaults.wacc}">
+                        </div>
+                    </div>
+                </div>
+                <div class="dcf-actions">
+                    <button id="dcf-calculate-btn" class="btn btn-primary">Berechnen</button>
+                    <button id="dcf-save-btn" class="btn">Szenario speichern</button>
+                    <input type="text" id="dcf-scenario-name" class="dcf-scenario-name-input" placeholder="Szenario-Name">
+                </div>
+            </div>
+
+            <!-- Ergebnisse (initial leer) -->
+            <div id="dcf-results-container"></div>
+        `;
+
+        detailBody.innerHTML = html;
+
+        // Event-Listener für Berechnen-Button
+        document.getElementById('dcf-calculate-btn').addEventListener('click', () => {
+            calculateDcf(data.company.isin);
+        });
+
+        // Event-Listener für Speichern-Button
+        document.getElementById('dcf-save-btn').addEventListener('click', () => {
+            saveDcfScenario(data.company.isin);
+        });
+
+        // Event-Listener für Szenario-Dropdown
+        document.getElementById('dcf-scenario-select').addEventListener('change', function() {
+            const scenarioId = this.value;
+            if (scenarioId) {
+                loadDcfScenario(parseInt(scenarioId));
+            } else {
+                // Defaults laden
+                document.getElementById('dcf-growth-y1').value = defaults.revenue_growth_y1;
+                document.getElementById('dcf-growth-y2').value = defaults.revenue_growth_y2;
+                document.getElementById('dcf-growth-y3').value = defaults.revenue_growth_y3;
+                document.getElementById('dcf-growth-y4').value = defaults.revenue_growth_y4;
+                document.getElementById('dcf-growth-y5').value = defaults.revenue_growth_y5;
+                document.getElementById('dcf-growth-y6').value = defaults.revenue_growth_y6;
+                document.getElementById('dcf-growth-y7').value = defaults.revenue_growth_y7;
+                document.getElementById('dcf-growth-y8').value = defaults.revenue_growth_y8;
+                document.getElementById('dcf-growth-y9').value = defaults.revenue_growth_y9;
+                document.getElementById('dcf-growth-y10').value = defaults.revenue_growth_y10;
+                document.getElementById('dcf-ebit-margin').value = defaults.ebit_margin;
+                document.getElementById('dcf-tax-rate').value = defaults.tax_rate;
+                document.getElementById('dcf-capex').value = defaults.capex_percent;
+                document.getElementById('dcf-depreciation').value = defaults.depreciation_percent;
+                document.getElementById('dcf-wc-change').value = defaults.wc_change_percent;
+                document.getElementById('dcf-terminal-growth').value = defaults.terminal_growth;
+                document.getElementById('dcf-wacc').value = defaults.wacc;
+                document.getElementById('dcf-scenario-name').value = '';
+                currentScenarioId = null;
+                document.getElementById('dcf-results-container').innerHTML = '';
+            }
+        });
+
+        // FCF Chart rendern
+        if (typeof Chart !== 'undefined' && data.historical.length > 0) {
+            setTimeout(() => renderDcfHistoricalChart(data.historical), 100);
+        }
+    }
+
+    function loadDcfScenario(scenarioId) {
+        const scenario = dcfData.scenarios.find(s => s.id === scenarioId);
+        if (!scenario) return;
+
+        document.getElementById('dcf-growth-y1').value = scenario.revenue_growth_y1 || 0;
+        document.getElementById('dcf-growth-y2').value = scenario.revenue_growth_y2 || 0;
+        document.getElementById('dcf-growth-y3').value = scenario.revenue_growth_y3 || 0;
+        document.getElementById('dcf-growth-y4').value = scenario.revenue_growth_y4 || 0;
+        document.getElementById('dcf-growth-y5').value = scenario.revenue_growth_y5 || 0;
+        document.getElementById('dcf-growth-y6').value = scenario.revenue_growth_y6 || 0;
+        document.getElementById('dcf-growth-y7').value = scenario.revenue_growth_y7 || 0;
+        document.getElementById('dcf-growth-y8').value = scenario.revenue_growth_y8 || 0;
+        document.getElementById('dcf-growth-y9').value = scenario.revenue_growth_y9 || 0;
+        document.getElementById('dcf-growth-y10').value = scenario.revenue_growth_y10 || 0;
+        document.getElementById('dcf-ebit-margin').value = scenario.ebit_margin || 15;
+        document.getElementById('dcf-tax-rate').value = scenario.tax_rate || 25;
+        document.getElementById('dcf-capex').value = scenario.capex_percent || 3;
+        document.getElementById('dcf-depreciation').value = scenario.depreciation_percent || 3;
+        document.getElementById('dcf-wc-change').value = scenario.wc_change_percent || 0;
+        document.getElementById('dcf-terminal-growth').value = scenario.terminal_growth || 2;
+        document.getElementById('dcf-wacc').value = scenario.wacc || 9;
+        document.getElementById('dcf-scenario-name').value = scenario.scenario_name;
+        currentScenarioId = scenarioId;
+    }
+
+    async function calculateDcf(isin) {
+        const assumptions = {
+            revenue_growth_y1: parseFloat(document.getElementById('dcf-growth-y1').value) || 0,
+            revenue_growth_y2: parseFloat(document.getElementById('dcf-growth-y2').value) || 0,
+            revenue_growth_y3: parseFloat(document.getElementById('dcf-growth-y3').value) || 0,
+            revenue_growth_y4: parseFloat(document.getElementById('dcf-growth-y4').value) || 0,
+            revenue_growth_y5: parseFloat(document.getElementById('dcf-growth-y5').value) || 0,
+            revenue_growth_y6: parseFloat(document.getElementById('dcf-growth-y6').value) || 0,
+            revenue_growth_y7: parseFloat(document.getElementById('dcf-growth-y7').value) || 0,
+            revenue_growth_y8: parseFloat(document.getElementById('dcf-growth-y8').value) || 0,
+            revenue_growth_y9: parseFloat(document.getElementById('dcf-growth-y9').value) || 0,
+            revenue_growth_y10: parseFloat(document.getElementById('dcf-growth-y10').value) || 0,
+            ebit_margin: parseFloat(document.getElementById('dcf-ebit-margin').value) || 15,
+            tax_rate: parseFloat(document.getElementById('dcf-tax-rate').value) || 25,
+            capex_percent: parseFloat(document.getElementById('dcf-capex').value) || 3,
+            depreciation_percent: parseFloat(document.getElementById('dcf-depreciation').value) || 3,
+            wc_change_percent: parseFloat(document.getElementById('dcf-wc-change').value) || 0,
+            terminal_growth: parseFloat(document.getElementById('dcf-terminal-growth').value) || 2,
+            wacc: parseFloat(document.getElementById('dcf-wacc').value) || 9
+        };
+
+        const resultsContainer = document.getElementById('dcf-results-container');
+        resultsContainer.innerHTML = '<div class="detail-loading">Berechne...</div>';
+
+        try {
+            const response = await fetch(`/api/stock/${isin}/dcf-calculate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(assumptions)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Berechnungsfehler');
+            }
+
+            const result = await response.json();
+            currentDcfResult = result;
+            renderDcfResults(result, assumptions);
+
+        } catch (error) {
+            console.error('Fehler:', error);
+            resultsContainer.innerHTML = `<div class="dcf-error">Fehler: ${error.message}</div>`;
+        }
+    }
+
+    function renderDcfResults(result, assumptions) {
+        const formatBillions = (val) => {
+            if (val === null || val === undefined) return '-';
+            return (val / 1e9).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Mrd';
+        };
+
+        const formatCurrency = (val) => {
+            if (val === null || val === undefined) return '-';
+            return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        const formatPercent = (val, showSign = false) => {
+            if (val === null || val === undefined) return '-';
+            const sign = showSign && val >= 0 ? '+' : '';
+            return sign + val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+        };
+
+        // Upside/Downside Klasse
+        const upsideClass = result.upside >= 0 ? 'dcf-upside' : 'dcf-downside';
+
+        // Sensitivitätstabelle
+        const sens = result.sensitivity;
+        let sensitivityHtml = `
+            <table class="dcf-sensitivity-table">
+                <thead>
+                    <tr>
+                        <th>WACC \\ TGR</th>
+                        ${sens.terminal_growth_values.map(tg => `<th>${tg}%</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sens.matrix.map(row => `
+                        <tr>
+                            <td class="dcf-sens-wacc">${row.wacc}%</td>
+                            ${row.values.map(v => `<td>${v !== null ? formatCurrency(v) : '-'}</td>`).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+
+        let html = `
+            <!-- Ergebnis-Box -->
+            <div class="detail-section">
+                <div class="detail-section-title">DCF Ergebnis</div>
+                <div class="dcf-results-grid">
+                    <div class="dcf-valuation-box">
+                        <div class="dcf-valuation-main">
+                            <div class="dcf-fair-value">
+                                <span class="dcf-fv-label">Fair Value</span>
+                                <span class="dcf-fv-value">${formatCurrency(result.fair_value)} ${dcfData.company.currency || 'EUR'}</span>
+                            </div>
+                            <div class="dcf-current-price">
+                                <span class="dcf-cp-label">Aktueller Kurs</span>
+                                <span class="dcf-cp-value">${formatCurrency(result.current_price)} ${dcfData.company.currency || 'EUR'}</span>
+                            </div>
+                            <div class="dcf-upside-box ${upsideClass}">
+                                <span class="dcf-upside-label">Potential</span>
+                                <span class="dcf-upside-value">${formatPercent(result.upside, true)}</span>
+                            </div>
+                        </div>
+                        <div class="dcf-valuation-details">
+                            <div class="dcf-val-item">
+                                <span>Enterprise Value</span>
+                                <span>${formatBillions(result.enterprise_value)}</span>
+                            </div>
+                            <div class="dcf-val-item">
+                                <span>- Net Debt</span>
+                                <span>${formatBillions(result.net_debt)}</span>
+                            </div>
+                            <div class="dcf-val-item">
+                                <span>= Equity Value</span>
+                                <span>${formatBillions(result.equity_value)}</span>
+                            </div>
+                            <div class="dcf-val-item">
+                                <span>/ Aktien</span>
+                                <span>${(result.shares_outstanding / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1 })} Mio.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dcf-sensitivity-box">
+                        <div class="dcf-sens-title">Sensitivitätsanalyse</div>
+                        ${sensitivityHtml}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prognose-Tabelle -->
+            <div class="detail-section">
+                <div class="detail-section-title">10-Jahres-Prognose (${dcfData.company.currency || 'EUR'})</div>
+                <div class="income-table-container">
+                    <table class="income-table dcf-projection-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                ${result.projections.map(p => `<th>Jahr ${p.year}</th>`).join('')}
+                                <th>Terminal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Revenue</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.revenue)}</td>`).join('')}
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>EBIT</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.ebit)}</td>`).join('')}
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>NOPAT</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.nopat)}</td>`).join('')}
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>+ D&A</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.depreciation)}</td>`).join('')}
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>- CapEx</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.capex)}</td>`).join('')}
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>- WC-Chg</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.wc_change)}</td>`).join('')}
+                                <td>-</td>
+                            </tr>
+                            <tr class="dcf-fcf-row">
+                                <td>= FCF</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.fcf)}</td>`).join('')}
+                                <td>${formatBillions(result.terminal_value)}</td>
+                            </tr>
+                            <tr>
+                                <td>Diskontfaktor</td>
+                                ${result.projections.map(p => `<td>${p.discount_factor.toFixed(4)}</td>`).join('')}
+                                <td>${(1 / Math.pow(1 + assumptions.wacc / 100, 5)).toFixed(4)}</td>
+                            </tr>
+                            <tr class="dcf-pv-row">
+                                <td>= Barwert</td>
+                                ${result.projections.map(p => `<td>${formatBillions(p.pv_fcf)}</td>`).join('')}
+                                <td>${formatBillions(result.terminal_pv)}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>Summe Barwerte</td>
+                                <td colspan="5">${formatBillions(result.sum_pv_fcf)}</td>
+                                <td>${formatBillions(result.terminal_pv)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FCF Chart -->
+            <div class="detail-section">
+                <div class="detail-section-title">Free Cash Flow (historisch + projiziert)</div>
+                <div class="chart-container dcf-chart-container">
+                    <div class="chart-wrapper dcf-chart-wrapper">
+                        <canvas id="dcf-fcf-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('dcf-results-container').innerHTML = html;
+
+        // Chart rendern
+        if (typeof Chart !== 'undefined') {
+            renderDcfFcfChart(dcfData.historical, result.projections);
+        }
+    }
+
+    function renderDcfHistoricalChart(historical) {
+        // Bereits im Results-Container gerendert
+    }
+
+    function renderDcfFcfChart(historical, projections) {
+        const ctx = document.getElementById('dcf-fcf-chart');
+        if (!ctx) return;
+
+        if (dcfChart) {
+            dcfChart.destroy();
+        }
+
+        // Historische FCF
+        const histLabels = historical.map(h => h.year);
+        const histData = historical.map(h => h.fcf ? h.fcf / 1e9 : 0);
+
+        // Projizierte FCF
+        const projLabels = projections.map(p => `+${p.year}`);
+        const projData = projections.map(p => p.fcf / 1e9);
+
+        const labels = [...histLabels, ...projLabels];
+        const fcfData = [...histData, ...projData];
+
+        // Farben: historisch vs. projiziert
+        const colors = fcfData.map((val, idx) => {
+            if (idx < histData.length) {
+                return val >= 0 ? '#2d5aa3' : '#dc3545';
+            }
+            return val >= 0 ? 'rgba(45, 90, 163, 0.5)' : 'rgba(220, 53, 69, 0.5)';
+        });
+
+        const borderColors = fcfData.map((val, idx) => {
+            if (idx < histData.length) {
+                return val >= 0 ? '#2d5aa3' : '#dc3545';
+            }
+            return val >= 0 ? '#2d5aa3' : '#dc3545';
+        });
+
+        dcfChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'FCF (Mrd)',
+                    data: fcfData,
+                    backgroundColor: colors,
+                    borderColor: borderColors,
+                    borderWidth: 1,
+                    borderRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                xMin: histData.length - 0.5,
+                                xMax: histData.length - 0.5,
+                                borderColor: '#999',
+                                borderWidth: 2,
+                                borderDash: [5, 5]
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { font: { size: 10 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { font: { size: 10 } },
+                        grid: { color: '#eee' }
+                    }
+                }
+            }
+        });
+    }
+
+    async function saveDcfScenario(isin) {
+        const scenarioName = document.getElementById('dcf-scenario-name').value || 'Standard';
+
+        const data = {
+            scenario_id: currentScenarioId,
+            scenario_name: scenarioName,
+            revenue_growth_y1: parseFloat(document.getElementById('dcf-growth-y1').value) || 0,
+            revenue_growth_y2: parseFloat(document.getElementById('dcf-growth-y2').value) || 0,
+            revenue_growth_y3: parseFloat(document.getElementById('dcf-growth-y3').value) || 0,
+            revenue_growth_y4: parseFloat(document.getElementById('dcf-growth-y4').value) || 0,
+            revenue_growth_y5: parseFloat(document.getElementById('dcf-growth-y5').value) || 0,
+            revenue_growth_y6: parseFloat(document.getElementById('dcf-growth-y6').value) || 0,
+            revenue_growth_y7: parseFloat(document.getElementById('dcf-growth-y7').value) || 0,
+            revenue_growth_y8: parseFloat(document.getElementById('dcf-growth-y8').value) || 0,
+            revenue_growth_y9: parseFloat(document.getElementById('dcf-growth-y9').value) || 0,
+            revenue_growth_y10: parseFloat(document.getElementById('dcf-growth-y10').value) || 0,
+            ebit_margin: parseFloat(document.getElementById('dcf-ebit-margin').value) || 15,
+            tax_rate: parseFloat(document.getElementById('dcf-tax-rate').value) || 25,
+            capex_percent: parseFloat(document.getElementById('dcf-capex').value) || 3,
+            wc_change_percent: parseFloat(document.getElementById('dcf-wc-change').value) || 0,
+            depreciation_percent: parseFloat(document.getElementById('dcf-depreciation').value) || 3,
+            terminal_growth: parseFloat(document.getElementById('dcf-terminal-growth').value) || 2,
+            wacc: parseFloat(document.getElementById('dcf-wacc').value) || 9,
+            fair_value_per_share: currentDcfResult ? currentDcfResult.fair_value : null
+        };
+
+        try {
+            const response = await fetch(`/api/stock/${isin}/dcf-save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Speicherfehler');
+            }
+
+            const result = await response.json();
+            currentScenarioId = result.scenario_id;
+
+            // Erfolgsmeldung
+            alert('Szenario gespeichert!');
+
+            // Daten neu laden um Dropdown zu aktualisieren
+            loadDcfData(isin);
+
+        } catch (error) {
+            console.error('Fehler:', error);
+            alert('Fehler beim Speichern: ' + error.message);
+        }
+    }
 
 });

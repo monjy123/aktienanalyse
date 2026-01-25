@@ -115,6 +115,7 @@ CREATE TABLE IF NOT EXISTS analytics.live_metrics (
     yf_payout_ratio DOUBLE COMMENT 'Payout Ratio von yfinance API in % (35.0 = 35%)',
     yf_profit_margin DOUBLE COMMENT 'Profit Margin von yfinance API in % (35.0 = 35%)',
     yf_operating_margin DOUBLE COMMENT 'Operating Margin von yfinance API in % (35.0 = 35%)',
+    next_earnings_date DATE COMMENT 'Nächstes Earnings-Datum von yfinance API',
 
     -- Metadata
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

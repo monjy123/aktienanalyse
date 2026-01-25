@@ -861,7 +861,7 @@ h1 {
    Stock Detail Modal
 ============================================================================= */
 .modal-xlarge {
-    max-width: 900px;
+    max-width: 1200px;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
@@ -1822,4 +1822,953 @@ h1 {
 .pe-value-with-tooltip {
     cursor: help;
     border-bottom: 1px dotted #666;
+}
+
+/* =============================================================================
+   DCF (Discounted Cash Flow) Modal Styling
+============================================================================= */
+
+/* DCF Data Table Container */
+.dcf-data-table-container {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+
+.dcf-full-width-table {
+    width: 100%;
+    font-size: 0.85rem;
+}
+
+.dcf-full-width-table th,
+.dcf-full-width-table td {
+    padding: 0.5rem 0.75rem;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.dcf-full-width-table th:first-child,
+.dcf-full-width-table td:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Historische Spalten */
+.dcf-historical-col {
+    background: #fff;
+}
+
+/* Estimate Spalten - visuell abgehoben */
+.dcf-estimate-col {
+    background: #f0f7ff;
+    border-left: 2px solid #4a90d9;
+    font-style: italic;
+    color: #2c5282;
+}
+
+.dcf-full-width-table thead .dcf-estimate-col {
+    background: #d4e5f7;
+    font-weight: 600;
+}
+
+/* DCF CAGR Row */
+.dcf-cagr-row {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-top: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+}
+
+.dcf-cagr-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.dcf-cagr-label {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.dcf-cagr-value {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Legende */
+.dcf-legend {
+    display: flex;
+    gap: 1rem;
+    margin-left: auto;
+    font-size: 0.8rem;
+}
+
+.dcf-legend-historical {
+    color: #333;
+}
+
+.dcf-legend-historical::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 1px solid #ccc;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.dcf-legend-estimate {
+    color: #2c5282;
+    font-style: italic;
+}
+
+.dcf-legend-estimate::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #f0f7ff;
+    border: 1px solid #4a90d9;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* DCF Assumptions Section */
+.dcf-assumptions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dcf-scenario-select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background: white;
+    min-width: 180px;
+}
+
+.dcf-assumptions-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.dcf-input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.dcf-growth-inputs {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 0.4rem;
+}
+
+.dcf-growth-inputs input {
+    width: 100%;
+    padding: 0.4rem 0.2rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    text-align: center;
+    min-width: 50px;
+}
+
+.dcf-params-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+.dcf-input-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.dcf-input-item label {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.dcf-input-item input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* DCF Actions */
+.dcf-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    align-items: center;
+}
+
+.dcf-scenario-name-input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 180px;
+}
+
+/* DCF Results Grid */
+.dcf-results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .dcf-results-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* DCF Valuation Box */
+.dcf-valuation-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.dcf-valuation-main {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.dcf-fair-value,
+.dcf-current-price,
+.dcf-upside-box {
+    text-align: center;
+}
+
+.dcf-fv-label,
+.dcf-cp-label,
+.dcf-upside-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.dcf-fv-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.dcf-cp-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.dcf-upside-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.dcf-upside .dcf-upside-value {
+    color: #28a745;
+}
+
+.dcf-downside .dcf-upside-value {
+    color: #dc3545;
+}
+
+.dcf-upside {
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.dcf-downside {
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.dcf-valuation-details {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.dcf-val-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+}
+
+.dcf-val-item span:first-child {
+    color: #666;
+}
+
+.dcf-val-item span:last-child {
+    font-weight: 500;
+}
+
+/* DCF Sensitivity Box */
+.dcf-sensitivity-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.dcf-sens-title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.dcf-sensitivity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.dcf-sensitivity-table th,
+.dcf-sensitivity-table td {
+    padding: 0.5rem;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.dcf-sensitivity-table th {
+    background: #eee;
+    font-weight: 600;
+}
+
+.dcf-sensitivity-table th:first-child {
+    text-align: left;
+}
+
+.dcf-sens-wacc {
+    background: #eee;
+    font-weight: 600;
+    text-align: left !important;
+}
+
+/* DCF Projection Table */
+.dcf-projection-table {
+    font-size: 0.8rem;
+}
+
+.dcf-projection-table th,
+.dcf-projection-table td {
+    padding: 0.4rem 0.6rem;
+}
+
+.dcf-fcf-row {
+    background: #e7f3ff;
+    font-weight: 600;
+}
+
+.dcf-pv-row {
+    background: #fff3cd;
+}
+
+.dcf-projection-table tfoot td {
+    font-weight: 600;
+    background: #f8f9fa;
+    border-top: 2px solid #ccc;
+}
+
+/* DCF Chart Container */
+.dcf-chart-container {
+    margin-top: 0.5rem;
+}
+
+.dcf-chart-wrapper {
+    height: 250px;
+}
+
+/* DCF Error Message */
+.dcf-error {
+    color: #dc3545;
+    background: #f8d7da;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* =============================================================================
+   MOBILE STYLES (max-width: 768px)
+   Alles unterhalb gilt NUR für mobile Geräte
+============================================================================= */
+@media (max-width: 768px) {
+
+    /* -------------------------------------------------------------------------
+       Navigation Mobile
+    ------------------------------------------------------------------------- */
+    .navbar {
+        flex-direction: column;
+        padding: 10px 15px;
+        gap: 10px;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .nav-link {
+        padding: 6px 12px;
+        font-size: 0.9em;
+    }
+
+    .nav-user {
+        width: 100%;
+        justify-content: center;
+        margin-left: 0;
+    }
+
+    /* -------------------------------------------------------------------------
+       Container & Page Header Mobile
+    ------------------------------------------------------------------------- */
+    .container {
+        padding: 10px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .page-header h1 {
+        font-size: 1.4em;
+        text-align: center;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    #search-input {
+        flex: 1;
+        width: 100%;
+    }
+
+    .header-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .header-buttons .btn {
+        flex: 1;
+    }
+
+    /* -------------------------------------------------------------------------
+       Tabelle → Card-Layout Mobile
+    ------------------------------------------------------------------------- */
+    .table-container {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .stock-table {
+        display: block;
+    }
+
+    .stock-table thead {
+        display: none;
+    }
+
+    .stock-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .stock-table tbody tr {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px 12px;
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    .stock-table tbody tr:hover {
+        background: white;
+    }
+
+    .stock-table tbody td {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        border: none;
+        text-align: left !important;
+        min-width: 0;
+    }
+
+    .stock-table tbody td::before {
+        content: attr(data-label);
+        font-size: 0.7em;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 2px;
+        font-weight: 500;
+    }
+
+    /* Firmenname als Haupttitel */
+    .stock-table tbody td.name {
+        grid-column: 1 / -1;
+        order: -2;
+        max-width: none;
+        white-space: normal;
+        font-size: 1.1em;
+        font-weight: 600;
+        color: #1a1a2e;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 4px;
+        padding-right: 50px; /* Platz für Favoriten-Dropdown */
+    }
+
+    .stock-table tbody td.name::before {
+        display: none;
+    }
+
+    /* Klickhinweis für Firmennamen */
+    .stock-table tbody td.name.clickable-cell {
+        color: #2d5aa3;
+    }
+
+    .stock-table tbody td.name.clickable-cell::after {
+        content: " →";
+        opacity: 0.5;
+    }
+
+    /* Favoriten-Spalte */
+    .stock-table tbody td[data-column="favorite"] {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        order: -1;
+    }
+
+    .stock-table tbody td[data-column="favorite"]::before {
+        display: none;
+    }
+
+    .favorite-select {
+        padding: 6px 10px;
+        font-size: 1em;
+    }
+
+    /* Notizen-Zelle */
+    .stock-table tbody td.notes-cell {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: flex-end;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+        margin-top: 4px;
+    }
+
+    .stock-table tbody td.notes-cell::before {
+        display: none;
+    }
+
+    .note-btn {
+        padding: 8px 20px;
+        font-size: 1em;
+    }
+
+    /* Numerische Werte rechts ausrichten */
+    .stock-table tbody td.num {
+        text-align: right !important;
+        align-items: flex-end;
+    }
+
+    /* Klickbare Zellen auf Mobile */
+    .stock-table tbody td.clickable-cell:not(.name) {
+        color: #2d5aa3;
+        cursor: pointer;
+    }
+
+    .stock-table tbody td.clickable-cell:not(.name):active {
+        background: #e8f0fe;
+        border-radius: 4px;
+    }
+
+    /* Info Text */
+    .info {
+        text-align: center;
+        padding: 5px 0;
+    }
+
+    /* -------------------------------------------------------------------------
+       Modals → Vollbild Mobile
+    ------------------------------------------------------------------------- */
+    .modal {
+        align-items: flex-end;
+    }
+
+    .modal-content,
+    .modal-large,
+    .modal-xlarge,
+    #note-modal .modal-content,
+    #columns-modal .modal-content,
+    #filter-modal .modal-content,
+    #stock-detail-modal .modal-content,
+    #company-info-modal .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        padding: 15px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .modal-header h3 {
+        font-size: 1.1em;
+    }
+
+    .modal-close {
+        font-size: 2em;
+        padding: 5px 10px;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        max-height: none !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-footer {
+        padding: 15px;
+        flex-shrink: 0;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        border-top: 1px solid #ddd;
+        gap: 10px;
+    }
+
+    .modal-footer .btn {
+        flex: 1;
+        padding: 12px;
+        font-size: 1em;
+        min-height: 44px;
+    }
+
+    /* -------------------------------------------------------------------------
+       Stock Detail Modal Mobile
+    ------------------------------------------------------------------------- */
+    .detail-header-left {
+        gap: 8px;
+    }
+
+    .detail-tabs {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .detail-tab {
+        padding: 8px 12px;
+        font-size: 0.85em;
+        flex: 1;
+        text-align: center;
+        min-width: calc(33% - 6px);
+    }
+
+    .pe-section-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .ttm-calc-box {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .ttm-formula {
+        justify-content: center;
+    }
+
+    .ttm-quarters {
+        border-left: none;
+        border-top: 1px solid #ddd;
+        padding-left: 0;
+        padding-top: 10px;
+    }
+
+    .detail-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-wrapper {
+        height: 150px;
+    }
+
+    .ev-calc-box {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ev-calc-box .ttm-quarters {
+        border-left: none;
+        padding-left: 0;
+    }
+
+    /* Tabellen innerhalb Modals */
+    .income-table-container,
+    .cagr-overview-box {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .income-table,
+    .cagr-table,
+    .pe-comparison-table {
+        font-size: 0.8em;
+        min-width: 500px;
+    }
+
+    /* -------------------------------------------------------------------------
+       Spalten-Konfiguration Modal Mobile
+    ------------------------------------------------------------------------- */
+    .columns-config-split {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .columns-selection {
+        max-height: none;
+    }
+
+    .columns-order {
+        flex: none;
+        width: 100%;
+    }
+
+    .column-item {
+        padding: 12px;
+    }
+
+    .column-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+
+    .order-item {
+        padding: 12px;
+    }
+
+    /* -------------------------------------------------------------------------
+       Filter Modal Mobile
+    ------------------------------------------------------------------------- */
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .numeric-filter-row {
+        flex-wrap: wrap;
+    }
+
+    .numeric-filter-row .filter-column {
+        flex: 1 1 100%;
+    }
+
+    .numeric-filter-row .filter-operator,
+    .numeric-filter-row .filter-value {
+        flex: 1;
+    }
+
+    /* -------------------------------------------------------------------------
+       Favoriten Modal Mobile
+    ------------------------------------------------------------------------- */
+    .favorites-config-split {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .favorites-filter {
+        flex: none;
+        width: 100%;
+    }
+
+    .label-item {
+        padding: 12px;
+    }
+
+    .label-item input[type="text"] {
+        padding: 10px;
+        font-size: 1em;
+    }
+
+    .filter-item {
+        padding: 12px;
+    }
+
+    .filter-item input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* -------------------------------------------------------------------------
+       Vollbild-Chart Modal Mobile
+    ------------------------------------------------------------------------- */
+    .modal-fullscreen {
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+    }
+
+    /* -------------------------------------------------------------------------
+       Buttons & Touch-Targets Mobile
+    ------------------------------------------------------------------------- */
+    .btn {
+        min-height: 44px;
+        padding: 10px 16px;
+    }
+
+    .note-btn,
+    .info-btn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px 12px;
+    }
+
+    /* -------------------------------------------------------------------------
+       DCF Modal Mobile (erweitert)
+    ------------------------------------------------------------------------- */
+    .dcf-cagr-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .dcf-legend {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+
+    .dcf-growth-inputs {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .dcf-valuation-main {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .dcf-actions {
+        flex-wrap: wrap;
+    }
+
+    .dcf-results-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dcf-params-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* -------------------------------------------------------------------------
+       Home Page Mobile
+    ------------------------------------------------------------------------- */
+    .home {
+        padding: 30px 15px;
+    }
+
+    .home h1 {
+        font-size: 1.8em;
+    }
+
+    .home-links {
+        gap: 15px;
+    }
+
+    .home-card {
+        width: 100%;
+        padding: 25px;
+    }
+
+    /* -------------------------------------------------------------------------
+       Auth Pages Mobile
+    ------------------------------------------------------------------------- */
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-box {
+        padding: 1.5rem;
+    }
+
+    .auth-box h1 {
+        font-size: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* -------------------------------------------------------------------------
+       Admin Table Mobile
+    ------------------------------------------------------------------------- */
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+    }
 }

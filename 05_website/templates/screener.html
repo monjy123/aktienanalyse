@@ -26,7 +26,7 @@
             <tr>
                 <th class="sortable" data-column="favorite" data-type="number">Fav</th>
                 {% for col in columns %}
-                <th class="sortable {{ 'num' if col.format_type != 'text' else '' }}" data-column="{{ col.column_key }}" data-type="{{ 'text' if col.format_type == 'text' else 'number' }}">{{ col.display_name | replace('/', '/<wbr>') | safe }}</th>
+                <th class="sortable {{ 'num' if col.format_type != 'text' else '' }}" data-column="{{ col.column_key }}" data-type="{{ 'date' if col.format_type == 'date' else ('text' if col.format_type == 'text' else 'number') }}">{{ col.display_name | replace('/', '/<wbr>') | safe }}</th>
                 {% endfor %}
                 <th>Notizen</th>
             </tr>
@@ -34,7 +34,7 @@
         <tbody>
             {% for stock in stocks %}
             <tr data-isin="{{ stock.isin }}">
-                <td data-column="favorite" data-value="{{ stock.favorite or 0 }}">
+                <td data-column="favorite" data-label="Favorit" data-value="{{ stock.favorite or 0 }}">
                     <select class="favorite-select" data-isin="{{ stock.isin }}">
                         <option value="0" {% if stock.favorite == 0 or not stock.favorite %}selected{% endif %}>-</option>
                         {% for i in range(1, 10) %}
@@ -44,7 +44,7 @@
                 </td>
                 {% for col in columns %}
                 {% set value = stock[col.column_key] %}
-                <td class="{{ 'num' if col.format_type != 'text' else '' }} {{ 'name' if col.column_key == 'company_name' else '' }}" data-column="{{ col.column_key }}" data-value="{{ value if value is not none else '' }}">
+                <td class="{{ 'num' if col.format_type != 'text' else '' }} {{ 'name' if col.column_key == 'company_name' else '' }}" data-column="{{ col.column_key }}" data-label="{{ col.display_name }}" data-value="{{ value if value is not none else '' }}">
                     {% if value is none %}
                         -
                     {% elif col.format_type == 'percent' %}
@@ -55,12 +55,14 @@
                         {{ value|de(2) }}
                     {% elif col.format_type == 'number' %}
                         {{ value|de }}
+                    {% elif col.format_type == 'date' %}
+                        {{ value|de_date }}
                     {% else %}
                         {{ value }}
                     {% endif %}
                 </td>
                 {% endfor %}
-                <td>
+                <td data-label="Notizen" class="notes-cell">
                     <button class="note-btn" data-isin="{{ stock.isin }}" data-notes="{{ stock.notes or '' }}">
                         {% if stock.notes %}📝{% else %}+{% endif %}
                     </button>
@@ -139,6 +141,7 @@
                     <button type="button" class="detail-tab" data-tab="ev_ebit">EV/EBIT</button>
                     <button type="button" class="detail-tab" data-tab="growth">Wachstum</button>
                     <button type="button" class="detail-tab" data-tab="margins">Margen</button>
+                    <button type="button" class="detail-tab" data-tab="dcf">DCF</button>
                 </div>
             </div>
             <button class="modal-close">&times;</button>
