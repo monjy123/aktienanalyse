@@ -486,11 +486,17 @@ def filter_screener():
         search_pattern = f"%{search}%"
         params.extend([search_pattern, search_pattern, search_pattern])
 
-    # Kategorische Filter (company_info)
+    # Kategorische Filter (company_info) - Multi-Select
     for field in ['stock_index', 'sector', 'industry', 'country']:
         if field in filters and filters[field]:
-            where_parts.append(f"ci.{field} = %s")
-            params.append(filters[field])
+            values = filters[field] if isinstance(filters[field], list) else [filters[field]]
+            if len(values) == 1:
+                where_parts.append(f"ci.{field} = %s")
+                params.append(values[0])
+            else:
+                placeholders = ', '.join(['%s'] * len(values))
+                where_parts.append(f"ci.{field} IN ({placeholders})")
+                params.extend(values)
 
     # Numerische Filter (live_metrics)
     numeric_filters = filters.get("numeric", [])
@@ -947,9 +953,9 @@ def get_stock_info(isin):
         if not info:
             return jsonify({"error": "Aktie nicht gefunden"}), 404
 
-        # Marktkapitalisierung aus live_metrics abrufen
+        # Marktkapitalisierung und nächsten Earnings-Termin aus live_metrics abrufen
         cur.execute("""
-            SELECT market_cap
+            SELECT market_cap, next_earnings_date
             FROM analytics.live_metrics
             WHERE isin = %s
         """, (isin,))
@@ -957,8 +963,132 @@ def get_stock_info(isin):
 
         if metrics:
             info['market_cap'] = metrics['market_cap']
+            info['next_earnings_date'] = metrics['next_earnings_date']
 
         return jsonify(info)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+
+@app.route("/api/stock/<isin>/price-history")
+@login_required
+def get_price_history(isin):
+    """
+    API: Historische Kursdaten für Chart.
+
+    Liefert:
+    - Kursdaten der letzten 5 Jahre (oder alle verfügbaren)
+    - date, close, volume
+    """
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # Stammdaten für Header
+        cur.execute("""
+            SELECT isin, ticker, company_name, currency
+            FROM analytics.company_info
+            WHERE isin = %s
+        """, (isin,))
+        company = cur.fetchone()
+
+        if not company:
+            return jsonify({"error": "Aktie nicht gefunden"}), 404
+
+        # Historische Kursdaten aus raw_data.yf_prices (letzte 5 Jahre)
+        cur.execute("""
+            SELECT date, close, volume
+            FROM raw_data.yf_prices
+            WHERE isin = %s
+              AND date >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)
+            ORDER BY date ASC
+        """, (isin,))
+        prices_raw = cur.fetchall()
+
+        # Daten formatieren
+        prices = []
+        for row in prices_raw:
+            prices.append({
+                "date": row['date'].strftime('%Y-%m-%d') if row['date'] else None,
+                "close": row['close'],
+                "volume": row['volume']
+            })
+
+        # Aktueller Kurs und Performance aus live_metrics
+        cur.execute("""
+            SELECT price, price_date
+            FROM analytics.live_metrics
+            WHERE isin = %s
+        """, (isin,))
+        current = cur.fetchone() or {}
+
+        # Performance-Kennzahlen berechnen
+        performance = {}
+        if prices:
+            current_price = current.get('price') or (prices[-1]['close'] if prices else None)
+            if current_price:
+                # 1 Monat (ca. 21 Handelstage)
+                if len(prices) >= 21:
+                    month_price = prices[-21]['close']
+                    if month_price:
+                        performance['1m'] = round((current_price / month_price - 1) * 100, 2)
+
+                # 3 Monate (ca. 63 Handelstage)
+                if len(prices) >= 63:
+                    price_3m = prices[-63]['close']
+                    if price_3m:
+                        performance['3m'] = round((current_price / price_3m - 1) * 100, 2)
+
+                # 6 Monate (ca. 126 Handelstage)
+                if len(prices) >= 126:
+                    price_6m = prices[-126]['close']
+                    if price_6m:
+                        performance['6m'] = round((current_price / price_6m - 1) * 100, 2)
+
+                # 1 Jahr (ca. 252 Handelstage)
+                if len(prices) >= 252:
+                    price_1y = prices[-252]['close']
+                    if price_1y:
+                        performance['1y'] = round((current_price / price_1y - 1) * 100, 2)
+
+                # 3 Jahre (ca. 756 Handelstage)
+                if len(prices) >= 756:
+                    price_3y = prices[-756]['close']
+                    if price_3y:
+                        performance['3y'] = round((current_price / price_3y - 1) * 100, 2)
+
+                # 5 Jahre (ca. 1260 Handelstage)
+                if len(prices) >= 1260:
+                    price_5y = prices[-1260]['close']
+                    if price_5y:
+                        performance['5y'] = round((current_price / price_5y - 1) * 100, 2)
+
+                # YTD
+                year_start = prices[-1]['date'][:4] + '-01-01'
+                ytd_price = next((p['close'] for p in prices if p['date'] >= year_start), None)
+                if ytd_price:
+                    performance['ytd'] = round((current_price / ytd_price - 1) * 100, 2)
+
+        result = {
+            "company": {
+                "isin": company['isin'],
+                "ticker": company['ticker'],
+                "name": company['company_name'],
+                "currency": company['currency']
+            },
+            "current": {
+                "price": current.get('price'),
+                "price_date": current.get('price_date').strftime('%Y-%m-%d') if current.get('price_date') else None
+            },
+            "performance": performance,
+            "prices": prices
+        }
+
+        return jsonify(result)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1687,6 +1817,351 @@ def delete_dcf_scenario(isin, scenario_id):
 
     except Exception as e:
         conn.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+# =============================================================================
+# Earnings Modal API Endpoint
+# =============================================================================
+
+@app.route("/api/stock/<isin>/earnings")
+@login_required
+def get_earnings_data(isin):
+    """
+    API: Earnings-Daten für das Modal.
+
+    Liefert:
+    - Unternehmensdaten (Name, Ticker, Fiskaljahr)
+    - Nächster Earnings-Termin + Letztes Quartal
+    - Historische Earnings (8 Quartale) mit Beat/Miss und Kursreaktion
+    - Zukünftige Schätzungen (FY)
+    """
+    from datetime import datetime, timedelta
+
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # 1. Stammdaten aus company_info
+        cur.execute("""
+            SELECT isin, ticker, company_name, currency, fiscal_year_end
+            FROM analytics.company_info
+            WHERE isin = %s
+        """, (isin,))
+        company = cur.fetchone()
+
+        if not company:
+            return jsonify({"error": "Aktie nicht gefunden"}), 404
+
+        # 2. Alle Quartale aus earnings_calendar holen (mit EPS Estimates)
+        cur.execute("""
+            SELECT period, release_date, eps_estimate
+            FROM analytics.earnings_calendar
+            WHERE isin = %s AND period LIKE 'Q%%'
+            ORDER BY release_date DESC
+            LIMIT 20
+        """, (isin,))
+        calendar_quarters = cur.fetchall()
+
+        # Nächstes Quartal (Zukunft) und letztes Quartal (Vergangenheit) bestimmen
+        today = datetime.now().date()
+        next_quarter = None
+        last_quarter = None
+
+        for q in calendar_quarters:
+            if q['release_date']:
+                if q['release_date'] >= today and next_quarter is None:
+                    next_quarter = q
+                elif q['release_date'] < today and last_quarter is None:
+                    last_quarter = q
+            if next_quarter and last_quarter:
+                break
+
+        # Falls kein nächstes gefunden, nimm das erste aus der Zukunft
+        if not next_quarter:
+            for q in reversed(calendar_quarters):
+                if q['release_date'] and q['release_date'] >= today:
+                    next_quarter = q
+                    break
+
+        # 3. Historische Actuals aus analyst_estimates holen
+        cur.execute("""
+            SELECT period, metric, estimate_value, actual_value, currency, unit
+            FROM analytics.analyst_estimates
+            WHERE isin = %s
+              AND period_type = 'quarter'
+              AND metric IN ('eps', 'revenue')
+            ORDER BY period DESC
+        """, (isin,))
+        estimates_raw = cur.fetchall()
+
+        # Gruppieren nach Quartal
+        quarters_data = {}
+        for row in estimates_raw:
+            period = row['period']
+            if period not in quarters_data:
+                quarters_data[period] = {
+                    'period': period,
+                    'eps_estimate': None,
+                    'eps_actual': None,
+                    'revenue_estimate': None,
+                    'revenue_actual': None,
+                    'currency': row['currency'],
+                    'unit': row['unit']
+                }
+
+            metric = row['metric']
+            if metric == 'eps':
+                quarters_data[period]['eps_estimate'] = float(row['estimate_value']) if row['estimate_value'] else None
+                quarters_data[period]['eps_actual'] = float(row['actual_value']) if row['actual_value'] else None
+            elif metric == 'revenue':
+                quarters_data[period]['revenue_estimate'] = float(row['estimate_value']) if row['estimate_value'] else None
+                quarters_data[period]['revenue_actual'] = float(row['actual_value']) if row['actual_value'] else None
+
+        # 4. Nächstes Quartal aufbereiten
+        next_earnings = None
+        if next_quarter:
+            next_earnings = {
+                "period": next_quarter['period'],
+                "date": next_quarter['release_date'].strftime('%Y-%m-%d') if next_quarter['release_date'] else None,
+                "eps_estimate": float(next_quarter['eps_estimate']) if next_quarter['eps_estimate'] else None
+            }
+
+        # 5. Letztes Quartal mit Actuals aufbereiten
+        last_earnings = None
+        if last_quarter:
+            last_period = last_quarter['period']
+            last_data = quarters_data.get(last_period, {})
+
+            # EPS Surprise berechnen
+            eps_estimate = float(last_quarter['eps_estimate']) if last_quarter['eps_estimate'] else None
+            eps_actual = last_data.get('eps_actual')
+            eps_surprise = None
+            if eps_estimate and eps_actual and eps_estimate != 0:
+                eps_surprise = round(((eps_actual - eps_estimate) / abs(eps_estimate)) * 100, 1)
+
+            # Status bestimmen
+            status = None
+            if eps_surprise is not None:
+                status = 'beat' if eps_surprise > 0 else ('miss' if eps_surprise < 0 else 'inline')
+
+            last_earnings = {
+                "period": last_period,
+                "date": last_quarter['release_date'].strftime('%Y-%m-%d') if last_quarter['release_date'] else None,
+                "eps_estimate": eps_estimate,
+                "eps_actual": eps_actual,
+                "eps_surprise": eps_surprise,
+                "status": status
+            }
+
+        # 6. Release-Daten Mapping erstellen
+        release_dates = {q['period']: q['release_date'] for q in calendar_quarters}
+
+        # 7. Historie aufbauen (letzte 8 Quartale mit Daten)
+        history = []
+        # Sortiere nach release_date aus calendar
+        sorted_periods = sorted(
+            [p for p in release_dates.keys() if release_dates[p] and release_dates[p] < today],
+            key=lambda p: release_dates[p],
+            reverse=True
+        )[:8]
+
+        for period in sorted_periods:
+            release_date = release_dates.get(period)
+
+            # EPS aus earnings_calendar
+            cal_data = next((q for q in calendar_quarters if q['period'] == period), None)
+            eps_estimate = float(cal_data['eps_estimate']) if cal_data and cal_data['eps_estimate'] else None
+
+            # Actuals aus analyst_estimates
+            q_data = quarters_data.get(period, {})
+            eps_actual = q_data.get('eps_actual')
+            rev_estimate = q_data.get('revenue_estimate')
+            rev_actual = q_data.get('revenue_actual')
+            unit = q_data.get('unit', '')
+
+            # Unit-Konvertierung für Revenue
+            if unit == 'millions':
+                if rev_estimate:
+                    rev_estimate = rev_estimate * 1_000_000
+                if rev_actual:
+                    rev_actual = rev_actual * 1_000_000
+
+            # Surprise berechnen
+            eps_surprise_pct = None
+            if eps_estimate and eps_actual and eps_estimate != 0:
+                eps_surprise_pct = round(((eps_actual - eps_estimate) / abs(eps_estimate)) * 100, 2)
+
+            revenue_surprise_pct = None
+            if rev_estimate and rev_actual and rev_estimate != 0:
+                revenue_surprise_pct = round(((rev_actual - rev_estimate) / abs(rev_estimate)) * 100, 2)
+
+            # Kursreaktion berechnen
+            price_reaction = None
+            if release_date:
+                cur.execute("""
+                    SELECT
+                        (SELECT close FROM raw_data.yf_prices
+                         WHERE isin = %s AND date = (
+                             SELECT MAX(date) FROM raw_data.yf_prices
+                             WHERE isin = %s AND date < %s
+                         )) as price_before,
+                        (SELECT close FROM raw_data.yf_prices
+                         WHERE isin = %s AND date = (
+                             SELECT MIN(date) FROM raw_data.yf_prices
+                             WHERE isin = %s AND date >= %s
+                         )) as price_after
+                """, (isin, isin, release_date, isin, isin, release_date))
+                price_row = cur.fetchone()
+
+                if price_row and price_row['price_before'] and price_row['price_after']:
+                    price_reaction = round(((price_row['price_after'] - price_row['price_before']) / price_row['price_before']) * 100, 2)
+
+            # Status
+            status = None
+            if eps_surprise_pct is not None:
+                status = 'beat' if eps_surprise_pct > 0 else ('miss' if eps_surprise_pct < 0 else 'inline')
+
+            history.append({
+                "period": period,
+                "release_date": release_date.strftime('%Y-%m-%d') if release_date else None,
+                "eps_estimate": eps_estimate,
+                "eps_actual": eps_actual,
+                "eps_surprise_pct": eps_surprise_pct,
+                "revenue_estimate": rev_estimate,
+                "revenue_actual": rev_actual,
+                "revenue_surprise_pct": revenue_surprise_pct,
+                "price_reaction": price_reaction,
+                "status": status
+            })
+
+        # 8. Fiskaljahr-Fortschritt berechnen
+        fiscal_year_progress = None
+        current_year = datetime.now().year
+
+        # Quartale des aktuellen Jahres sammeln
+        # Period Format ist z.B. "Q1 2026" oder "Q2 2025"
+        fy_quarters = []
+        for q in calendar_quarters:
+            period = q['period']
+            # Extrahiere Jahr aus dem Period-String
+            year_match = re.search(r'(\d{4})', period)
+            if year_match:
+                q_year = int(year_match.group(1))
+                if q_year == current_year:
+                    release_date = q['release_date']
+                    is_reported = release_date and release_date < today
+                    eps_estimate = float(q['eps_estimate']) if q['eps_estimate'] else None
+
+                    # Versuche Actual zu finden
+                    q_data = quarters_data.get(period, {})
+                    eps_actual = q_data.get('eps_actual')
+
+                    fy_quarters.append({
+                        'period': period,
+                        'quarter': period[:2],  # "Q1", "Q2", etc.
+                        'eps_estimate': eps_estimate,
+                        'eps_actual': eps_actual if is_reported else None,
+                        'is_reported': is_reported
+                    })
+
+        # Nach Quartal sortieren (Q1, Q2, Q3, Q4)
+        fy_quarters.sort(key=lambda x: x['quarter'])
+
+        if fy_quarters:
+            # Berechne Summen
+            total_eps_estimate = sum(q['eps_estimate'] or 0 for q in fy_quarters)
+            total_eps_actual = sum(q['eps_actual'] or 0 for q in fy_quarters if q['is_reported'])
+            quarters_reported = sum(1 for q in fy_quarters if q['is_reported'])
+            total_quarters = len(fy_quarters)
+
+            # Jahresschätzung aus analyst_estimates holen
+            cur.execute("""
+                SELECT estimate_value
+                FROM analytics.analyst_estimates
+                WHERE isin = %s
+                  AND period_type = 'fiscal_year'
+                  AND metric = 'eps'
+                  AND period LIKE %s
+                LIMIT 1
+            """, (isin, f'%{current_year}%'))
+            fy_eps_row = cur.fetchone()
+            full_year_estimate = float(fy_eps_row['estimate_value']) if fy_eps_row and fy_eps_row['estimate_value'] else None
+
+            # Hochrechnung: gemeldete Quartale + geschätzte verbleibende Quartale
+            projection = total_eps_actual
+            for q in fy_quarters:
+                if not q['is_reported'] and q['eps_estimate']:
+                    projection += q['eps_estimate']
+
+            fiscal_year_progress = {
+                'year': f'FY {current_year}',
+                'quarters': fy_quarters,
+                'quarters_reported': quarters_reported,
+                'total_quarters': total_quarters,
+                'progress_pct': round((quarters_reported / total_quarters) * 100) if total_quarters > 0 else 0,
+                'ytd_actual': round(total_eps_actual, 2) if total_eps_actual else 0,
+                'full_year_estimate': round(full_year_estimate, 2) if full_year_estimate else None,
+                'projection': round(projection, 2) if projection else None
+            }
+
+        # 9. Zukünftige Schätzungen (Fiskaljahre)
+        cur.execute("""
+            SELECT period, metric, estimate_value, currency, unit
+            FROM analytics.analyst_estimates
+            WHERE isin = %s
+              AND period_type = 'fiscal_year'
+              AND metric IN ('eps', 'revenue', 'ebit')
+            ORDER BY period ASC
+        """, (isin,))
+        future_raw = cur.fetchall()
+
+        future_estimates = {}
+        for row in future_raw:
+            period = row['period']
+            year_match = re.search(r'(\d{4})', period)
+            if year_match:
+                year = int(year_match.group(1))
+                if year >= current_year:
+                    if period not in future_estimates:
+                        future_estimates[period] = {
+                            "period": period,
+                            "eps": None,
+                            "revenue": None,
+                            "ebit": None
+                        }
+
+                    value = float(row['estimate_value']) if row['estimate_value'] else None
+                    if row['unit'] == 'millions' and value:
+                        value = value * 1_000_000
+
+                    future_estimates[period][row['metric']] = value
+
+        # Response zusammenbauen
+        result = {
+            "company": {
+                "isin": company['isin'],
+                "ticker": company['ticker'],
+                "name": company['company_name'],
+                "currency": company['currency'],
+                "fiscal_year_end": company['fiscal_year_end']
+            },
+            "next_earnings": next_earnings,
+            "last_earnings": last_earnings,
+            "fiscal_year_progress": fiscal_year_progress,
+            "history": history,
+            "future_estimates": list(future_estimates.values())
+        }
+
+        return jsonify(result)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
     finally:

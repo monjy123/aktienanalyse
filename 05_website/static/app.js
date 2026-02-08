@@ -2,6 +2,101 @@
 // Aktien-Tool JavaScript
 // =============================================================================
 
+// Übersetzungen für Länder
+const countryTranslations = {
+    'Austria': 'Österreich',
+    'Germany': 'Deutschland',
+    'Switzerland': 'Schweiz',
+    'United States': 'USA',
+    'United Kingdom': 'Großbritannien',
+    'France': 'Frankreich',
+    'Italy': 'Italien',
+    'Spain': 'Spanien',
+    'Netherlands': 'Niederlande',
+    'Belgium': 'Belgien',
+    'Sweden': 'Schweden',
+    'Norway': 'Norwegen',
+    'Denmark': 'Dänemark',
+    'Finland': 'Finnland',
+    'Poland': 'Polen',
+    'Czech Republic': 'Tschechien',
+    'Hungary': 'Ungarn',
+    'Portugal': 'Portugal',
+    'Ireland': 'Irland',
+    'Luxembourg': 'Luxemburg',
+    'Greece': 'Griechenland',
+    'Japan': 'Japan',
+    'China': 'China',
+    'Hong Kong': 'Hongkong',
+    'South Korea': 'Südkorea',
+    'Taiwan': 'Taiwan',
+    'India': 'Indien',
+    'Australia': 'Australien',
+    'Canada': 'Kanada',
+    'Brazil': 'Brasilien',
+    'Mexico': 'Mexiko',
+    'Russia': 'Russland',
+    'Singapore': 'Singapur'
+};
+
+// Übersetzungen für Branchen (Industries)
+const industryTranslations = {
+    'Software': 'Software',
+    'Hardware': 'Hardware',
+    'Semiconductors': 'Halbleiter',
+    'Banks': 'Banken',
+    'Insurance': 'Versicherungen',
+    'Asset Management': 'Vermögensverwaltung',
+    'Biotechnology': 'Biotechnologie',
+    'Pharmaceuticals': 'Pharma',
+    'Medical Devices': 'Medizintechnik',
+    'Healthcare Services': 'Gesundheitsdienste',
+    'Automobiles': 'Automobile',
+    'Auto Parts': 'Autozulieferer',
+    'Aerospace & Defense': 'Luft- & Raumfahrt',
+    'Industrial Machinery': 'Maschinenbau',
+    'Electrical Equipment': 'Elektrotechnik',
+    'Chemicals': 'Chemie',
+    'Construction Materials': 'Baustoffe',
+    'Construction & Engineering': 'Bau & Ingenieurwesen',
+    'Retail': 'Einzelhandel',
+    'Food & Beverage': 'Lebensmittel & Getränke',
+    'Household Products': 'Haushaltsprodukte',
+    'Apparel': 'Bekleidung',
+    'Luxury Goods': 'Luxusgüter',
+    'Media': 'Medien',
+    'Entertainment': 'Unterhaltung',
+    'Telecommunications': 'Telekommunikation',
+    'Internet': 'Internet',
+    'Oil & Gas': 'Öl & Gas',
+    'Utilities': 'Versorger',
+    'Renewable Energy': 'Erneuerbare Energien',
+    'Mining': 'Bergbau',
+    'Steel': 'Stahl',
+    'Real Estate': 'Immobilien',
+    'REITs': 'Immobilienfonds',
+    'Transportation': 'Transport',
+    'Airlines': 'Fluggesellschaften',
+    'Shipping': 'Schifffahrt',
+    'Logistics': 'Logistik',
+    'Hotels & Restaurants': 'Hotels & Gastronomie',
+    'Travel & Leisure': 'Reisen & Freizeit',
+    'Education': 'Bildung',
+    'Professional Services': 'Unternehmensberatung',
+    'Diversified': 'Diversifiziert',
+    'Conglomerates': 'Mischkonzerne'
+};
+
+function translateValue(value, field) {
+    if (field === 'country' && countryTranslations[value]) {
+        return countryTranslations[value];
+    }
+    if (field === 'industry' && industryTranslations[value]) {
+        return industryTranslations[value];
+    }
+    return value;
+}
+
 // View-Name aus URL ermitteln
 function getCurrentView() {
     const path = window.location.pathname;
@@ -198,16 +293,46 @@ document.addEventListener('DOMContentLoaded', function() {
     // =========================================================================
     // Modal schließen
     // =========================================================================
+    function resetModalState(modal) {
+        if (!modal) return;
+
+        // Reset Detail Modal Zustand
+        if (modal.id === 'stock-detail-modal') {
+            currentDetailData = null;
+            currentTab = 'pe';
+        }
+
+        // Reset Company Info Modal Zustand
+        if (modal.id === 'company-info-modal') {
+            if (typeof currentCompanyInfoData !== 'undefined') {
+                currentCompanyInfoData = null;
+                currentCompanyInfoTab = 'info';
+                currentCompanyIsin = null;
+            }
+            // Reset earnings data if exists
+            if (typeof currentEarningsData !== 'undefined') {
+                currentEarningsData = null;
+            }
+            // Destroy price chart if exists
+            if (typeof priceChart !== 'undefined' && priceChart) {
+                priceChart.destroy();
+                priceChart = null;
+            }
+            // Reset Tab zum "Info" Tab
+            const infoTabsEl = document.getElementById('info-tabs');
+            if (infoTabsEl) {
+                infoTabsEl.querySelectorAll('.detail-tab').forEach(t => {
+                    t.classList.toggle('active', t.dataset.tab === 'info');
+                });
+            }
+        }
+    }
+
     document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', function() {
             const modal = this.closest('.modal');
             modal.classList.add('hidden');
-
-            // Reset Detail Modal Zustand
-            if (modal && modal.id === 'stock-detail-modal') {
-                currentDetailData = null;
-                currentTab = 'pe';
-            }
+            resetModalState(modal);
         });
     });
 
@@ -216,12 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
                 this.classList.add('hidden');
-
-                // Reset Detail Modal Zustand
-                if (this.id === 'stock-detail-modal') {
-                    currentDetailData = null;
-                    currentTab = 'pe';
-                }
+                resetModalState(this);
             }
         });
     });
@@ -231,12 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.classList.add('hidden');
-
-                // Reset Detail Modal Zustand
-                if (modal.id === 'stock-detail-modal') {
-                    currentDetailData = null;
-                    currentTab = 'pe';
-                }
+                resetModalState(modal);
             });
         }
     });
@@ -725,10 +840,20 @@ document.addEventListener('DOMContentLoaded', function() {
             html += `
                 <div class="filter-field">
                     <label>${categoryLabels[field] || field}</label>
-                    <select id="filter-${field}" class="filter-select">
-                        <option value="">Alle</option>
-                        ${values.map(v => `<option value="${v}">${v}</option>`).join('')}
-                    </select>
+                    <div class="filter-dropdown" id="filter-${field}" data-field="${field}">
+                        <button type="button" class="filter-dropdown-toggle">
+                            <span class="filter-dropdown-text">Alle</span>
+                            <span class="filter-dropdown-arrow">▼</span>
+                        </button>
+                        <div class="filter-dropdown-menu">
+                            ${values.map(v => `
+                                <label class="filter-checkbox-item">
+                                    <input type="checkbox" value="${v}" name="filter-${field}">
+                                    <span>${translateValue(v, field)}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -749,8 +874,58 @@ document.addEventListener('DOMContentLoaded', function() {
         numericFilterCount = 0;
         document.getElementById('add-numeric-filter').addEventListener('click', addNumericFilter);
 
+        // Event Listener für Filter-Dropdowns
+        initFilterDropdowns();
+
         // Gespeicherte Filter wiederherstellen
         restoreSavedFilters();
+    }
+
+    function initFilterDropdowns() {
+        // Toggle-Buttons
+        document.querySelectorAll('.filter-dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dropdown = this.closest('.filter-dropdown');
+                const wasOpen = dropdown.classList.contains('open');
+
+                // Alle anderen schließen
+                document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+
+                // Dieses öffnen/schließen
+                if (!wasOpen) {
+                    dropdown.classList.add('open');
+                }
+            });
+        });
+
+        // Checkboxen - Text aktualisieren bei Änderung
+        document.querySelectorAll('.filter-dropdown input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', function() {
+                updateDropdownText(this.closest('.filter-dropdown'));
+            });
+        });
+
+        // Klick außerhalb schließt Dropdown
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.filter-dropdown')) {
+                document.querySelectorAll('.filter-dropdown.open').forEach(d => d.classList.remove('open'));
+            }
+        });
+    }
+
+    function updateDropdownText(dropdown) {
+        const checked = dropdown.querySelectorAll('input[type="checkbox"]:checked');
+        const textEl = dropdown.querySelector('.filter-dropdown-text');
+        const field = dropdown.dataset.field;
+
+        if (checked.length === 0) {
+            textEl.textContent = 'Alle';
+        } else if (checked.length === 1) {
+            textEl.textContent = translateValue(checked[0].value, field);
+        } else {
+            textEl.textContent = `${checked.length} ausgewählt`;
+        }
     }
 
     function addNumericFilter() {
@@ -808,9 +983,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function restoreSavedFilters() {
         // Kategorische Filter wiederherstellen
         for (const field of ['stock_index', 'sector', 'industry', 'country']) {
-            const select = document.getElementById(`filter-${field}`);
-            if (select && currentFilters[field]) {
-                select.value = currentFilters[field];
+            const dropdown = document.getElementById(`filter-${field}`);
+            if (dropdown && currentFilters[field]) {
+                const values = Array.isArray(currentFilters[field]) ? currentFilters[field] : [currentFilters[field]];
+                const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.checked = values.includes(cb.value);
+                });
+                updateDropdownText(dropdown);
             }
         }
 
@@ -848,11 +1028,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Kategorische Filter aus Modal sammeln (falls vorhanden)
         for (const field of ['stock_index', 'sector', 'industry', 'country']) {
-            const select = document.getElementById(`filter-${field}`);
-            if (select && select.value) {
-                filters[field] = select.value;
-            } else if (select) {
-                delete filters[field];
+            const container = document.getElementById(`filter-${field}`);
+            if (container) {
+                const checked = Array.from(container.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+                if (checked.length > 0) {
+                    filters[field] = checked;
+                } else {
+                    delete filters[field];
+                }
             }
         }
 
@@ -937,8 +1121,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Kategorische Filter zurücksetzen
             for (const field of ['stock_index', 'sector', 'industry', 'country']) {
-                const select = document.getElementById(`filter-${field}`);
-                if (select) select.value = '';
+                const container = document.getElementById(`filter-${field}`);
+                if (container) {
+                    container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                }
             }
 
             // Numerische Filter entfernen
@@ -1004,7 +1190,7 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let i = 1; i <= 9; i++) {
                 favOptions += `<option value="${i}" ${stock.favorite == i ? 'selected' : ''}>${i}</option>`;
             }
-            html += `<td data-column="favorite" data-value="${stock.favorite || 0}">
+            html += `<td data-column="favorite" data-label="Favorit" data-value="${stock.favorite || 0}">
                 <select class="favorite-select" data-isin="${stock.isin}">
                     ${favOptions}
                 </select>
@@ -1038,10 +1224,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
 
-                html += `<td class="${numClass} ${nameClass}" data-column="${col.column_key}" data-value="${value !== null && value !== undefined ? value : ''}">${displayValue}</td>`;
+                html += `<td class="${numClass} ${nameClass}" data-column="${col.column_key}" data-label="${col.display_name}" data-value="${value !== null && value !== undefined ? value : ''}">${displayValue}</td>`;
             }
 
-            html += `<td>
+            html += `<td class="notes-cell" data-label="Notizen">
                 <button class="note-btn" data-isin="${stock.isin}" data-notes="${stock.notes || ''}">
                     ${stock.notes ? '📝' : '+'}
                 </button>
@@ -1245,6 +1431,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     const isin = row?.dataset.isin;
                     if (isin) {
                         openStockDetail(isin, 'margins');
+                    }
+                });
+            }
+
+            // Kurs-Spalte (price) - öffnet Chart im Company Info Modal
+            else if (columnKey === 'price') {
+                cell.classList.add('clickable-cell');
+                cell.addEventListener('click', function(e) {
+                    const row = this.closest('tr');
+                    const isin = row?.dataset.isin;
+                    if (isin) {
+                        openCompanyInfoWithTab(isin, 'chart');
                     }
                 });
             }
@@ -2911,15 +3109,67 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =========================================================================
-    // Company Info Modal (Unternehmensbeschreibung)
+    // Company Info Modal (Unternehmensbeschreibung + Chart mit Tabs)
     // =========================================================================
     const companyInfoModal = document.getElementById('company-info-modal');
     const infoCompanyName = document.getElementById('info-company-name');
     const infoMeta = document.getElementById('info-meta');
     const companyInfoBody = document.getElementById('info-body');
+    const infoTabs = document.getElementById('info-tabs');
+
+    // Zustandsvariablen für Company Info Modal
+    let currentCompanyInfoData = null;
+    let currentCompanyInfoTab = 'info';
+    let currentCompanyIsin = null;
+    let priceChart = null;
+
+    // Tab-Klicks für Company Info Modal - Event Delegation auf Container
+    if (infoTabs) {
+        infoTabs.addEventListener('click', function(e) {
+            const tabBtn = e.target.closest('.detail-tab');
+            if (!tabBtn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const tabType = tabBtn.dataset.tab;
+            console.log('Info Tab clicked:', tabType, 'ISIN:', currentCompanyIsin);
+
+            if (!currentCompanyIsin) {
+                console.warn('No ISIN set for company info modal');
+                return;
+            }
+
+            // Aktiven Tab wechseln
+            infoTabs.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+            tabBtn.classList.add('active');
+            currentCompanyInfoTab = tabType;
+
+            // Content rendern
+            if (tabType === 'chart') {
+                loadPriceChart(currentCompanyIsin);
+            } else if (tabType === 'earnings') {
+                loadEarningsData(currentCompanyIsin);
+            } else {
+                if (currentCompanyInfoData) {
+                    renderCompanyInfo(currentCompanyInfoData);
+                } else {
+                    loadCompanyInfo(currentCompanyIsin);
+                }
+            }
+        });
+    }
 
     async function openCompanyInfo(isin) {
+        openCompanyInfoWithTab(isin, 'info');
+    }
+
+    async function openCompanyInfoWithTab(isin, tab = 'info') {
         if (!companyInfoModal) return;
+
+        currentCompanyIsin = isin;
+        currentCompanyInfoTab = tab;
+        currentCompanyInfoData = null;
 
         // Modal öffnen mit Ladeindikator
         companyInfoModal.classList.remove('hidden');
@@ -2927,53 +3177,591 @@ document.addEventListener('DOMContentLoaded', function() {
         infoMeta.textContent = '';
         companyInfoBody.innerHTML = '<div class="detail-loading">Lade Daten...</div>';
 
+        // Aktiven Tab setzen
+        if (infoTabs) {
+            infoTabs.querySelectorAll('.detail-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+        }
+
+        // Je nach Tab laden
+        if (tab === 'chart') {
+            loadPriceChart(isin);
+        } else if (tab === 'earnings') {
+            loadEarningsData(isin);
+        } else {
+            loadCompanyInfo(isin);
+        }
+    }
+
+    async function loadCompanyInfo(isin) {
         try {
             const response = await fetch(`/api/stock/${isin}/info`);
             if (!response.ok) throw new Error('Fehler beim Laden');
 
             const data = await response.json();
-
-            // Header
-            infoCompanyName.textContent = data.company_name || '-';
-            const fiscalYear = data.fiscal_year_end ? ` | FJ: ${data.fiscal_year_end}` : '';
-            infoMeta.textContent = `${data.ticker} | ${data.sector || '-'} | ${data.country || '-'}${fiscalYear}`;
-
-            // Body: Beschreibung
-            let html = '<div class="company-description">';
-
-            if (data.description) {
-                html += `<p>${data.description}</p>`;
-            } else {
-                html += '<p class="empty-state">Keine Beschreibung verfügbar.</p>';
-            }
-
-            // Weitere Infos
-            html += '<div class="company-meta-info">';
-            if (data.industry) {
-                html += `<p><strong>Branche:</strong> ${data.industry}</p>`;
-            }
-            if (data.stock_index) {
-                html += `<p><strong>Index:</strong> ${data.stock_index}</p>`;
-            }
-            if (data.currency) {
-                html += `<p><strong>Währung:</strong> ${data.currency}</p>`;
-            }
-            if (data.market_cap) {
-                const marketCapFormatted = (data.market_cap / 1e9).toLocaleString('de-DE', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }) + ' Mrd.';
-                html += `<p><strong>Marktkapitalisierung:</strong> ${marketCapFormatted}</p>`;
-            }
-            html += '</div>';
-
-            html += '</div>';
-            companyInfoBody.innerHTML = html;
+            currentCompanyInfoData = data;
+            renderCompanyInfo(data);
 
         } catch (error) {
             console.error('Fehler:', error);
             companyInfoBody.innerHTML = '<div class="detail-loading">Fehler beim Laden der Daten.</div>';
         }
+    }
+
+    function renderCompanyInfo(data) {
+        // Header
+        infoCompanyName.textContent = data.company_name || '-';
+        const fiscalYear = data.fiscal_year_end ? ` | FJ: ${data.fiscal_year_end}` : '';
+        infoMeta.textContent = `${data.ticker} | ${data.sector || '-'} | ${data.country || '-'}${fiscalYear}`;
+
+        // Body: Beschreibung
+        let html = '<div class="company-description">';
+
+        if (data.description) {
+            html += `<p>${data.description}</p>`;
+        } else {
+            html += '<p class="empty-state">Keine Beschreibung verfügbar.</p>';
+        }
+
+        // Weitere Infos
+        html += '<div class="company-meta-info">';
+        if (data.industry) {
+            html += `<p><strong>Branche:</strong> ${data.industry}</p>`;
+        }
+        if (data.stock_index) {
+            html += `<p><strong>Index:</strong> ${data.stock_index}</p>`;
+        }
+        if (data.currency) {
+            html += `<p><strong>Währung:</strong> ${data.currency}</p>`;
+        }
+        if (data.market_cap) {
+            const marketCapFormatted = (data.market_cap / 1e9).toLocaleString('de-DE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' Mrd.';
+            html += `<p><strong>Marktkapitalisierung:</strong> ${marketCapFormatted}</p>`;
+        }
+        if (data.next_earnings_date) {
+            const earningsDate = new Date(data.next_earnings_date);
+            const earningsFormatted = earningsDate.toLocaleDateString('de-DE', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            html += `<p><strong>Nächster Earnings-Termin:</strong> ${earningsFormatted}</p>`;
+        }
+        html += '</div>';
+
+        html += '</div>';
+        companyInfoBody.innerHTML = html;
+    }
+
+    async function loadPriceChart(isin) {
+        console.log('loadPriceChart called with ISIN:', isin);
+        companyInfoBody.innerHTML = '<div class="detail-loading">Lade Kursdaten...</div>';
+
+        try {
+            console.log('Fetching price history...');
+            const response = await fetch(`/api/stock/${isin}/price-history`);
+            console.log('Response status:', response.status);
+            if (!response.ok) throw new Error('Fehler beim Laden: ' + response.status);
+
+            const data = await response.json();
+            console.log('Price data received:', data);
+            renderPriceChart(data);
+
+        } catch (error) {
+            console.error('Fehler beim Laden der Kursdaten:', error);
+            companyInfoBody.innerHTML = '<div class="detail-loading">Fehler beim Laden der Kursdaten.</div>';
+        }
+    }
+
+    function renderPriceChart(data) {
+        // Header aktualisieren
+        infoCompanyName.textContent = data.company.name || '-';
+        infoMeta.textContent = `${data.company.ticker} | Kursverlauf`;
+
+        const formatCurrency = (val, currency) => {
+            if (val === null || val === undefined) return '-';
+            return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + (currency || 'EUR');
+        };
+
+        const formatPercent = (val, showSign = false) => {
+            if (val === null || val === undefined) return '-';
+            const sign = showSign && val >= 0 ? '+' : '';
+            return sign + val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+        };
+
+        const getPerformanceClass = (val) => {
+            if (val === null || val === undefined) return '';
+            return val >= 0 ? 'perf-positive' : 'perf-negative';
+        };
+
+        // Performance-Badges
+        const perf = data.performance || {};
+        let perfHtml = '<div class="price-performance-badges">';
+        const perfLabels = {
+            '1m': '1M', '3m': '3M', '6m': '6M',
+            '1y': '1J', '3y': '3J', '5y': '5J', 'ytd': 'YTD'
+        };
+        for (const [key, label] of Object.entries(perfLabels)) {
+            if (perf[key] !== undefined) {
+                perfHtml += `<span class="perf-badge ${getPerformanceClass(perf[key])}">${label}: ${formatPercent(perf[key], true)}</span>`;
+            }
+        }
+        perfHtml += '</div>';
+
+        // Zeitraum-Buttons für Chart
+        let html = `
+            <div class="price-chart-container">
+                <div class="price-chart-header">
+                    <div class="price-current">
+                        <span class="price-value">${formatCurrency(data.current.price, data.company.currency)}</span>
+                        <span class="price-date">${data.current.price_date ? new Date(data.current.price_date).toLocaleDateString('de-DE') : '-'}</span>
+                    </div>
+                    ${perfHtml}
+                </div>
+                <div class="price-chart-timeframe">
+                    <button class="timeframe-btn" data-range="1m">1M</button>
+                    <button class="timeframe-btn" data-range="3m">3M</button>
+                    <button class="timeframe-btn" data-range="6m">6M</button>
+                    <button class="timeframe-btn active" data-range="1y">1J</button>
+                    <button class="timeframe-btn" data-range="3y">3J</button>
+                    <button class="timeframe-btn" data-range="5y">5J</button>
+                    <button class="timeframe-btn" data-range="all">Max</button>
+                </div>
+                <div class="price-chart-wrapper">
+                    <canvas id="price-chart-canvas"></canvas>
+                </div>
+            </div>
+        `;
+
+        companyInfoBody.innerHTML = html;
+
+        // Chart rendern
+        if (typeof Chart !== 'undefined' && data.prices && data.prices.length > 0) {
+            setTimeout(() => {
+                renderPriceChartCanvas(data.prices, '1y');
+
+                // Timeframe-Buttons Event-Listener
+                document.querySelectorAll('.timeframe-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        renderPriceChartCanvas(data.prices, this.dataset.range);
+                    });
+                });
+            }, 100);
+        } else {
+            companyInfoBody.innerHTML = '<div class="detail-loading">Keine Kursdaten verfügbar.</div>';
+        }
+    }
+
+    function renderPriceChartCanvas(prices, range) {
+        // Destroy existing chart
+        if (priceChart) {
+            priceChart.destroy();
+            priceChart = null;
+        }
+
+        const canvas = document.getElementById('price-chart-canvas');
+        if (!canvas) return;
+
+        // Daten nach Zeitraum filtern
+        let filteredPrices = prices;
+        const now = new Date();
+        let startDate;
+
+        switch (range) {
+            case '1m':
+                startDate = new Date(now.setMonth(now.getMonth() - 1));
+                break;
+            case '3m':
+                startDate = new Date(now.setMonth(now.getMonth() - 3));
+                break;
+            case '6m':
+                startDate = new Date(now.setMonth(now.getMonth() - 6));
+                break;
+            case '1y':
+                startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                break;
+            case '3y':
+                startDate = new Date(now.setFullYear(now.getFullYear() - 3));
+                break;
+            case '5y':
+                startDate = new Date(now.setFullYear(now.getFullYear() - 5));
+                break;
+            default:
+                startDate = null; // all
+        }
+
+        if (startDate) {
+            const startStr = startDate.toISOString().split('T')[0];
+            filteredPrices = prices.filter(p => p.date >= startStr);
+        }
+
+        // Daten für Chart
+        const labels = filteredPrices.map(p => {
+            const d = new Date(p.date);
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        });
+        const dataPoints = filteredPrices.map(p => p.close);
+
+        // Farbe basierend auf Performance
+        const startPrice = dataPoints[0];
+        const endPrice = dataPoints[dataPoints.length - 1];
+        const isPositive = endPrice >= startPrice;
+        const lineColor = isPositive ? '#28a745' : '#dc3545';
+        const fillColor = isPositive ? 'rgba(40, 167, 69, 0.1)' : 'rgba(220, 53, 69, 0.1)';
+
+        priceChart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Kurs',
+                    data: dataPoints,
+                    borderColor: lineColor,
+                    backgroundColor: fillColor,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                return items[0]?.label || '';
+                            },
+                            label: (context) => {
+                                const value = context.parsed.y;
+                                return value?.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '-';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        ticks: {
+                            maxTicksLimit: 8,
+                            font: { size: 10 }
+                        },
+                        grid: { display: false }
+                    },
+                    y: {
+                        display: true,
+                        position: 'right',
+                        ticks: {
+                            font: { size: 10 },
+                            callback: (value) => value.toLocaleString('de-DE', { minimumFractionDigits: 0 })
+                        },
+                        grid: { color: '#eee' }
+                    }
+                }
+            }
+        });
+    }
+
+    // =========================================================================
+    // Earnings Tab (Company Info Modal)
+    // =========================================================================
+    let currentEarningsData = null;
+
+    async function loadEarningsData(isin) {
+        console.log('loadEarningsData called with ISIN:', isin);
+        companyInfoBody.innerHTML = '<div class="detail-loading">Lade Earnings-Daten...</div>';
+
+        try {
+            console.log('Fetching earnings data...');
+            const response = await fetch(`/api/stock/${isin}/earnings`);
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                throw new Error('Fehler beim Laden: ' + response.status);
+            }
+
+            const data = await response.json();
+            console.log('Earnings data received:', data);
+            currentEarningsData = data;
+            renderEarningsTab(data);
+
+        } catch (error) {
+            console.error('Fehler beim Laden der Earnings-Daten:', error);
+            companyInfoBody.innerHTML = `<div class="detail-loading">Fehler beim Laden der Earnings-Daten: ${error.message}</div>`;
+        }
+    }
+
+    function renderEarningsTab(data) {
+        // Header aktualisieren
+        infoCompanyName.textContent = data.company.name || '-';
+        const fiscalYear = data.company.fiscal_year_end ? ` | FJ: ${data.company.fiscal_year_end}` : '';
+        infoMeta.textContent = `${data.company.ticker} | Earnings${fiscalYear}`;
+
+        // Formatierungsfunktionen
+        const formatNumber = (val, decimals = 2) => {
+            if (val === null || val === undefined) return '-';
+            return val.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        };
+
+        const formatBillions = (val) => {
+            if (val === null || val === undefined) return '-';
+            return (val / 1e9).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Mrd.';
+        };
+
+        const formatMillions = (val) => {
+            if (val === null || val === undefined) return '-';
+            return (val / 1e6).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' Mio.';
+        };
+
+        const formatPercent = (val, showSign = false) => {
+            if (val === null || val === undefined) return '-';
+            const sign = showSign && val > 0 ? '+' : '';
+            return sign + val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+        };
+
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        };
+
+        const getStatusIcon = (status) => {
+            if (status === 'beat') return '<span class="earnings-status-beat">Beat</span>';
+            if (status === 'miss') return '<span class="earnings-status-miss">Miss</span>';
+            if (status === 'inline') return '<span class="earnings-status-inline">Inline</span>';
+            return '-';
+        };
+
+        const getPriceReactionClass = (val) => {
+            if (val === null || val === undefined) return '';
+            return val >= 0 ? 'earnings-reaction-positive' : 'earnings-reaction-negative';
+        };
+
+        // 1. Hero-Section: Nächstes Quartal + Letztes Quartal kompakt nebeneinander
+        let heroHtml = '<div class="earnings-hero-grid">';
+
+        // Nächstes Quartal (links)
+        if (data.next_earnings) {
+            const ne = data.next_earnings;
+            heroHtml += `
+                <div class="earnings-hero earnings-hero-next">
+                    <div class="earnings-hero-header">
+                        <span class="earnings-hero-label-top">Nächstes Quartal</span>
+                    </div>
+                    <div class="earnings-hero-main">
+                        <span class="earnings-hero-period">${ne.period || '-'}</span>
+                        <span class="earnings-hero-date">${formatDate(ne.date)}</span>
+                    </div>
+                    <div class="earnings-hero-data">
+                        <div class="earnings-hero-row">
+                            <span class="earnings-hero-label">EPS Schätzung</span>
+                            <span class="earnings-hero-value">${formatNumber(ne.eps_estimate)} ${data.company.currency || ''}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            heroHtml += `
+                <div class="earnings-hero earnings-hero-next earnings-hero-empty">
+                    <p class="earnings-hero-no-data">Kein Termin</p>
+                </div>
+            `;
+        }
+
+        // Letztes Quartal (rechts)
+        if (data.last_earnings) {
+            const le = data.last_earnings;
+            const surpriseClass = le.eps_surprise > 0 ? 'surprise-positive' : (le.eps_surprise < 0 ? 'surprise-negative' : '');
+            heroHtml += `
+                <div class="earnings-hero earnings-hero-last">
+                    <div class="earnings-hero-header">
+                        <span class="earnings-hero-label-top">Letztes Quartal</span>
+                        ${le.status ? getStatusIcon(le.status) : ''}
+                    </div>
+                    <div class="earnings-hero-main">
+                        <span class="earnings-hero-period">${le.period || '-'}</span>
+                        <span class="earnings-hero-date">${formatDate(le.date)}</span>
+                    </div>
+                    <div class="earnings-hero-data">
+                        <div class="earnings-hero-row">
+                            <span class="earnings-hero-label">Schätzung</span>
+                            <span class="earnings-hero-value">${formatNumber(le.eps_estimate)}</span>
+                        </div>
+                        <div class="earnings-hero-row">
+                            <span class="earnings-hero-label">Ergebnis</span>
+                            <span class="earnings-hero-value">${formatNumber(le.eps_actual)}</span>
+                        </div>
+                        <div class="earnings-hero-row">
+                            <span class="earnings-hero-label">Abweichung</span>
+                            <span class="earnings-hero-value ${surpriseClass}">${formatPercent(le.eps_surprise, true)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            heroHtml += `
+                <div class="earnings-hero earnings-hero-last earnings-hero-empty">
+                    <p class="earnings-hero-no-data">Keine Daten</p>
+                </div>
+            `;
+        }
+
+        heroHtml += '</div>';
+
+        // 2. Fiskaljahr-Fortschritt
+        let fyProgressHtml = '';
+        if (data.fiscal_year_progress && data.fiscal_year_progress.quarters && data.fiscal_year_progress.quarters.length > 0) {
+            const fyp = data.fiscal_year_progress;
+            const currency = data.company.currency || '';
+
+            // Quartals-Boxen erstellen
+            const quarterBoxes = fyp.quarters.map(q => {
+                const value = q.is_reported ? q.eps_actual : q.eps_estimate;
+                const statusClass = q.is_reported ? 'fy-quarter-reported' : 'fy-quarter-estimated';
+                const statusText = q.is_reported ? `${q.quarter} ✓` : `${q.quarter} (est)`;
+                return `
+                    <div class="fy-quarter-box ${statusClass}" title="${q.is_reported ? 'Gemeldet' : 'Geschätzt'}">
+                        <span class="fy-quarter-label">${statusText}</span>
+                        <span class="fy-quarter-value">${formatNumber(value)}</span>
+                    </div>
+                `;
+            }).join('<span class="fy-quarter-plus">+</span>');
+
+            fyProgressHtml = `
+                <div class="earnings-section earnings-fy-progress">
+                    <div class="earnings-section-title">${fyp.year} Hochrechnung</div>
+                    <div class="fy-progress-content">
+                        <div class="fy-quarters-row">
+                            ${quarterBoxes}
+                            <span class="fy-quarter-equals">=</span>
+                            <div class="fy-quarter-box fy-quarter-total">
+                                <span class="fy-quarter-label">Summe</span>
+                                <span class="fy-quarter-value">${formatNumber(fyp.projection)} ${currency}</span>
+                            </div>
+                        </div>
+                        <div class="fy-progress-bar-container">
+                            <div class="fy-progress-bar" style="width: ${fyp.progress_pct}%"></div>
+                        </div>
+                        <div class="fy-progress-info">
+                            <span class="fy-progress-text">${fyp.quarters_reported}/${fyp.total_quarters} Quartale gemeldet (${fyp.progress_pct}%)</span>
+                            ${fyp.full_year_estimate ? `<span class="fy-estimate-text">Jahresschätzung: ${formatNumber(fyp.full_year_estimate)} ${currency}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. Quartals-Historie mit Beat/Miss
+        let historyHtml = '';
+        if (data.history && data.history.length > 0) {
+            const historyRows = data.history.map(h => {
+                const epsSurpriseClass = h.eps_surprise_pct > 0 ? 'surprise-positive' : (h.eps_surprise_pct < 0 ? 'surprise-negative' : '');
+                const revSurpriseClass = h.revenue_surprise_pct > 0 ? 'surprise-positive' : (h.revenue_surprise_pct < 0 ? 'surprise-negative' : '');
+
+                return `
+                    <tr>
+                        <td class="earnings-history-period">${h.period}</td>
+                        <td class="earnings-history-date">${formatDate(h.release_date)}</td>
+                        <td class="num">${formatNumber(h.eps_estimate)}</td>
+                        <td class="num">${formatNumber(h.eps_actual)}</td>
+                        <td class="num ${epsSurpriseClass}">${formatPercent(h.eps_surprise_pct, true)}</td>
+                        <td class="num">${formatMillions(h.revenue_estimate)}</td>
+                        <td class="num">${formatMillions(h.revenue_actual)}</td>
+                        <td class="num ${revSurpriseClass}">${formatPercent(h.revenue_surprise_pct, true)}</td>
+                        <td class="num ${getPriceReactionClass(h.price_reaction)}">${formatPercent(h.price_reaction, true)}</td>
+                        <td class="earnings-status-cell">${getStatusIcon(h.status)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            historyHtml = `
+                <div class="earnings-section">
+                    <div class="earnings-section-title">Quartals-Historie (letzte 8 Quartale)</div>
+                    <div class="earnings-history-table-container">
+                        <table class="earnings-history-table">
+                            <thead>
+                                <tr>
+                                    <th>Quartal</th>
+                                    <th>Datum</th>
+                                    <th class="num">EPS Est</th>
+                                    <th class="num">EPS Act</th>
+                                    <th class="num">Surprise</th>
+                                    <th class="num">Rev Est</th>
+                                    <th class="num">Rev Act</th>
+                                    <th class="num">Surprise</th>
+                                    <th class="num">Kursreaktion</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${historyRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 4. Zukünftige Schätzungen
+        let futureHtml = '';
+        if (data.future_estimates && data.future_estimates.length > 0) {
+            const futureRows = data.future_estimates.map(fe => `
+                <tr>
+                    <td class="earnings-future-period">${fe.period}</td>
+                    <td class="num">${formatBillions(fe.revenue)}</td>
+                    <td class="num">${formatBillions(fe.ebit)}</td>
+                    <td class="num">${formatNumber(fe.eps)}</td>
+                </tr>
+            `).join('');
+
+            futureHtml = `
+                <div class="earnings-section">
+                    <div class="earnings-section-title">Künftige Schätzungen</div>
+                    <table class="earnings-future-table">
+                        <thead>
+                            <tr>
+                                <th>Periode</th>
+                                <th class="num">Umsatz</th>
+                                <th class="num">EBIT</th>
+                                <th class="num">EPS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${futureRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Gesamtes HTML zusammenbauen
+        let html = `
+            <div class="earnings-tab-content">
+                ${heroHtml}
+                ${fyProgressHtml}
+                ${historyHtml}
+                ${futureHtml}
+                ${(!data.history || data.history.length === 0) && (!data.future_estimates || data.future_estimates.length === 0) ?
+                    '<div class="earnings-empty-state"><p>Keine Earnings-Daten verfügbar.</p></div>' : ''}
+            </div>
+        `;
+
+        companyInfoBody.innerHTML = html;
     }
 
     // Event-Listener für Klicks auf Unternehmensnamen

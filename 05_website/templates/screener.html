@@ -167,13 +167,20 @@
     </div>
 </div>
 
-<!-- Modal für Unternehmensinformationen -->
+<!-- Modal für Unternehmensinformationen mit Tabs -->
 <div id="company-info-modal" class="modal hidden">
-    <div class="modal-content modal-large">
+    <div class="modal-content modal-xlarge">
         <div class="modal-header">
-            <div class="detail-header-info">
-                <h3 id="info-company-name">-</h3>
-                <span class="detail-meta" id="info-meta">-</span>
+            <div class="detail-header-left">
+                <div class="detail-header-info">
+                    <h3 id="info-company-name">-</h3>
+                    <span class="detail-meta" id="info-meta">-</span>
+                </div>
+                <div class="detail-tabs" id="info-tabs">
+                    <button type="button" class="detail-tab active" data-tab="info">Info</button>
+                    <button type="button" class="detail-tab" data-tab="chart">Chart</button>
+                    <button type="button" class="detail-tab" data-tab="earnings">Earnings</button>
+                </div>
             </div>
             <button class="modal-close">&times;</button>
         </div>

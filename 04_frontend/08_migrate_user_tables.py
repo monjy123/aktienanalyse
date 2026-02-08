@@ -349,7 +349,16 @@ def migrate_user_column_settings(admin_id):
             FOREIGN KEY (user_id) REFERENCES analytics.users(id) ON DELETE CASCADE
         """)
 
-        # 6. UNIQUE Constraint hinzufügen (user_id, view_name, column_key)
+        # 6. Alten UNIQUE Constraint entfernen (nur view_name, column_key)
+        try:
+            cur.execute("""
+                ALTER TABLE analytics.user_column_settings
+                DROP INDEX unique_view_column
+            """)
+        except Error:
+            pass  # Index existiert möglicherweise nicht
+
+        # 7. Neuen UNIQUE Constraint hinzufügen (user_id, view_name, column_key)
         try:
             cur.execute("""
                 ALTER TABLE analytics.user_column_settings
