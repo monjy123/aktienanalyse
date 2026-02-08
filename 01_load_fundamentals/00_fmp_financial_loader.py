@@ -16,9 +16,7 @@ Workflow:
 
 import sys
 import os
-import time
 import logging
-import threading
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
@@ -26,17 +24,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import requests
 from tqdm import tqdm
-from dotenv import load_dotenv
 from mysql.connector import Error as MySQLError
 from db import get_connection
+from utils.fmp_api import api_request, get_fmp_api_key
 
-# .env laden
-load_dotenv(Path(__file__).parent.parent / ".env")
-
-FMP_API_KEY = os.getenv("FMP_API_KEY")
-FMP_BASE_URL = "https://financialmodelingprep.com"
+FMP_API_KEY = get_fmp_api_key()
 
 # Threading Konfiguration
 MAX_WORKERS = 5  # Anzahl paralleler Threads
@@ -246,37 +239,12 @@ CREATE TABLE IF NOT EXISTS raw_data.fmp_financial_statements (
 
 
 # =============================================================================
-# API Functions
+# API Functions (nutzt utils.fmp_api)
 # =============================================================================
-
-def api_request(endpoint, params=None, max_retries=3):
-    """API Request mit Retry und Rate Limiting."""
-    if params is None:
-        params = {}
-    params["apikey"] = FMP_API_KEY
-
-    url = f"{FMP_BASE_URL}{endpoint}"
-
-    for attempt in range(max_retries):
-        try:
-            time.sleep(0.25)  # Rate limiting
-            response = requests.get(url, params=params, timeout=30)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            if attempt < max_retries - 1:
-                wait = 2 ** attempt
-                logger.warning(f"API Fehler (Versuch {attempt+1}): {e}. Warte {wait}s...")
-                time.sleep(wait)
-            else:
-                logger.error(f"API Fehler nach {max_retries} Versuchen: {e}")
-                return None
-    return None
-
 
 def search_isin(isin):
     """Suche Ticker für ISIN via FMP API. Gibt alle Ergebnisse zurück."""
-    data = api_request(f"/stable/search-isin", {"isin": isin})
+    data = api_request("/stable/search-isin", {"isin": isin}, rate_limit=0.25)
     if data and len(data) > 0:
         return data  # Alle Ergebnisse für Fallback-Logik
     return None
@@ -359,7 +327,7 @@ def get_balance_sheet(ticker, period="annual"):
     return api_request(f"/stable/balance-sheet-statement?symbol={ticker}", {
         "period": period,
         "limit": 1000
-    })
+    }, rate_limit=0.25)
 
 
 def get_income_statement(ticker, period="annual"):
@@ -367,7 +335,7 @@ def get_income_statement(ticker, period="annual"):
     return api_request(f"/stable/income-statement?symbol={ticker}", {
         "period": period,
         "limit": 1000
-    })
+    }, rate_limit=0.25)
 
 
 def get_cash_flow(ticker, period="annual"):
@@ -375,7 +343,7 @@ def get_cash_flow(ticker, period="annual"):
     return api_request(f"/stable/cash-flow-statement?symbol={ticker}", {
         "period": period,
         "limit": 1000
-    })
+    }, rate_limit=0.25)
 
 
 # =============================================================================

@@ -1339,104 +1339,101 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // KGV-relevante Spalten, die das PE-Modal öffnen
-    const PE_COLUMNS = [
+    // KGV-relevante Spalten, die das PE-Modal öffnen (Set für O(1) Lookup)
+    const PE_COLUMNS = new Set([
         'ttm_pe', 'fy_pe',
         'pe_avg_5y', 'pe_avg_10y', 'pe_avg_15y', 'pe_avg_20y', 'pe_avg_10y_2019',
         'pe_avg_5y_count', 'pe_avg_10y_count', 'pe_avg_15y_count', 'pe_avg_20y_count',
         'yf_ttm_pe', 'yf_forward_pe',
         'yf_ttm_pe_vs_avg_5y', 'yf_ttm_pe_vs_avg_10y', 'yf_ttm_pe_vs_avg_15y', 'yf_ttm_pe_vs_avg_20y', 'yf_ttm_pe_vs_avg_10y_2019',
         'yf_fwd_pe_vs_avg_5y', 'yf_fwd_pe_vs_avg_10y', 'yf_fwd_pe_vs_avg_15y', 'yf_fwd_pe_vs_avg_20y', 'yf_fwd_pe_vs_avg_10y_2019'
-    ];
+    ]);
 
     // EV/EBIT-relevante Spalten
-    const EV_EBIT_COLUMNS = [
+    const EV_EBIT_COLUMNS = new Set([
         'ttm_ev_ebit', 'fy_ev_ebit',
         'ev_ebit_avg_5y', 'ev_ebit_avg_10y', 'ev_ebit_avg_15y', 'ev_ebit_avg_20y', 'ev_ebit_avg_10y_2019',
         'ev_ebit_avg_5y_count', 'ev_ebit_avg_10y_count', 'ev_ebit_avg_15y_count', 'ev_ebit_avg_20y_count',
         'ev_ebit_vs_avg_5y', 'ev_ebit_vs_avg_10y', 'ev_ebit_vs_avg_15y', 'ev_ebit_vs_avg_20y', 'ev_ebit_vs_avg_10y_2019'
-    ];
+    ]);
 
     // Wachstums-relevante Spalten
-    const GROWTH_COLUMNS = [
+    const GROWTH_COLUMNS = new Set([
         'revenue_cagr_3y', 'revenue_cagr_5y', 'revenue_cagr_10y',
         'ebit_cagr_3y', 'ebit_cagr_5y', 'ebit_cagr_10y',
         'net_income_cagr_3y', 'net_income_cagr_5y', 'net_income_cagr_10y'
-    ];
+    ]);
 
     // Margen-relevante Spalten
-    const MARGIN_COLUMNS = [
+    const MARGIN_COLUMNS = new Set([
         'profit_margin', 'operating_margin',
         'profit_margin_avg_3y', 'profit_margin_avg_5y', 'profit_margin_avg_10y', 'profit_margin_avg_5y_2019',
         'operating_margin_avg_3y', 'operating_margin_avg_5y', 'operating_margin_avg_10y', 'operating_margin_avg_5y_2019'
-    ];
+    ]);
 
-    // Funktion zum Initialisieren der clickable cells
+    // Funktion zum Initialisieren der clickable cells mittels Event Delegation
     function initializeClickableCells() {
+        // Event Delegation: Registriere nur einen Handler auf der Tabelle
+        const tables = document.querySelectorAll('.stock-table');
+        tables.forEach(table => {
+            // Prüfe ob bereits initialisiert
+            if (table.dataset.cellClicksInitialized) return;
+            table.dataset.cellClicksInitialized = 'true';
+
+            table.addEventListener('click', function(e) {
+                const cell = e.target.closest('td[data-column]');
+                if (!cell) return;
+
+                const columnKey = cell.dataset.column;
+
+                // company_name wird von initializeCompanyNameClicks() behandelt
+                if (columnKey === 'company_name') return;
+
+                const row = cell.closest('tr');
+                const isin = row?.dataset.isin;
+                if (!isin) return;
+
+                // Bestimme Modal-Typ basierend auf Spalte
+                if (PE_COLUMNS.has(columnKey)) {
+                    openStockDetail(isin, 'pe');
+                } else if (EV_EBIT_COLUMNS.has(columnKey)) {
+                    openStockDetail(isin, 'ev_ebit');
+                } else if (GROWTH_COLUMNS.has(columnKey)) {
+                    openStockDetail(isin, 'growth');
+                } else if (MARGIN_COLUMNS.has(columnKey)) {
+                    openStockDetail(isin, 'margins');
+                } else if (columnKey === 'price') {
+                    openCompanyInfoModal(isin);
+                }
+            });
+        });
+
+        // CSS-Klassen für clickable cells hinzufügen (für Styling)
+        document.querySelectorAll('.stock-table tbody td[data-column]').forEach(cell => {
+            const columnKey = cell.dataset.column;
+            if (columnKey === 'company_name') return;
+            if (cell.classList.contains('clickable-cell')) return;
+
+            if (PE_COLUMNS.has(columnKey) ||
+                EV_EBIT_COLUMNS.has(columnKey) ||
+                GROWTH_COLUMNS.has(columnKey) ||
+                MARGIN_COLUMNS.has(columnKey) ||
+                columnKey === 'price') {
+                cell.classList.add('clickable-cell');
+            }
+        });
+    }
+
+    // Legacy-Support: Wird nicht mehr benötigt, aber für Kompatibilität beibehalten
+    function initializeClickableCellsLegacy() {
         document.querySelectorAll('.stock-table tbody td[data-column]').forEach(cell => {
             const columnKey = cell.dataset.column;
 
-            // company_name wird von initializeCompanyNameClicks() behandelt (öffnet Beschreibungs-Modal)
-            if (columnKey === 'company_name') {
-                return;
-            }
-
-            // Entferne alte Event-Listener, indem wir die Klasse prüfen
-            if (cell.classList.contains('clickable-cell')) {
-                // Zelle wurde bereits initialisiert, überspringen
-                return;
-            }
-
-            // KGV-Spalten
-            if (PE_COLUMNS.includes(columnKey)) {
-                cell.classList.add('clickable-cell');
-                cell.addEventListener('click', function(e) {
-                    const row = this.closest('tr');
-                    const isin = row?.dataset.isin;
-                    if (isin) {
-                        openStockDetail(isin, 'pe');
-                    }
-                });
-            }
-
-            // EV/EBIT-Spalten
-            else if (EV_EBIT_COLUMNS.includes(columnKey)) {
-                cell.classList.add('clickable-cell');
-                cell.addEventListener('click', function(e) {
-                    const row = this.closest('tr');
-                    const isin = row?.dataset.isin;
-                    if (isin) {
-                        openStockDetail(isin, 'ev_ebit');
-                    }
-                });
-            }
-
-            // Wachstums-Spalten
-            else if (GROWTH_COLUMNS.includes(columnKey)) {
-                cell.classList.add('clickable-cell');
-                cell.addEventListener('click', function(e) {
-                    const row = this.closest('tr');
-                    const isin = row?.dataset.isin;
-                    if (isin) {
-                        openStockDetail(isin, 'growth');
-                    }
-                });
-            }
-
-            // Margen-Spalten
-            else if (MARGIN_COLUMNS.includes(columnKey)) {
-                cell.classList.add('clickable-cell');
-                cell.addEventListener('click', function(e) {
-                    const row = this.closest('tr');
-                    const isin = row?.dataset.isin;
-                    if (isin) {
-                        openStockDetail(isin, 'margins');
-                    }
-                });
-            }
+            if (columnKey === 'company_name') return;
+            if (cell.classList.contains('clickable-cell')) return;
 
             // Kurs-Spalte (price) - öffnet Chart im Company Info Modal
-            else if (columnKey === 'price') {
+            if (columnKey === 'price') {
                 cell.classList.add('clickable-cell');
                 cell.addEventListener('click', function(e) {
                     const row = this.closest('tr');
@@ -1853,6 +1850,91 @@ document.addEventListener('DOMContentLoaded', function() {
                     y: {
                         beginAtZero: true,
                         max: yMax,
+                        ticks: { font: { size: 9 } },
+                        grid: { color: '#eee' }
+                    }
+                }
+            }
+        });
+    }
+
+    // =========================================================================
+    // Chart Factory: Generische Bar-Chart-Erstellung
+    // =========================================================================
+
+    /**
+     * Erstellt einen Bar-Chart mit optionalem TTM-Wert.
+     * @param {Object} options - Konfigurationsobjekt
+     * @param {string} options.canvasId - ID des Canvas-Elements
+     * @param {Object} options.chartRef - Referenz auf die Chart-Variable (zur Zerstörung)
+     * @param {Array} options.incomeStatement - Array mit Jahreswerten
+     * @param {Object} options.ttmIncomeStatement - TTM-Objekt (optional)
+     * @param {string} options.dataField - Feld im incomeStatement (z.B. 'net_income')
+     * @param {string} options.ttmField - Feld im ttmIncomeStatement (optional, default = dataField)
+     * @param {string} options.label - Legende/Label für das Dataset
+     * @param {string} options.positiveColor - Farbe für positive Werte (default: '#2d5aa3')
+     * @param {string} options.ttmColor - Farbe für TTM-Wert (default: '#1a1a2e')
+     * @param {boolean} options.beginAtZero - Y-Achse bei 0 beginnen (default: false)
+     * @returns {Chart|null} - Chart-Instanz oder null
+     */
+    function createFinancialBarChart(options) {
+        const {
+            canvasId,
+            incomeStatement,
+            ttmIncomeStatement,
+            dataField,
+            ttmField = dataField,
+            label,
+            positiveColor = '#2d5aa3',
+            ttmColor = '#1a1a2e',
+            negativeColor = '#dc3545',
+            beginAtZero = false
+        } = options;
+
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return null;
+
+        const labels = incomeStatement.map(y => y.year);
+        const data = incomeStatement.map(y => y[dataField] ? y[dataField] / 1e9 : 0);
+
+        // TTM hinzufügen
+        if (ttmIncomeStatement?.[ttmField]) {
+            labels.push('TTM');
+            data.push(ttmIncomeStatement[ttmField] / 1e9);
+        }
+
+        // Farben basierend auf positiv/negativ, TTM in separater Farbe
+        const colors = data.map((val, idx) => {
+            if (labels[idx] === 'TTM') {
+                return val >= 0 ? ttmColor : negativeColor;
+            }
+            return val >= 0 ? positiveColor : negativeColor;
+        });
+
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    backgroundColor: colors,
+                    borderRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        ticks: { font: { size: 9 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: beginAtZero,
                         ticks: { font: { size: 9 } },
                         grid: { color: '#eee' }
                     }

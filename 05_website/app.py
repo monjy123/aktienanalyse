@@ -113,6 +113,11 @@ app.jinja_env.filters['de_billions'] = format_de_billions
 app.jinja_env.filters['de_date'] = format_de_date
 
 
+def safe_round(value, decimals=2):
+    """Rundet sicher mit None-Handling."""
+    return round(value, decimals) if value is not None else None
+
+
 # =============================================================================
 # Helper: Spalten-Konfiguration
 # =============================================================================
@@ -783,76 +788,76 @@ def get_stock_details(isin):
                 "market_cap": live.get('market_cap'),
                 "price": live.get('price'),
                 "price_date": live.get('price_date').strftime('%Y-%m-%d') if live.get('price_date') else None,
-                "ttm_pe": round(current_ttm_pe, 2) if current_ttm_pe else None
+                "ttm_pe": safe_round(current_ttm_pe, 2)
             },
             "pe_overview": {
-                "ttm_pe": round(live.get('ttm_pe'), 2) if live.get('ttm_pe') else None,
-                "fy_pe": round(live.get('fy_pe'), 2) if live.get('fy_pe') else None,
-                "pe_avg_5y": round(live.get('pe_avg_5y'), 2) if live.get('pe_avg_5y') else None,
-                "pe_avg_10y": round(live.get('pe_avg_10y'), 2) if live.get('pe_avg_10y') else None,
-                "pe_avg_15y": round(live.get('pe_avg_15y'), 2) if live.get('pe_avg_15y') else None,
-                "pe_avg_20y": round(live.get('pe_avg_20y'), 2) if live.get('pe_avg_20y') else None,
-                "pe_avg_10y_2019": round(live.get('pe_avg_10y_2019'), 2) if live.get('pe_avg_10y_2019') else None,
+                "ttm_pe": safe_round(live.get('ttm_pe'), 2),
+                "fy_pe": safe_round(live.get('fy_pe'), 2),
+                "pe_avg_5y": safe_round(live.get('pe_avg_5y'), 2),
+                "pe_avg_10y": safe_round(live.get('pe_avg_10y'), 2),
+                "pe_avg_15y": safe_round(live.get('pe_avg_15y'), 2),
+                "pe_avg_20y": safe_round(live.get('pe_avg_20y'), 2),
+                "pe_avg_10y_2019": safe_round(live.get('pe_avg_10y_2019'), 2),
                 "pe_avg_5y_count": live.get('pe_avg_5y_count'),
                 "pe_avg_10y_count": live.get('pe_avg_10y_count'),
                 "pe_avg_15y_count": live.get('pe_avg_15y_count'),
                 "pe_avg_20y_count": live.get('pe_avg_20y_count'),
-                "yf_ttm_pe": round(live.get('yf_ttm_pe'), 2) if live.get('yf_ttm_pe') else None,
-                "yf_forward_pe": round(live.get('yf_forward_pe'), 2) if live.get('yf_forward_pe') else None,
+                "yf_ttm_pe": safe_round(live.get('yf_ttm_pe'), 2),
+                "yf_forward_pe": safe_round(live.get('yf_forward_pe'), 2),
                 # Abweichungen TTM-KGV vs. Durchschnitte
-                "yf_ttm_pe_vs_avg_5y": round(live.get('yf_ttm_pe_vs_avg_5y'), 1) if live.get('yf_ttm_pe_vs_avg_5y') else None,
-                "yf_ttm_pe_vs_avg_10y": round(live.get('yf_ttm_pe_vs_avg_10y'), 1) if live.get('yf_ttm_pe_vs_avg_10y') else None,
-                "yf_ttm_pe_vs_avg_15y": round(live.get('yf_ttm_pe_vs_avg_15y'), 1) if live.get('yf_ttm_pe_vs_avg_15y') else None,
-                "yf_ttm_pe_vs_avg_20y": round(live.get('yf_ttm_pe_vs_avg_20y'), 1) if live.get('yf_ttm_pe_vs_avg_20y') else None,
-                "yf_ttm_pe_vs_avg_10y_2019": round(live.get('yf_ttm_pe_vs_avg_10y_2019'), 1) if live.get('yf_ttm_pe_vs_avg_10y_2019') else None,
+                "yf_ttm_pe_vs_avg_5y": safe_round(live.get('yf_ttm_pe_vs_avg_5y'), 1),
+                "yf_ttm_pe_vs_avg_10y": safe_round(live.get('yf_ttm_pe_vs_avg_10y'), 1),
+                "yf_ttm_pe_vs_avg_15y": safe_round(live.get('yf_ttm_pe_vs_avg_15y'), 1),
+                "yf_ttm_pe_vs_avg_20y": safe_round(live.get('yf_ttm_pe_vs_avg_20y'), 1),
+                "yf_ttm_pe_vs_avg_10y_2019": safe_round(live.get('yf_ttm_pe_vs_avg_10y_2019'), 1),
                 # Abweichungen Forward-KGV vs. Durchschnitte
-                "yf_fwd_pe_vs_avg_5y": round(live.get('yf_fwd_pe_vs_avg_5y'), 1) if live.get('yf_fwd_pe_vs_avg_5y') else None,
-                "yf_fwd_pe_vs_avg_10y": round(live.get('yf_fwd_pe_vs_avg_10y'), 1) if live.get('yf_fwd_pe_vs_avg_10y') else None,
-                "yf_fwd_pe_vs_avg_15y": round(live.get('yf_fwd_pe_vs_avg_15y'), 1) if live.get('yf_fwd_pe_vs_avg_15y') else None,
-                "yf_fwd_pe_vs_avg_20y": round(live.get('yf_fwd_pe_vs_avg_20y'), 1) if live.get('yf_fwd_pe_vs_avg_20y') else None,
-                "yf_fwd_pe_vs_avg_10y_2019": round(live.get('yf_fwd_pe_vs_avg_10y_2019'), 1) if live.get('yf_fwd_pe_vs_avg_10y_2019') else None
+                "yf_fwd_pe_vs_avg_5y": safe_round(live.get('yf_fwd_pe_vs_avg_5y'), 1),
+                "yf_fwd_pe_vs_avg_10y": safe_round(live.get('yf_fwd_pe_vs_avg_10y'), 1),
+                "yf_fwd_pe_vs_avg_15y": safe_round(live.get('yf_fwd_pe_vs_avg_15y'), 1),
+                "yf_fwd_pe_vs_avg_20y": safe_round(live.get('yf_fwd_pe_vs_avg_20y'), 1),
+                "yf_fwd_pe_vs_avg_10y_2019": safe_round(live.get('yf_fwd_pe_vs_avg_10y_2019'), 1)
             },
             "ev_ebit_overview": {
-                "ttm_ev_ebit": round(live.get('ttm_ev_ebit'), 2) if live.get('ttm_ev_ebit') else None,
-                "fy_ev_ebit": round(live.get('fy_ev_ebit'), 2) if live.get('fy_ev_ebit') else None,
-                "ev_ebit_avg_5y": round(live.get('ev_ebit_avg_5y'), 2) if live.get('ev_ebit_avg_5y') else None,
-                "ev_ebit_avg_10y": round(live.get('ev_ebit_avg_10y'), 2) if live.get('ev_ebit_avg_10y') else None,
-                "ev_ebit_avg_15y": round(live.get('ev_ebit_avg_15y'), 2) if live.get('ev_ebit_avg_15y') else None,
-                "ev_ebit_avg_20y": round(live.get('ev_ebit_avg_20y'), 2) if live.get('ev_ebit_avg_20y') else None,
-                "ev_ebit_avg_10y_2019": round(live.get('ev_ebit_avg_10y_2019'), 2) if live.get('ev_ebit_avg_10y_2019') else None,
+                "ttm_ev_ebit": safe_round(live.get('ttm_ev_ebit'), 2),
+                "fy_ev_ebit": safe_round(live.get('fy_ev_ebit'), 2),
+                "ev_ebit_avg_5y": safe_round(live.get('ev_ebit_avg_5y'), 2),
+                "ev_ebit_avg_10y": safe_round(live.get('ev_ebit_avg_10y'), 2),
+                "ev_ebit_avg_15y": safe_round(live.get('ev_ebit_avg_15y'), 2),
+                "ev_ebit_avg_20y": safe_round(live.get('ev_ebit_avg_20y'), 2),
+                "ev_ebit_avg_10y_2019": safe_round(live.get('ev_ebit_avg_10y_2019'), 2),
                 "ev_ebit_avg_5y_count": live.get('ev_ebit_avg_5y_count'),
                 "ev_ebit_avg_10y_count": live.get('ev_ebit_avg_10y_count'),
                 "ev_ebit_avg_15y_count": live.get('ev_ebit_avg_15y_count'),
                 "ev_ebit_avg_20y_count": live.get('ev_ebit_avg_20y_count'),
                 # Abweichungen EV/EBIT vs. Durchschnitte
-                "ev_ebit_vs_avg_5y": round(live.get('ev_ebit_vs_avg_5y'), 1) if live.get('ev_ebit_vs_avg_5y') else None,
-                "ev_ebit_vs_avg_10y": round(live.get('ev_ebit_vs_avg_10y'), 1) if live.get('ev_ebit_vs_avg_10y') else None,
-                "ev_ebit_vs_avg_15y": round(live.get('ev_ebit_vs_avg_15y'), 1) if live.get('ev_ebit_vs_avg_15y') else None,
-                "ev_ebit_vs_avg_20y": round(live.get('ev_ebit_vs_avg_20y'), 1) if live.get('ev_ebit_vs_avg_20y') else None,
-                "ev_ebit_vs_avg_10y_2019": round(live.get('ev_ebit_vs_avg_10y_2019'), 1) if live.get('ev_ebit_vs_avg_10y_2019') else None
+                "ev_ebit_vs_avg_5y": safe_round(live.get('ev_ebit_vs_avg_5y'), 1),
+                "ev_ebit_vs_avg_10y": safe_round(live.get('ev_ebit_vs_avg_10y'), 1),
+                "ev_ebit_vs_avg_15y": safe_round(live.get('ev_ebit_vs_avg_15y'), 1),
+                "ev_ebit_vs_avg_20y": safe_round(live.get('ev_ebit_vs_avg_20y'), 1),
+                "ev_ebit_vs_avg_10y_2019": safe_round(live.get('ev_ebit_vs_avg_10y_2019'), 1)
             },
             "growth_overview": {
-                "revenue_cagr_3y": round(live.get('revenue_cagr_3y'), 1) if live.get('revenue_cagr_3y') else None,
-                "revenue_cagr_5y": round(live.get('revenue_cagr_5y'), 1) if live.get('revenue_cagr_5y') else None,
-                "revenue_cagr_10y": round(live.get('revenue_cagr_10y'), 1) if live.get('revenue_cagr_10y') else None,
-                "ebit_cagr_3y": round(live.get('ebit_cagr_3y'), 1) if live.get('ebit_cagr_3y') else None,
-                "ebit_cagr_5y": round(live.get('ebit_cagr_5y'), 1) if live.get('ebit_cagr_5y') else None,
-                "ebit_cagr_10y": round(live.get('ebit_cagr_10y'), 1) if live.get('ebit_cagr_10y') else None,
-                "net_income_cagr_3y": round(live.get('net_income_cagr_3y'), 1) if live.get('net_income_cagr_3y') else None,
-                "net_income_cagr_5y": round(live.get('net_income_cagr_5y'), 1) if live.get('net_income_cagr_5y') else None,
-                "net_income_cagr_10y": round(live.get('net_income_cagr_10y'), 1) if live.get('net_income_cagr_10y') else None
+                "revenue_cagr_3y": safe_round(live.get('revenue_cagr_3y'), 1),
+                "revenue_cagr_5y": safe_round(live.get('revenue_cagr_5y'), 1),
+                "revenue_cagr_10y": safe_round(live.get('revenue_cagr_10y'), 1),
+                "ebit_cagr_3y": safe_round(live.get('ebit_cagr_3y'), 1),
+                "ebit_cagr_5y": safe_round(live.get('ebit_cagr_5y'), 1),
+                "ebit_cagr_10y": safe_round(live.get('ebit_cagr_10y'), 1),
+                "net_income_cagr_3y": safe_round(live.get('net_income_cagr_3y'), 1),
+                "net_income_cagr_5y": safe_round(live.get('net_income_cagr_5y'), 1),
+                "net_income_cagr_10y": safe_round(live.get('net_income_cagr_10y'), 1)
             },
             "margins_overview": {
-                "profit_margin": round(live.get('profit_margin'), 1) if live.get('profit_margin') else None,
-                "operating_margin": round(live.get('operating_margin'), 1) if live.get('operating_margin') else None,
-                "profit_margin_avg_3y": round(live.get('profit_margin_avg_3y'), 1) if live.get('profit_margin_avg_3y') else None,
-                "profit_margin_avg_5y": round(live.get('profit_margin_avg_5y'), 1) if live.get('profit_margin_avg_5y') else None,
-                "profit_margin_avg_10y": round(live.get('profit_margin_avg_10y'), 1) if live.get('profit_margin_avg_10y') else None,
-                "profit_margin_avg_5y_2019": round(live.get('profit_margin_avg_5y_2019'), 1) if live.get('profit_margin_avg_5y_2019') else None,
-                "operating_margin_avg_3y": round(live.get('operating_margin_avg_3y'), 1) if live.get('operating_margin_avg_3y') else None,
-                "operating_margin_avg_5y": round(live.get('operating_margin_avg_5y'), 1) if live.get('operating_margin_avg_5y') else None,
-                "operating_margin_avg_10y": round(live.get('operating_margin_avg_10y'), 1) if live.get('operating_margin_avg_10y') else None,
-                "operating_margin_avg_5y_2019": round(live.get('operating_margin_avg_5y_2019'), 1) if live.get('operating_margin_avg_5y_2019') else None
+                "profit_margin": safe_round(live.get('profit_margin'), 1),
+                "operating_margin": safe_round(live.get('operating_margin'), 1),
+                "profit_margin_avg_3y": safe_round(live.get('profit_margin_avg_3y'), 1),
+                "profit_margin_avg_5y": safe_round(live.get('profit_margin_avg_5y'), 1),
+                "profit_margin_avg_10y": safe_round(live.get('profit_margin_avg_10y'), 1),
+                "profit_margin_avg_5y_2019": safe_round(live.get('profit_margin_avg_5y_2019'), 1),
+                "operating_margin_avg_3y": safe_round(live.get('operating_margin_avg_3y'), 1),
+                "operating_margin_avg_5y": safe_round(live.get('operating_margin_avg_5y'), 1),
+                "operating_margin_avg_10y": safe_round(live.get('operating_margin_avg_10y'), 1),
+                "operating_margin_avg_5y_2019": safe_round(live.get('operating_margin_avg_5y_2019'), 1)
             },
             "ttm_calculation": {
                 "market_cap": live.get('market_cap'),
@@ -873,9 +878,9 @@ def get_stock_details(isin):
                 "net_income": ttm_net_income
             },
             "pe_history": pe_history,
-            "current_ttm_pe": round(current_ttm_pe, 2) if current_ttm_pe else None,
+            "current_ttm_pe": safe_round(current_ttm_pe, 2),
             "ev_ebit_history": ev_ebit_history,
-            "current_ttm_ev_ebit": round(current_ttm_ev_ebit, 2) if current_ttm_ev_ebit else None,
+            "current_ttm_ev_ebit": safe_round(current_ttm_ev_ebit, 2),
             "income_statement": income_statement
         }
 

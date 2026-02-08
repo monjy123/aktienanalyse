@@ -678,43 +678,38 @@ def main():
         conn.commit()
         cur_insert.close()
 
-        # Statistik
+        # Statistik - konsolidierte Query für alle Zähler
         print("\n" + "=" * 60)
         print("FERTIG - STATISTIK")
         print("=" * 60)
 
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics")
-        total = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE ttm_pe IS NOT NULL")
-        with_ttm_pe = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE fy_pe IS NOT NULL")
-        with_fy_pe = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE pe_avg_10y_2019 IS NOT NULL")
-        with_2019 = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE price IS NOT NULL")
-        with_price = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE market_cap IS NOT NULL")
-        with_market_cap = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE yf_ttm_pe IS NOT NULL")
-        with_yf_ttm_pe = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE yf_forward_pe IS NOT NULL")
-        with_yf_forward_pe = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE yf_profit_margin IS NOT NULL")
-        with_yf_profit_margin = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT COUNT(*) as cnt FROM analytics.live_metrics WHERE next_earnings_date IS NOT NULL")
-        with_next_earnings = cur.fetchone()["cnt"]
-
-        cur.execute("SELECT MAX(price_date) as max_date FROM analytics.live_metrics")
-        latest_price_date = cur.fetchone()["max_date"]
+        cur.execute("""
+            SELECT
+                COUNT(*) as total,
+                SUM(CASE WHEN ttm_pe IS NOT NULL THEN 1 ELSE 0 END) as with_ttm_pe,
+                SUM(CASE WHEN fy_pe IS NOT NULL THEN 1 ELSE 0 END) as with_fy_pe,
+                SUM(CASE WHEN pe_avg_10y_2019 IS NOT NULL THEN 1 ELSE 0 END) as with_2019,
+                SUM(CASE WHEN price IS NOT NULL THEN 1 ELSE 0 END) as with_price,
+                SUM(CASE WHEN market_cap IS NOT NULL THEN 1 ELSE 0 END) as with_market_cap,
+                SUM(CASE WHEN yf_ttm_pe IS NOT NULL THEN 1 ELSE 0 END) as with_yf_ttm_pe,
+                SUM(CASE WHEN yf_forward_pe IS NOT NULL THEN 1 ELSE 0 END) as with_yf_forward_pe,
+                SUM(CASE WHEN yf_profit_margin IS NOT NULL THEN 1 ELSE 0 END) as with_yf_profit_margin,
+                SUM(CASE WHEN next_earnings_date IS NOT NULL THEN 1 ELSE 0 END) as with_next_earnings,
+                MAX(price_date) as latest_price_date
+            FROM analytics.live_metrics
+        """)
+        stats = cur.fetchone()
+        total = stats["total"]
+        with_ttm_pe = stats["with_ttm_pe"]
+        with_fy_pe = stats["with_fy_pe"]
+        with_2019 = stats["with_2019"]
+        with_price = stats["with_price"]
+        with_market_cap = stats["with_market_cap"]
+        with_yf_ttm_pe = stats["with_yf_ttm_pe"]
+        with_yf_forward_pe = stats["with_yf_forward_pe"]
+        with_yf_profit_margin = stats["with_yf_profit_margin"]
+        with_next_earnings = stats["with_next_earnings"]
+        latest_price_date = stats["latest_price_date"]
 
         cur.execute("""
             SELECT stock_index, COUNT(*) as cnt

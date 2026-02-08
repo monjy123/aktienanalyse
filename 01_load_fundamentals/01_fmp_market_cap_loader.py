@@ -14,8 +14,6 @@ Workflow:
 """
 
 import sys
-import os
-import time
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -24,20 +22,13 @@ import threading
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import requests
 from tqdm import tqdm
-from dotenv import load_dotenv
 from mysql.connector import Error as MySQLError
 from db import get_connection
+from utils.fmp_api import api_request
 
 # Thread-lokaler Storage für DB-Connections
 thread_local = threading.local()
-
-# .env laden
-load_dotenv(Path(__file__).parent.parent / ".env")
-
-FMP_API_KEY = os.getenv("FMP_API_KEY")
-FMP_BASE_URL = "https://financialmodelingprep.com"
 
 # Anzahl paralleler Threads (FMP erlaubt typischerweise 10-30 parallele Requests)
 MAX_WORKERS = 10
@@ -87,44 +78,12 @@ CREATE TABLE IF NOT EXISTS raw_data.fmp_historical_market_cap (
 
 
 # =============================================================================
-# API Functions
+# API Functions (nutzt utils.fmp_api)
 # =============================================================================
-
-def get_session():
-    """Thread-lokale requests Session für Connection Pooling."""
-    if not hasattr(thread_local, "session"):
-        thread_local.session = requests.Session()
-    return thread_local.session
-
-
-def api_request(endpoint, params=None, max_retries=3):
-    """API Request mit Retry (ohne künstliches Rate Limiting bei Threading)."""
-    if params is None:
-        params = {}
-    params["apikey"] = FMP_API_KEY
-
-    url = f"{FMP_BASE_URL}{endpoint}"
-    session = get_session()
-
-    for attempt in range(max_retries):
-        try:
-            response = session.get(url, params=params, timeout=30)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            if attempt < max_retries - 1:
-                wait = 2 ** attempt
-                logger.warning(f"API Fehler (Versuch {attempt+1}): {e}. Warte {wait}s...")
-                time.sleep(wait)
-            else:
-                logger.error(f"API Fehler nach {max_retries} Versuchen: {e}")
-                return None
-    return None
-
 
 def search_isin(isin):
     """Suche Ticker für ISIN via FMP API."""
-    data = api_request(f"/stable/search-isin", {"isin": isin})
+    data = api_request("/stable/search-isin", {"isin": isin}, rate_limit=0)
     if data and len(data) > 0:
         return data[0]  # Erstes Ergebnis
     return None
@@ -132,10 +91,10 @@ def search_isin(isin):
 
 def get_historical_market_cap(ticker):
     """Lade historische Marktkapitalisierung (30+ Jahre)."""
-    return api_request(f"/stable/historical-market-capitalization", {
+    return api_request("/stable/historical-market-capitalization", {
         "symbol": ticker,
         "from": "1990-01-01"  # 30+ Jahre historische Daten
-    })
+    }, rate_limit=0)  # Kein Rate Limiting bei Threading
 
 
 # =============================================================================

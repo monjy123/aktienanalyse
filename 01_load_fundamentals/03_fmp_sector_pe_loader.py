@@ -20,25 +20,16 @@ GICS Sektoren:
 """
 
 import sys
-import os
-import time
 import logging
 from pathlib import Path
 from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import requests
 from tqdm import tqdm
-from dotenv import load_dotenv
 from mysql.connector import Error as MySQLError
 from db import get_connection
-
-# .env laden
-load_dotenv(Path(__file__).parent.parent / ".env")
-
-FMP_API_KEY = os.getenv("FMP_API_KEY")
-FMP_BASE_URL = "https://financialmodelingprep.com"
+from utils.fmp_api import api_request
 
 # Die 11 Sektoren (FMP-Bezeichnungen)
 FMP_SECTORS = [
@@ -101,41 +92,16 @@ CREATE TABLE IF NOT EXISTS raw_data.fmp_historical_sector_pe (
 
 
 # =============================================================================
-# API Functions
+# API Functions (nutzt utils.fmp_api)
 # =============================================================================
-
-def api_request(endpoint, params=None, max_retries=3):
-    """API Request mit Retry und Rate Limiting."""
-    if params is None:
-        params = {}
-    params["apikey"] = FMP_API_KEY
-
-    url = f"{FMP_BASE_URL}{endpoint}"
-
-    for attempt in range(max_retries):
-        try:
-            time.sleep(0.1)  # Rate Limiting
-            response = requests.get(url, params=params, timeout=30)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            if attempt < max_retries - 1:
-                wait = 2 ** attempt
-                logger.warning(f"API Fehler (Versuch {attempt+1}): {e}. Warte {wait}s...")
-                time.sleep(wait)
-            else:
-                logger.error(f"API Fehler nach {max_retries} Versuchen: {e}")
-                return None
-    return None
-
 
 def get_historical_sector_pe(sector, exchange):
     """Lade historische Sector PE Ratio (alle verfügbaren Daten)."""
-    return api_request(f"/stable/historical-sector-pe", {
+    return api_request("/stable/historical-sector-pe", {
         "sector": sector,
         "exchange": exchange,
         "from": "1990-01-01"  # Maximale Historie anfordern
-    })
+    }, rate_limit=0.1)
 
 
 # =============================================================================

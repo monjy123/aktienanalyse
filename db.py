@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 from dotenv import load_dotenv
 import mysql.connector
 
@@ -30,3 +31,30 @@ def get_connection(db_name=None, autocommit=True):
         database=db_name,
         autocommit=autocommit
     )
+
+
+@contextmanager
+def get_cursor(db_name=None, dictionary=True, autocommit=True):
+    """
+    Context Manager für DB-Cursor mit automatischem Cleanup.
+
+    Verwendung:
+        with get_cursor() as (cur, conn):
+            cur.execute("SELECT * FROM tabelle")
+            rows = cur.fetchall()
+
+    Args:
+        db_name: Datenbankname (optional, wie bei get_connection)
+        dictionary: True für dict-Cursor (default), False für tuple-Cursor
+        autocommit: Autocommit-Modus (default: True)
+
+    Yields:
+        Tuple (cursor, connection)
+    """
+    conn = get_connection(db_name, autocommit=autocommit)
+    cur = conn.cursor(dictionary=dictionary)
+    try:
+        yield cur, conn
+    finally:
+        cur.close()
+        conn.close()
