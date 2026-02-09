@@ -1462,28 +1462,56 @@ def get_dcf_data(isin):
         ebit_margins = [h['ebit_margin'] for h in historical[-5:] if h['ebit_margin'] is not None]
         avg_ebit_margin = sum(ebit_margins) / len(ebit_margins) if ebit_margins else (live.get('operating_margin') or 15.0)
 
-        # Default Wachstum basierend auf historischem CAGR
-        default_growth = revenue_cagr_5y or revenue_cagr_3y or 5.0
+        # YoY Revenue-Wachstum aus historischen Daten + Schätzungen berechnen
+        # Alle Jahre mit Revenue kombinieren (chronologisch)
+        all_revenue = []
+        for h in historical:
+            if h['revenue']:
+                all_revenue.append({'year': h['year'], 'revenue': h['revenue']})
+        for e in estimates:
+            if e.get('revenue'):
+                all_revenue.append({'year': e['year'], 'revenue': e['revenue']})
+        all_revenue.sort(key=lambda x: x['year'])
 
-        defaults = {
-            "revenue_growth_y1": round(default_growth, 1) if default_growth else 8.0,
-            "revenue_growth_y2": round(default_growth * 0.9, 1) if default_growth else 7.0,
-            "revenue_growth_y3": round(default_growth * 0.8, 1) if default_growth else 6.0,
-            "revenue_growth_y4": round(default_growth * 0.7, 1) if default_growth else 5.0,
-            "revenue_growth_y5": round(default_growth * 0.6, 1) if default_growth else 4.0,
-            "revenue_growth_y6": round(default_growth * 0.5, 1) if default_growth else 3.5,
-            "revenue_growth_y7": round(default_growth * 0.4, 1) if default_growth else 3.0,
-            "revenue_growth_y8": round(default_growth * 0.35, 1) if default_growth else 2.5,
-            "revenue_growth_y9": round(default_growth * 0.3, 1) if default_growth else 2.0,
-            "revenue_growth_y10": round(default_growth * 0.25, 1) if default_growth else 2.0,
-            "ebit_margin": round(avg_ebit_margin, 1),
+        # YoY-Wachstumsraten für Projektionsjahre berechnen
+        yoy_growth = {}
+        for i in range(1, len(all_revenue)):
+            prev_rev = all_revenue[i - 1]['revenue']
+            curr_rev = all_revenue[i]['revenue']
+            curr_year = all_revenue[i]['year']
+            if prev_rev and prev_rev > 0 and curr_rev:
+                growth = ((curr_rev / prev_rev) - 1) * 100
+                proj_year = curr_year - last_hist_year
+                if 1 <= proj_year <= 10:
+                    yoy_growth[proj_year] = round(growth, 1)
+
+        # Fallback: CAGR-basiertes Tapering für Jahre ohne Schätzungen
+        default_growth = revenue_cagr_5y or revenue_cagr_3y or 5.0
+        tapering = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.35, 0.3, 0.25]
+
+        defaults = {}
+        for i in range(1, 11):
+            if i in yoy_growth:
+                defaults[f"revenue_growth_y{i}"] = yoy_growth[i]
+            elif default_growth:
+                defaults[f"revenue_growth_y{i}"] = round(default_growth * tapering[i - 1], 1)
+            else:
+                defaults[f"revenue_growth_y{i}"] = round(5.0 * tapering[i - 1], 1)
+
+        # EBIT-Marge: erstes Estimate-Jahr bevorzugen, sonst historischer Durchschnitt
+        first_est_ebit_margin = None
+        if estimates and estimates[0].get('ebit_margin') is not None:
+            first_est_ebit_margin = estimates[0]['ebit_margin']
+
+        defaults.update({
+            "ebit_margin": round(first_est_ebit_margin, 1) if first_est_ebit_margin is not None else round(avg_ebit_margin, 1),
             "tax_rate": 25.0,
             "capex_percent": 3.0,
             "wc_change_percent": 0.0,
             "depreciation_percent": 3.0,
             "terminal_growth": 2.0,
             "wacc": 9.0
-        }
+        })
 
         # 7. Gespeicherte Szenarien des Users laden
         cur.execute("""
