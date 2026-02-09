@@ -648,11 +648,14 @@ def get_stock_details(isin):
         ev_components = cur.fetchone() or {}
 
         # 4. TTM-Berechnung: Quartale ODER Halbjahre aus fmp_filtered_numbers
+        #    Nur Perioden mit revenue UND net_income (unvollstaendige ignorieren)
         cur.execute("""
             SELECT period, date, net_income, revenue, gross_profit, operating_income
             FROM analytics.fmp_filtered_numbers
             WHERE isin = %s AND period != 'FY'
               AND date >= DATE_SUB(CURDATE(), INTERVAL 18 MONTH)
+              AND revenue IS NOT NULL
+              AND net_income IS NOT NULL
             ORDER BY date DESC
         """, (isin,))
         all_periods = cur.fetchall()

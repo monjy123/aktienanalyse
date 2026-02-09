@@ -108,10 +108,19 @@ function getCurrentView() {
 document.addEventListener('DOMContentLoaded', function() {
 
     // =========================================================================
-    // Stock Detail Modal Variablen (früh deklariert für alle Event-Handler)
+    // Unified Modal State (alle 8 Tabs in einem Modal)
     // =========================================================================
-    let currentDetailData = null;
-    let currentTab = 'pe';
+    let modalState = {
+        isin: null,
+        activeTab: 'pe',
+        cache: {
+            detailData: null,   // /api/stock/{isin}/details → KGV, EV/EBIT, Wachstum, Margen
+            infoData: null,     // /api/stock/{isin}/info → Info
+            priceData: null,    // /api/stock/{isin}/price-history → Chart
+            earningsData: null, // /api/stock/{isin}/earnings → Earnings
+            dcfData: null       // /api/stock/{isin}/dcf-data → DCF
+        }
+    };
     let peChart = null;
     let incomeChart = null;
     let evEbitChart = null;
@@ -296,33 +305,35 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetModalState(modal) {
         if (!modal) return;
 
-        // Reset Detail Modal Zustand
         if (modal.id === 'stock-detail-modal') {
-            currentDetailData = null;
-            currentTab = 'pe';
-        }
+            // Reset unified modal state
+            modalState.isin = null;
+            modalState.activeTab = 'pe';
+            modalState.cache = {
+                detailData: null,
+                infoData: null,
+                priceData: null,
+                earningsData: null,
+                dcfData: null
+            };
 
-        // Reset Company Info Modal Zustand
-        if (modal.id === 'company-info-modal') {
-            if (typeof currentCompanyInfoData !== 'undefined') {
-                currentCompanyInfoData = null;
-                currentCompanyInfoTab = 'info';
-                currentCompanyIsin = null;
-            }
-            // Reset earnings data if exists
-            if (typeof currentEarningsData !== 'undefined') {
-                currentEarningsData = null;
-            }
-            // Destroy price chart if exists
-            if (typeof priceChart !== 'undefined' && priceChart) {
-                priceChart.destroy();
-                priceChart = null;
-            }
-            // Reset Tab zum "Info" Tab
-            const infoTabsEl = document.getElementById('info-tabs');
-            if (infoTabsEl) {
-                infoTabsEl.querySelectorAll('.detail-tab').forEach(t => {
-                    t.classList.toggle('active', t.dataset.tab === 'info');
+            // Destroy all charts
+            if (priceChart) { priceChart.destroy(); priceChart = null; }
+            if (peChart) { peChart.destroy(); peChart = null; }
+            if (incomeChart) { incomeChart.destroy(); incomeChart = null; }
+            if (evEbitChart) { evEbitChart.destroy(); evEbitChart = null; }
+            if (ebitChart) { ebitChart.destroy(); ebitChart = null; }
+            if (growthRevenueChart) { growthRevenueChart.destroy(); growthRevenueChart = null; }
+            if (growthEbitChart) { growthEbitChart.destroy(); growthEbitChart = null; }
+            if (growthNetIncomeChart) { growthNetIncomeChart.destroy(); growthNetIncomeChart = null; }
+            if (marginsChart) { marginsChart.destroy(); marginsChart = null; }
+            if (dcfChart) { dcfChart.destroy(); dcfChart = null; }
+
+            // Reset tabs visual
+            const tabsEl = document.getElementById('unified-tabs');
+            if (tabsEl) {
+                tabsEl.querySelectorAll('.detail-tab').forEach(t => {
+                    t.classList.toggle('active', t.dataset.tab === 'pe');
                 });
             }
         }
@@ -1304,10 +1315,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailCompanyName = document.getElementById('detail-company-name');
     const detailMeta = document.getElementById('detail-meta');
     const detailBody = document.getElementById('detail-body');
-    // Tab-Klicks mit Event Delegation am Modal-Container
+    // Unified Tab-Klicks mit Event Delegation am Modal-Container
     if (stockDetailModal) {
         stockDetailModal.addEventListener('click', function(e) {
-            // Prüfe ob ein Tab-Button geklickt wurde
             const tab = e.target.closest('.detail-tab');
             if (!tab) return;
 
@@ -1315,27 +1325,15 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
 
             const tabType = tab.dataset.tab;
-
-            // Wenn keine Daten vorhanden, nichts tun
-            if (!currentDetailData) return;
+            if (!modalState.isin) return;
 
             // Aktiven Tab wechseln
             stockDetailModal.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            currentTab = tabType;
+            modalState.activeTab = tabType;
 
-            // Content rendern
-            if (tabType === 'ev_ebit') {
-                renderEvEbitDetail(currentDetailData);
-            } else if (tabType === 'growth') {
-                renderGrowthDetail(currentDetailData);
-            } else if (tabType === 'margins') {
-                renderMarginsDetail(currentDetailData);
-            } else if (tabType === 'dcf') {
-                loadDcfData(currentDetailData.company.isin);
-            } else {
-                renderStockDetail(currentDetailData);
-            }
+            // Content laden via Dispatcher
+            loadTabContent(tabType);
         });
     }
 
@@ -1395,15 +1393,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Bestimme Modal-Typ basierend auf Spalte
                 if (PE_COLUMNS.has(columnKey)) {
-                    openStockDetail(isin, 'pe');
+                    openUnifiedModal(isin, 'pe');
                 } else if (EV_EBIT_COLUMNS.has(columnKey)) {
-                    openStockDetail(isin, 'ev_ebit');
+                    openUnifiedModal(isin, 'ev_ebit');
                 } else if (GROWTH_COLUMNS.has(columnKey)) {
-                    openStockDetail(isin, 'growth');
+                    openUnifiedModal(isin, 'growth');
                 } else if (MARGIN_COLUMNS.has(columnKey)) {
-                    openStockDetail(isin, 'margins');
+                    openUnifiedModal(isin, 'margins');
                 } else if (columnKey === 'price') {
-                    openCompanyInfoModal(isin);
+                    openUnifiedModal(isin, 'chart');
                 }
             });
         });
@@ -1424,33 +1422,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Legacy-Support: Wird nicht mehr benötigt, aber für Kompatibilität beibehalten
-    function initializeClickableCellsLegacy() {
-        document.querySelectorAll('.stock-table tbody td[data-column]').forEach(cell => {
-            const columnKey = cell.dataset.column;
-
-            if (columnKey === 'company_name') return;
-            if (cell.classList.contains('clickable-cell')) return;
-
-            // Kurs-Spalte (price) - öffnet Chart im Company Info Modal
-            if (columnKey === 'price') {
-                cell.classList.add('clickable-cell');
-                cell.addEventListener('click', function(e) {
-                    const row = this.closest('tr');
-                    const isin = row?.dataset.isin;
-                    if (isin) {
-                        openCompanyInfoWithTab(isin, 'chart');
-                    }
-                });
-            }
-        });
-    }
-
     // Klick auf Tabellenzellen mit Kennzahlen initialisieren
     initializeClickableCells();
 
-    async function openStockDetail(isin, type = 'pe') {
+    // Helper: Modal-Header konsistent setzen (Ticker | Sektor | Land | FJ)
+    function setModalHeader(companyData) {
+        if (!companyData) return;
+        // Normalisiere verschiedene API-Formate (flat vs nested)
+        const name = companyData.name || companyData.company_name || '-';
+        const ticker = companyData.ticker || '';
+        const sector = companyData.sector || '';
+        const country = companyData.country || '';
+        const fiscalYear = companyData.fiscal_year_end ? ` | FJ: ${companyData.fiscal_year_end}` : '';
+
+        detailCompanyName.textContent = name;
+        const parts = [ticker, sector, country].filter(Boolean);
+        detailMeta.textContent = parts.join(' | ') + fiscalYear;
+    }
+
+    // Unified Modal öffnen — ersetzt openStockDetail, openCompanyInfo, openCompanyInfoWithTab
+    async function openUnifiedModal(isin, tab = 'pe') {
         if (!stockDetailModal) return;
+
+        // Bei neuem ISIN: Cache leeren
+        if (modalState.isin !== isin) {
+            modalState.isin = isin;
+            modalState.cache = {
+                detailData: null,
+                infoData: null,
+                priceData: null,
+                earningsData: null,
+                dcfData: null
+            };
+        }
+
+        modalState.activeTab = tab;
 
         // Modal öffnen mit Ladeindikator
         stockDetailModal.classList.remove('hidden');
@@ -1459,31 +1465,73 @@ document.addEventListener('DOMContentLoaded', function() {
         detailBody.innerHTML = '<div class="detail-loading">Lade Daten...</div>';
 
         // Aktiven Tab setzen
-        currentTab = type;
-        stockDetailModal.querySelectorAll('.detail-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.tab === type);
+        stockDetailModal.querySelectorAll('.detail-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tab);
         });
 
+        // Content laden via Dispatcher
+        loadTabContent(tab);
+    }
+
+    // Zentraler Tab-Dispatcher: Prüft Cache, lädt bei Bedarf, rendert
+    async function loadTabContent(tab) {
+        const isin = modalState.isin;
+        if (!isin) return;
+
         try {
-            const response = await fetch(`/api/stock/${isin}/details`);
-            if (!response.ok) throw new Error('Fehler beim Laden');
+            if (tab === 'pe' || tab === 'ev_ebit' || tab === 'growth' || tab === 'margins') {
+                // Diese 4 Tabs teilen sich den /details-Endpoint
+                if (!modalState.cache.detailData) {
+                    detailBody.innerHTML = '<div class="detail-loading">Lade Daten...</div>';
+                    const response = await fetch(`/api/stock/${isin}/details`);
+                    if (!response.ok) throw new Error('Fehler beim Laden');
+                    modalState.cache.detailData = await response.json();
+                }
+                const data = modalState.cache.detailData;
+                if (tab === 'ev_ebit') renderEvEbitDetail(data);
+                else if (tab === 'growth') renderGrowthDetail(data);
+                else if (tab === 'margins') renderMarginsDetail(data);
+                else renderStockDetail(data);
 
-            const data = await response.json();
-            currentDetailData = data; // Daten cachen für Tab-Wechsel
+            } else if (tab === 'info') {
+                if (!modalState.cache.infoData) {
+                    detailBody.innerHTML = '<div class="detail-loading">Lade Daten...</div>';
+                    const response = await fetch(`/api/stock/${isin}/info`);
+                    if (!response.ok) throw new Error('Fehler beim Laden');
+                    modalState.cache.infoData = await response.json();
+                }
+                renderCompanyInfo(modalState.cache.infoData);
 
-            // Je nach Typ unterschiedliches Modal rendern
-            if (type === 'ev_ebit') {
-                renderEvEbitDetail(data);
-            } else if (type === 'growth') {
-                renderGrowthDetail(data);
-            } else if (type === 'margins') {
-                renderMarginsDetail(data);
-            } else if (type === 'dcf') {
-                loadDcfData(isin);
-            } else {
-                renderStockDetail(data);
+            } else if (tab === 'chart') {
+                if (!modalState.cache.priceData) {
+                    detailBody.innerHTML = '<div class="detail-loading">Lade Kursdaten...</div>';
+                    const response = await fetch(`/api/stock/${isin}/price-history`);
+                    if (!response.ok) throw new Error('Fehler beim Laden');
+                    modalState.cache.priceData = await response.json();
+                }
+                renderPriceChart(modalState.cache.priceData);
+
+            } else if (tab === 'earnings') {
+                if (!modalState.cache.earningsData) {
+                    detailBody.innerHTML = '<div class="detail-loading">Lade Earnings-Daten...</div>';
+                    const response = await fetch(`/api/stock/${isin}/earnings`);
+                    if (!response.ok) throw new Error('Fehler beim Laden');
+                    modalState.cache.earningsData = await response.json();
+                }
+                renderEarningsTab(modalState.cache.earningsData);
+
+            } else if (tab === 'dcf') {
+                if (!modalState.cache.dcfData) {
+                    detailBody.innerHTML = '<div class="detail-loading">Lade DCF-Daten...</div>';
+                    const response = await fetch(`/api/stock/${isin}/dcf-data`);
+                    if (!response.ok) throw new Error('Fehler beim Laden');
+                    modalState.cache.dcfData = await response.json();
+                    dcfData = modalState.cache.dcfData;
+                    currentScenarioId = null;
+                    currentDcfResult = null;
+                }
+                renderDcfDetail(modalState.cache.dcfData);
             }
-
         } catch (error) {
             console.error('Fehler:', error);
             detailBody.innerHTML = '<div class="detail-loading">Fehler beim Laden der Daten.</div>';
@@ -1492,9 +1540,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderStockDetail(data) {
         // Header
-        detailCompanyName.textContent = data.company.name || '-';
-        const fiscalYear = data.company.fiscal_year_end ? ` | FJ: ${data.company.fiscal_year_end}` : '';
-        detailMeta.textContent = `${data.company.ticker} | ${data.company.sector || '-'} | ${data.company.country || '-'}${fiscalYear}`;
+        setModalHeader(data.company);
 
         // Formatierungsfunktionen
         const formatBillions = (val) => {
@@ -2006,9 +2052,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderEvEbitDetail(data) {
         // Header
-        detailCompanyName.textContent = data.company.name || '-';
-        const fiscalYear = data.company.fiscal_year_end ? ` | FJ: ${data.company.fiscal_year_end}` : '';
-        detailMeta.textContent = `${data.company.ticker} | ${data.company.sector || '-'} | ${data.company.country || '-'}${fiscalYear}`;
+        setModalHeader(data.company);
 
         // Formatierungsfunktionen
         const formatBillions = (val) => {
@@ -2555,9 +2599,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderGrowthDetail(data) {
         // Header
-        detailCompanyName.textContent = data.company.name || '-';
-        const fiscalYear = data.company.fiscal_year_end ? ` | FJ: ${data.company.fiscal_year_end}` : '';
-        detailMeta.textContent = `${data.company.ticker} | ${data.company.sector || '-'} | ${data.company.country || '-'}${fiscalYear}`;
+        setModalHeader(data.company);
 
         // Formatierungsfunktionen
         const formatBillions = (val) => {
@@ -2852,9 +2894,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderMarginsDetail(data) {
         // Header
-        detailCompanyName.textContent = data.company.name || '-';
-        const fiscalYear = data.company.fiscal_year_end ? ` | FJ: ${data.company.fiscal_year_end}` : '';
-        detailMeta.textContent = `${data.company.ticker} | ${data.company.sector || '-'} | ${data.company.country || '-'}${fiscalYear}`;
+        setModalHeader(data.company);
 
         // Formatierungsfunktionen
         const formatBillions = (val) => {
@@ -3191,111 +3231,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =========================================================================
-    // Company Info Modal (Unternehmensbeschreibung + Chart mit Tabs)
+    // Company Info / Chart / Earnings Render-Funktionen (jetzt im Unified Modal)
     // =========================================================================
-    const companyInfoModal = document.getElementById('company-info-modal');
-    const infoCompanyName = document.getElementById('info-company-name');
-    const infoMeta = document.getElementById('info-meta');
-    const companyInfoBody = document.getElementById('info-body');
-    const infoTabs = document.getElementById('info-tabs');
-
-    // Zustandsvariablen für Company Info Modal
-    let currentCompanyInfoData = null;
-    let currentCompanyInfoTab = 'info';
-    let currentCompanyIsin = null;
     let priceChart = null;
 
-    // Tab-Klicks für Company Info Modal - Event Delegation auf Container
-    if (infoTabs) {
-        infoTabs.addEventListener('click', function(e) {
-            const tabBtn = e.target.closest('.detail-tab');
-            if (!tabBtn) return;
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            const tabType = tabBtn.dataset.tab;
-            console.log('Info Tab clicked:', tabType, 'ISIN:', currentCompanyIsin);
-
-            if (!currentCompanyIsin) {
-                console.warn('No ISIN set for company info modal');
-                return;
-            }
-
-            // Aktiven Tab wechseln
-            infoTabs.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
-            tabBtn.classList.add('active');
-            currentCompanyInfoTab = tabType;
-
-            // Content rendern
-            if (tabType === 'chart') {
-                loadPriceChart(currentCompanyIsin);
-            } else if (tabType === 'earnings') {
-                loadEarningsData(currentCompanyIsin);
-            } else {
-                if (currentCompanyInfoData) {
-                    renderCompanyInfo(currentCompanyInfoData);
-                } else {
-                    loadCompanyInfo(currentCompanyIsin);
-                }
-            }
-        });
-    }
-
-    async function openCompanyInfo(isin) {
-        openCompanyInfoWithTab(isin, 'info');
-    }
-
-    async function openCompanyInfoWithTab(isin, tab = 'info') {
-        if (!companyInfoModal) return;
-
-        currentCompanyIsin = isin;
-        currentCompanyInfoTab = tab;
-        currentCompanyInfoData = null;
-
-        // Modal öffnen mit Ladeindikator
-        companyInfoModal.classList.remove('hidden');
-        infoCompanyName.textContent = 'Lade...';
-        infoMeta.textContent = '';
-        companyInfoBody.innerHTML = '<div class="detail-loading">Lade Daten...</div>';
-
-        // Aktiven Tab setzen
-        if (infoTabs) {
-            infoTabs.querySelectorAll('.detail-tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.tab === tab);
-            });
-        }
-
-        // Je nach Tab laden
-        if (tab === 'chart') {
-            loadPriceChart(isin);
-        } else if (tab === 'earnings') {
-            loadEarningsData(isin);
-        } else {
-            loadCompanyInfo(isin);
-        }
-    }
-
-    async function loadCompanyInfo(isin) {
-        try {
-            const response = await fetch(`/api/stock/${isin}/info`);
-            if (!response.ok) throw new Error('Fehler beim Laden');
-
-            const data = await response.json();
-            currentCompanyInfoData = data;
-            renderCompanyInfo(data);
-
-        } catch (error) {
-            console.error('Fehler:', error);
-            companyInfoBody.innerHTML = '<div class="detail-loading">Fehler beim Laden der Daten.</div>';
-        }
-    }
-
     function renderCompanyInfo(data) {
-        // Header
-        infoCompanyName.textContent = data.company_name || '-';
-        const fiscalYear = data.fiscal_year_end ? ` | FJ: ${data.fiscal_year_end}` : '';
-        infoMeta.textContent = `${data.ticker} | ${data.sector || '-'} | ${data.country || '-'}${fiscalYear}`;
+        // Header (flat format from /info endpoint)
+        setModalHeader({
+            name: data.company_name,
+            ticker: data.ticker,
+            sector: data.sector,
+            country: data.country,
+            fiscal_year_end: data.fiscal_year_end
+        });
 
         // Body: Beschreibung
         let html = '<div class="company-description">';
@@ -3336,33 +3284,12 @@ document.addEventListener('DOMContentLoaded', function() {
         html += '</div>';
 
         html += '</div>';
-        companyInfoBody.innerHTML = html;
-    }
-
-    async function loadPriceChart(isin) {
-        console.log('loadPriceChart called with ISIN:', isin);
-        companyInfoBody.innerHTML = '<div class="detail-loading">Lade Kursdaten...</div>';
-
-        try {
-            console.log('Fetching price history...');
-            const response = await fetch(`/api/stock/${isin}/price-history`);
-            console.log('Response status:', response.status);
-            if (!response.ok) throw new Error('Fehler beim Laden: ' + response.status);
-
-            const data = await response.json();
-            console.log('Price data received:', data);
-            renderPriceChart(data);
-
-        } catch (error) {
-            console.error('Fehler beim Laden der Kursdaten:', error);
-            companyInfoBody.innerHTML = '<div class="detail-loading">Fehler beim Laden der Kursdaten.</div>';
-        }
+        detailBody.innerHTML = html;
     }
 
     function renderPriceChart(data) {
         // Header aktualisieren
-        infoCompanyName.textContent = data.company.name || '-';
-        infoMeta.textContent = `${data.company.ticker} | Kursverlauf`;
+        setModalHeader(data.company);
 
         const formatCurrency = (val, currency) => {
             if (val === null || val === undefined) return '-';
@@ -3419,7 +3346,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
 
-        companyInfoBody.innerHTML = html;
+        detailBody.innerHTML = html;
 
         // Chart rendern
         if (typeof Chart !== 'undefined' && data.prices && data.prices.length > 0) {
@@ -3436,7 +3363,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }, 100);
         } else {
-            companyInfoBody.innerHTML = '<div class="detail-loading">Keine Kursdaten verfügbar.</div>';
+            detailBody.innerHTML = '<div class="detail-loading">Keine Kursdaten verfügbar.</div>';
         }
     }
 
@@ -3558,41 +3485,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =========================================================================
-    // Earnings Tab (Company Info Modal)
+    // Earnings Tab (jetzt im Unified Modal)
     // =========================================================================
-    let currentEarningsData = null;
-
-    async function loadEarningsData(isin) {
-        console.log('loadEarningsData called with ISIN:', isin);
-        companyInfoBody.innerHTML = '<div class="detail-loading">Lade Earnings-Daten...</div>';
-
-        try {
-            console.log('Fetching earnings data...');
-            const response = await fetch(`/api/stock/${isin}/earnings`);
-            console.log('Response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                throw new Error('Fehler beim Laden: ' + response.status);
-            }
-
-            const data = await response.json();
-            console.log('Earnings data received:', data);
-            currentEarningsData = data;
-            renderEarningsTab(data);
-
-        } catch (error) {
-            console.error('Fehler beim Laden der Earnings-Daten:', error);
-            companyInfoBody.innerHTML = `<div class="detail-loading">Fehler beim Laden der Earnings-Daten: ${error.message}</div>`;
-        }
-    }
-
     function renderEarningsTab(data) {
         // Header aktualisieren
-        infoCompanyName.textContent = data.company.name || '-';
-        const fiscalYear = data.company.fiscal_year_end ? ` | FJ: ${data.company.fiscal_year_end}` : '';
-        infoMeta.textContent = `${data.company.ticker} | Earnings${fiscalYear}`;
+        setModalHeader(data.company);
 
         // Formatierungsfunktionen
         const formatNumber = (val, decimals = 2) => {
@@ -3843,7 +3740,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
 
-        companyInfoBody.innerHTML = html;
+        detailBody.innerHTML = html;
     }
 
     // Event-Listener für Klicks auf Unternehmensnamen
@@ -3859,7 +3756,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const row = this.closest('tr');
                 const isin = row?.dataset.isin;
                 if (isin) {
-                    openCompanyInfo(isin);
+                    openUnifiedModal(isin, 'info');
                 }
             });
         });
@@ -3884,6 +3781,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error('Fehler beim Laden');
 
             dcfData = await response.json();
+            modalState.cache.dcfData = dcfData;
             currentScenarioId = null;
             currentDcfResult = null;
             renderDcfDetail(dcfData);
@@ -3896,8 +3794,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderDcfDetail(data) {
         // Header aktualisieren
-        detailCompanyName.textContent = data.company.name || '-';
-        detailMeta.textContent = `${data.company.ticker} | DCF-Bewertung`;
+        setModalHeader(data.company);
 
         const formatBillions = (val) => {
             if (val === null || val === undefined) return '-';

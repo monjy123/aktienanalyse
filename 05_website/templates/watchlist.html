@@ -146,7 +146,10 @@
                     <h3 id="detail-company-name">-</h3>
                     <span class="detail-meta" id="detail-meta">-</span>
                 </div>
-                <div class="detail-tabs">
+                <div class="detail-tabs" id="unified-tabs">
+                    <button type="button" class="detail-tab" data-tab="info">Info</button>
+                    <button type="button" class="detail-tab" data-tab="chart">Chart</button>
+                    <button type="button" class="detail-tab" data-tab="earnings">Earnings</button>
                     <button type="button" class="detail-tab active" data-tab="pe">KGV</button>
                     <button type="button" class="detail-tab" data-tab="ev_ebit">EV/EBIT</button>
                     <button type="button" class="detail-tab" data-tab="growth">Wachstum</button>
@@ -177,28 +180,6 @@
     </div>
 </div>
 
-<!-- Modal für Unternehmensinformationen mit Tabs -->
-<div id="company-info-modal" class="modal hidden">
-    <div class="modal-content modal-xlarge">
-        <div class="modal-header">
-            <div class="detail-header-left">
-                <div class="detail-header-info">
-                    <h3 id="info-company-name">-</h3>
-                    <span class="detail-meta" id="info-meta">-</span>
-                </div>
-                <div class="detail-tabs" id="info-tabs">
-                    <button type="button" class="detail-tab active" data-tab="info">Info</button>
-                    <button type="button" class="detail-tab" data-tab="chart">Chart</button>
-                    <button type="button" class="detail-tab" data-tab="earnings">Earnings</button>
-                </div>
-            </div>
-            <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body" id="info-body">
-            <div class="detail-loading">Lade Daten...</div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}

@@ -995,7 +995,7 @@ h1 {
 }
 
 .detail-tab {
-    padding: 6px 16px;
+    padding: 6px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
     background: #f8f9fa;
@@ -1379,19 +1379,6 @@ h1 {
 .stock-table tbody td.clickable-cell:hover {
     background: #e8f0fe;
     text-decoration: underline;
-}
-
-/* =============================================================================
-   Company Info Modal
-============================================================================= */
-#company-info-modal .modal-content {
-    max-width: 900px;
-    max-height: 90vh;
-}
-
-#company-info-modal .modal-body {
-    max-height: 75vh;
-    overflow-y: auto;
 }
 
 .company-description {
@@ -2643,8 +2630,7 @@ h1 {
     #note-modal .modal-content,
     #columns-modal .modal-content,
     #filter-modal .modal-content,
-    #stock-detail-modal .modal-content,
-    #company-info-modal .modal-content {
+    #stock-detail-modal .modal-content {
         width: 100% !important;
         max-width: 100% !important;
         height: 100vh !important;
@@ -2721,7 +2707,7 @@ h1 {
         font-size: 0.85em;
         flex: 1;
         text-align: center;
-        min-width: calc(33% - 6px);
+        min-width: calc(25% - 6px);
     }
 
     .pe-section-grid {
