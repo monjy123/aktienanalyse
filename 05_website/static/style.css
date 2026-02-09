@@ -948,7 +948,7 @@ h1 {
    Stock Detail Modal
 ============================================================================= */
 .modal-xlarge {
-    max-width: 1200px;
+    max-width: 1500px;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
@@ -1923,12 +1923,12 @@ h1 {
 
 .dcf-full-width-table {
     width: 100%;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .dcf-full-width-table th,
 .dcf-full-width-table td {
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.5rem;
     white-space: nowrap;
     text-align: right;
 }
@@ -1955,6 +1955,21 @@ h1 {
 .dcf-full-width-table thead .dcf-estimate-col {
     background: #d4e5f7;
     font-weight: 600;
+}
+
+/* YoY-Veränderungszeilen */
+.dcf-yoy-row td {
+    font-size: 0.7rem;
+    color: rgba(0, 0, 0, 0.45);
+    padding-top: 0;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+.dcf-yoy-row td.dcf-estimate-col {
+    color: rgba(44, 82, 130, 0.5);
+}
+.dcf-yoy-row td:first-child {
+    font-weight: normal;
 }
 
 /* DCF CAGR Row */

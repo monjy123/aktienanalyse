@@ -3914,6 +3914,62 @@ document.addEventListener('DOMContentLoaded', function() {
             return val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
         };
 
+        const formatEps = (val) => {
+            if (val === null || val === undefined) return '-';
+            return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        // YoY-Berechnung: Prozentuale Veränderung zum Vorjahr
+        const allData = [...data.historical, ...(data.estimates || [])];
+        const calcYoy = (key) => {
+            return allData.map((item, i) => {
+                if (i === 0) return null;
+                const prev = allData[i - 1][key];
+                const curr = item[key];
+                if (prev === null || prev === undefined || curr === null || curr === undefined || prev === 0) return null;
+                return ((curr - prev) / Math.abs(prev)) * 100;
+            });
+        };
+        // Für Margen: Differenz in Prozentpunkten statt prozentuale Veränderung
+        const calcYoyMargin = (key) => {
+            return allData.map((item, i) => {
+                if (i === 0) return null;
+                const prev = allData[i - 1][key];
+                const curr = item[key];
+                if (prev === null || prev === undefined || curr === null || curr === undefined) return null;
+                return curr - prev;
+            });
+        };
+
+        const yoyRevenue = calcYoy('revenue');
+        const yoyEbit = calcYoy('ebit');
+        const yoyFcf = calcYoy('fcf');
+        const yoyNetIncome = calcYoy('net_income');
+        const yoyEps = calcYoy('eps');
+        const yoyEbitMargin = calcYoyMargin('ebit_margin');
+        const yoyProfitMargin = calcYoyMargin('profit_margin');
+
+        const numHistorical = data.historical.length;
+        const formatYoy = (val) => {
+            if (val === null || val === undefined) return '';
+            const sign = val >= 0 ? '+' : '';
+            return sign + val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+        };
+        const formatYoyPp = (val) => {
+            if (val === null || val === undefined) return '';
+            const sign = val >= 0 ? '+' : '';
+            return sign + val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' pp';
+        };
+
+        const buildYoyRow = (label, yoyArr, formatter) => {
+            let cells = '';
+            for (let i = 0; i < yoyArr.length; i++) {
+                const cls = i >= numHistorical ? 'dcf-estimate-col' : 'dcf-historical-col';
+                cells += `<td class="${cls}">${formatter(yoyArr[i])}</td>`;
+            }
+            return `<tr class="dcf-yoy-row"><td>${label}</td>${cells}</tr>`;
+        };
+
         // Defaults oder geladenes Szenario verwenden
         const defaults = data.defaults;
 
@@ -3948,20 +4004,39 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ${data.historical.map(h => `<td class="dcf-historical-col">${formatBillions(h.revenue)}</td>`).join('')}
                                 ${estimates.map(e => `<td class="dcf-estimate-col">${formatBillions(e.revenue)}</td>`).join('')}
                             </tr>
+                            ${buildYoyRow('YoY', yoyRevenue, formatYoy)}
                             <tr>
                                 <td>EBIT</td>
                                 ${data.historical.map(h => `<td class="dcf-historical-col">${formatBillions(h.ebit)}</td>`).join('')}
                                 ${estimates.map(e => `<td class="dcf-estimate-col">${formatBillions(e.ebit)}</td>`).join('')}
                             </tr>
+                            ${buildYoyRow('YoY', yoyEbit, formatYoy)}
                             <tr>
                                 <td>FCF</td>
                                 ${data.historical.map(h => `<td class="dcf-historical-col">${formatBillions(h.fcf)}</td>`).join('')}
                                 ${estimates.map(e => `<td class="dcf-estimate-col">${formatBillions(e.fcf)}</td>`).join('')}
                             </tr>
+                            ${buildYoyRow('YoY', yoyFcf, formatYoy)}
+                            <tr>
+                                <td>Gewinn</td>
+                                ${data.historical.map(h => `<td class="dcf-historical-col">${formatBillions(h.net_income)}</td>`).join('')}
+                                ${estimates.map(e => `<td class="dcf-estimate-col">${formatBillions(e.net_income)}</td>`).join('')}
+                            </tr>
+                            ${buildYoyRow('YoY', yoyNetIncome, formatYoy)}
+                            <tr>
+                                <td>Gewinn/Aktie</td>
+                                ${data.historical.map(h => `<td class="dcf-historical-col">${formatEps(h.eps)}</td>`).join('')}
+                                ${estimates.map(e => `<td class="dcf-estimate-col">${formatEps(e.eps)}</td>`).join('')}
+                            </tr>
                             <tr>
                                 <td>EBIT-Marge</td>
                                 ${data.historical.map(h => `<td class="dcf-historical-col">${formatPercent(h.ebit_margin)}</td>`).join('')}
                                 ${estimates.map(e => `<td class="dcf-estimate-col">${formatPercent(e.ebit_margin)}</td>`).join('')}
+                            </tr>
+                            <tr>
+                                <td>Gewinnmarge</td>
+                                ${data.historical.map(h => `<td class="dcf-historical-col">${formatPercent(h.profit_margin)}</td>`).join('')}
+                                ${estimates.map(e => `<td class="dcf-estimate-col">${formatPercent(e.profit_margin)}</td>`).join('')}
                             </tr>
                         </tbody>
                     </table>
@@ -4053,6 +4128,10 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         detailBody.innerHTML = html;
+
+        // Auto-Scroll: Tabelle nach rechts scrollen damit Estimates sichtbar sind
+        const dcfTableContainer = document.querySelector('.dcf-data-table-container');
+        if (dcfTableContainer) dcfTableContainer.scrollLeft = dcfTableContainer.scrollWidth;
 
         // Event-Listener für Berechnen-Button
         document.getElementById('dcf-calculate-btn').addEventListener('click', () => {

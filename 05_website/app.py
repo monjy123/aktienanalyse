@@ -1321,14 +1321,14 @@ def get_dcf_data(isin):
         """, (isin,))
         balance = cur.fetchone() or {}
 
-        # 4. Historische Daten (5 Jahre) für Revenue, EBIT, FCF
+        # 4. Historische Daten (10 Jahre) für Revenue, EBIT, FCF, Net Income, EPS
         cur.execute("""
             SELECT YEAR(date) as year, revenue, operating_income,
-                   free_cash_flow, net_income
+                   free_cash_flow, net_income, COALESCE(eps_diluted, eps) as eps
             FROM analytics.fmp_filtered_numbers
             WHERE isin = %s AND period = 'FY'
             ORDER BY date DESC
-            LIMIT 5
+            LIMIT 10
         """, (isin,))
         historical_raw = cur.fetchall()
 
@@ -1338,26 +1338,32 @@ def get_dcf_data(isin):
             revenue = row['revenue']
             ebit = row['operating_income']
             fcf = row['free_cash_flow']
+            net_income = row['net_income']
+            eps = row['eps']
 
             # Margen berechnen
             ebit_margin = (ebit / revenue * 100) if revenue and ebit else None
             fcf_margin = (fcf / revenue * 100) if revenue and fcf else None
+            profit_margin = (net_income / revenue * 100) if revenue and net_income else None
 
             historical.append({
                 "year": row['year'],
                 "revenue": revenue,
                 "ebit": ebit,
                 "fcf": fcf,
+                "net_income": net_income,
+                "eps": float(eps) if eps is not None else None,
                 "ebit_margin": round(ebit_margin, 1) if ebit_margin else None,
-                "fcf_margin": round(fcf_margin, 1) if fcf_margin else None
+                "fcf_margin": round(fcf_margin, 1) if fcf_margin else None,
+                "profit_margin": round(profit_margin, 1) if profit_margin is not None else None
             })
 
-        # 4b. Analyst Estimates aus finanzen.net (Revenue, EBIT, FCF)
+        # 4b. Analyst Estimates aus finanzen.net (Revenue, EBIT, FCF, EPS, Net Income)
         cur.execute("""
             SELECT period, metric, estimate_value, currency, unit
             FROM analytics.analyst_estimates
             WHERE isin = %s
-              AND metric IN ('revenue', 'ebit', 'free_cashflow')
+              AND metric IN ('revenue', 'ebit', 'free_cashflow', 'eps', 'net_income')
               AND period_type = 'fiscal_year'
             ORDER BY period ASC
         """, (isin,))
@@ -1380,14 +1386,19 @@ def get_dcf_data(isin):
                             "revenue": None,
                             "ebit": None,
                             "fcf": None,
+                            "net_income": None,
+                            "eps": None,
                             "ebit_margin": None,
+                            "profit_margin": None,
                             "is_estimate": True
                         }
 
-                    # Wert konvertieren (Mio zu absolut)
+                    # Wert konvertieren (Mio zu absolut, aber NICHT für per_share)
                     value = row['estimate_value']
                     if row['unit'] == 'millions' and value:
                         value = float(value) * 1_000_000
+                    elif row['unit'] == 'per_share' and value:
+                        value = float(value)
 
                     metric = row['metric']
                     if metric == 'revenue':
@@ -1396,12 +1407,20 @@ def get_dcf_data(isin):
                         estimates_by_year[year]['ebit'] = value
                     elif metric == 'free_cashflow':
                         estimates_by_year[year]['fcf'] = value
+                    elif metric == 'eps':
+                        estimates_by_year[year]['eps'] = value
+                    elif metric == 'net_income':
+                        estimates_by_year[year]['net_income'] = value
 
-        # EBIT-Marge berechnen wo möglich
+        # Margen berechnen wo möglich
         for year_data in estimates_by_year.values():
             if year_data['revenue'] and year_data['ebit']:
                 year_data['ebit_margin'] = round(
                     (year_data['ebit'] / year_data['revenue']) * 100, 1
+                )
+            if year_data['revenue'] and year_data.get('net_income'):
+                year_data['profit_margin'] = round(
+                    (year_data['net_income'] / year_data['revenue']) * 100, 1
                 )
 
         # In sortierte Liste umwandeln
