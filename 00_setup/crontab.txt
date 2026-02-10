@@ -1,0 +1,27 @@
+# =============================================================================
+# Aktienanalyse Crontabs
+# =============================================================================
+
+# Daily Update - Mo-Sa um 2:00 Uhr (inkl. Sa fuer Freitags-Schlusskurse)
+0 2 * * 1-6 /home/monjy/aktienanalyse/run_daily_update.sh
+
+# Weekend Scraping - finanzen.net Earnings & Estimates
+# Sa um 2:30 (nach Daily Update), So um 2:00
+30 2 * * 6 /home/monjy/aktienanalyse/run_weekend_scraping.sh
+0 2 * * 0 /home/monjy/aktienanalyse/run_weekend_scraping.sh
+
+# yfinance Fundamentaldaten-Update - Taeglich um 2:45
+45 2 * * * /home/monjy/aktienanalyse/run_yf_fundamentals.sh
+
+# Website Neustart - Taeglich um 5:30 Uhr
+30 5 * * * /home/monjy/aktienanalyse/restart_website.sh
+
+# =============================================================================
+# Earnings Actual Fetcher - Taeglich aktuelle Earnings abrufen
+# =============================================================================
+
+# EU/Asien Earnings (morgens um 9:00, Mo-Fr)
+0 9 * * 1-5 /home/monjy/aktienanalyse/run_earnings_fetch.sh
+
+# US Earnings vom Vortag (morgens um 8:00, Di-Sa)
+0 8 * * 2-6 /home/monjy/aktienanalyse/run_earnings_fetch.sh --yesterday
