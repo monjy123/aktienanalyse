@@ -121,7 +121,7 @@ def determine_period(report_date, fy_end_month, is_annual):
     return f'Q{quarter}'
 
 
-def get_existing_periods(cur, isin, stock_index):
+def get_existing_periods(cur, isin):
     """Laedt existierende (year, period) Kombinationen aus der DB.
 
     Returns:
@@ -132,8 +132,8 @@ def get_existing_periods(cur, isin, stock_index):
         SELECT YEAR(date) AS yr, period, date,
                revenue, gross_profit, operating_income, net_income
         FROM analytics.fmp_filtered_numbers
-        WHERE isin = %s AND stock_index = %s
-    """, (isin, stock_index))
+        WHERE isin = %s
+    """, (isin,))
     complete = set()
     incomplete = {}
     for row in cur.fetchall():
@@ -393,7 +393,7 @@ def main():
             continue
 
         # Existierende Perioden laden (complete + incomplete)
-        complete_periods, incomplete_periods = get_existing_periods(cur, isin, stock_index)
+        complete_periods, incomplete_periods = get_existing_periods(cur, isin)
 
         # Verarbeiten
         new_rows, update_rows, is_semiannual = process_ticker(

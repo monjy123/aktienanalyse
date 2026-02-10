@@ -280,7 +280,10 @@ def scrape_schaetzungen(session: requests.Session, slug: str, isin: str) -> list
         is_annual = any(identify_metric(t) for t in row_texts)
 
         if is_quarterly:
-            estimates.extend(_parse_quarterly_table_bs(rows, periods, isin))
+            # Metrik aus vorhergehender Überschrift erkennen
+            prev_heading = table.find_previous(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            heading_text = prev_heading.get_text(strip=True).lower() if prev_heading else ""
+            estimates.extend(_parse_quarterly_table_bs(rows, periods, isin, heading_text))
         elif is_annual:
             estimates.extend(_parse_annual_table_bs(rows, periods, isin))
 
@@ -313,7 +316,7 @@ def parse_period_from_header(header_text: str) -> tuple[str, str, str | None]:
     return "", "unknown", None
 
 
-def _parse_quarterly_table_bs(rows, periods, isin: str) -> list[dict]:
+def _parse_quarterly_table_bs(rows, periods, isin: str, heading_text: str = "") -> list[dict]:
     """Parst Quartalsschätzungen mit BeautifulSoup."""
     estimates = []
     num_analysts = {}
@@ -321,7 +324,8 @@ def _parse_quarterly_table_bs(rows, periods, isin: str) -> list[dict]:
     prior_year_values = {}
     actual_values = {}
     currency = None
-    metric = "eps"
+    # Metrik aus Überschrift über der Tabelle erkennen (z.B. "Quartalsschätzungen Umsatzerlöse in Mio.")
+    metric = "revenue" if "umsatz" in heading_text else "eps"
 
     for row in rows[1:]:
         cells = row.find_all('td')
@@ -329,9 +333,6 @@ def _parse_quarterly_table_bs(rows, periods, isin: str) -> list[dict]:
             continue
 
         label = cells[0].get_text(strip=True).lower()
-
-        if "umsatz" in label:
-            metric = "revenue"
 
         values = [c.get_text(strip=True) for c in cells[1:]]
 

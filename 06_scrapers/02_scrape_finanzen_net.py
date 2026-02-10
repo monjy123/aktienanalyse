@@ -379,9 +379,17 @@ def scrape_schaetzungen(driver, slug: str, isin: str) -> list[dict]:
             is_annual_table = any(identify_metric(l) for l in row_labels)
 
             if is_quarterly_table:
+                # Metrik aus vorhergehender Überschrift erkennen
+                try:
+                    heading_text = driver.execute_script(
+                        "var el = arguments[0]; while (el = el.previousElementSibling) { if (/^H[1-6]$/.test(el.tagName)) return el.innerText; } return '';",
+                        table
+                    ) or ""
+                except Exception:
+                    heading_text = ""
                 # Quartalsschätzungen verarbeiten
                 estimates.extend(
-                    _parse_quarterly_table(rows, periods, isin, table_idx)
+                    _parse_quarterly_table(rows, periods, isin, heading_text)
                 )
 
             elif is_annual_table:
@@ -398,7 +406,7 @@ def scrape_schaetzungen(driver, slug: str, isin: str) -> list[dict]:
     return estimates
 
 
-def _parse_quarterly_table(rows, periods, isin: str, table_idx: int) -> list[dict]:
+def _parse_quarterly_table(rows, periods, isin: str, heading_text: str = "") -> list[dict]:
     """Parst Quartalsschätzungen (Tabellen 1-4)."""
     estimates = []
 
@@ -408,9 +416,8 @@ def _parse_quarterly_table(rows, periods, isin: str, table_idx: int) -> list[dic
     actual_values = {}
     currency = None
 
-    # Metrik aus Tabellenindex ableiten (Tabelle 1,3 = EPS, Tabelle 2,4 = Revenue)
-    # Besser: aus Kontext erkennen
-    metric = "eps"  # Default
+    # Metrik aus Überschrift über der Tabelle erkennen (z.B. "Quartalsschätzungen Umsatzerlöse in Mio.")
+    metric = "revenue" if "umsatz" in heading_text.lower() else "eps"
 
     for row in rows[1:]:
         text = row.get_attribute("innerText") or ""
@@ -419,10 +426,6 @@ def _parse_quarterly_table(rows, periods, isin: str, table_idx: int) -> list[dic
             continue
 
         label = parts[0].lower()
-
-        # Metrik aus Tabelle erkennen
-        if "umsatz" in label:
-            metric = "revenue"
 
         if "anzahl" in label and "analyst" in label:
             for i, val in enumerate(parts[1:]):
