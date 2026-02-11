@@ -151,49 +151,49 @@ def main():
         cur.execute("""
             SELECT
                 c.isin,
-                c.ticker,
-                c.company_name,
-                c.stock_index,
-                c.date,
-                c.fy_pe,
-                c.fy_ev_ebit,
-                c.ttm_net_income,
-                c.ttm_ebit,
-                c.pe_avg_5y,
-                c.pe_avg_10y,
-                c.pe_avg_15y,
-                c.pe_avg_20y,
-                c.pe_avg_5y_count,
-                c.pe_avg_10y_count,
-                c.pe_avg_15y_count,
-                c.pe_avg_20y_count,
-                c.ev_ebit_avg_5y,
-                c.ev_ebit_avg_10y,
-                c.ev_ebit_avg_15y,
-                c.ev_ebit_avg_20y,
-                c.ev_ebit_avg_5y_count,
-                c.ev_ebit_avg_10y_count,
-                c.ev_ebit_avg_15y_count,
-                c.ev_ebit_avg_20y_count,
-                c.revenue_cagr_3y,
-                c.revenue_cagr_5y,
-                c.revenue_cagr_10y,
-                c.ebit_cagr_3y,
-                c.ebit_cagr_5y,
-                c.ebit_cagr_10y,
-                c.net_income_cagr_3y,
-                c.net_income_cagr_5y,
-                c.net_income_cagr_10y,
-                c.equity_ratio,
-                c.net_debt_ebitda,
-                c.profit_margin,
-                c.operating_margin,
-                c.profit_margin_avg_3y,
-                c.profit_margin_avg_5y,
-                c.profit_margin_avg_10y,
-                c.operating_margin_avg_3y,
-                c.operating_margin_avg_5y,
-                c.operating_margin_avg_10y
+                MAX(c.ticker) as ticker,
+                MAX(c.company_name) as company_name,
+                MAX(c.stock_index) as stock_index,
+                MAX(c.date) as date,
+                AVG(c.fy_pe) as fy_pe,
+                AVG(c.fy_ev_ebit) as fy_ev_ebit,
+                AVG(c.ttm_net_income) as ttm_net_income,
+                AVG(c.ttm_ebit) as ttm_ebit,
+                AVG(c.pe_avg_5y) as pe_avg_5y,
+                AVG(c.pe_avg_10y) as pe_avg_10y,
+                AVG(c.pe_avg_15y) as pe_avg_15y,
+                AVG(c.pe_avg_20y) as pe_avg_20y,
+                MAX(c.pe_avg_5y_count) as pe_avg_5y_count,
+                MAX(c.pe_avg_10y_count) as pe_avg_10y_count,
+                MAX(c.pe_avg_15y_count) as pe_avg_15y_count,
+                MAX(c.pe_avg_20y_count) as pe_avg_20y_count,
+                AVG(c.ev_ebit_avg_5y) as ev_ebit_avg_5y,
+                AVG(c.ev_ebit_avg_10y) as ev_ebit_avg_10y,
+                AVG(c.ev_ebit_avg_15y) as ev_ebit_avg_15y,
+                AVG(c.ev_ebit_avg_20y) as ev_ebit_avg_20y,
+                MAX(c.ev_ebit_avg_5y_count) as ev_ebit_avg_5y_count,
+                MAX(c.ev_ebit_avg_10y_count) as ev_ebit_avg_10y_count,
+                MAX(c.ev_ebit_avg_15y_count) as ev_ebit_avg_15y_count,
+                MAX(c.ev_ebit_avg_20y_count) as ev_ebit_avg_20y_count,
+                AVG(c.revenue_cagr_3y) as revenue_cagr_3y,
+                AVG(c.revenue_cagr_5y) as revenue_cagr_5y,
+                AVG(c.revenue_cagr_10y) as revenue_cagr_10y,
+                AVG(c.ebit_cagr_3y) as ebit_cagr_3y,
+                AVG(c.ebit_cagr_5y) as ebit_cagr_5y,
+                AVG(c.ebit_cagr_10y) as ebit_cagr_10y,
+                AVG(c.net_income_cagr_3y) as net_income_cagr_3y,
+                AVG(c.net_income_cagr_5y) as net_income_cagr_5y,
+                AVG(c.net_income_cagr_10y) as net_income_cagr_10y,
+                AVG(c.equity_ratio) as equity_ratio,
+                AVG(c.net_debt_ebitda) as net_debt_ebitda,
+                AVG(c.profit_margin) as profit_margin,
+                AVG(c.operating_margin) as operating_margin,
+                AVG(c.profit_margin_avg_3y) as profit_margin_avg_3y,
+                AVG(c.profit_margin_avg_5y) as profit_margin_avg_5y,
+                AVG(c.profit_margin_avg_10y) as profit_margin_avg_10y,
+                AVG(c.operating_margin_avg_3y) as operating_margin_avg_3y,
+                AVG(c.operating_margin_avg_5y) as operating_margin_avg_5y,
+                AVG(c.operating_margin_avg_10y) as operating_margin_avg_10y
             FROM analytics.calcu_numbers c
             INNER JOIN (
                 SELECT isin, MAX(date) as max_date
@@ -202,6 +202,7 @@ def main():
                 GROUP BY isin
             ) latest ON c.isin = latest.isin AND c.date = latest.max_date
             WHERE c.period = 'FY'
+            GROUP BY c.isin
         """)
         latest_data = cur.fetchall()
         print(f"  -> {len(latest_data)} Ticker mit aktuellen Kennzahlen")
@@ -211,13 +212,14 @@ def main():
         cur.execute("""
             SELECT
                 isin,
-                pe_avg_10y as pe_avg_10y_2019,
-                ev_ebit_avg_10y as ev_ebit_avg_10y_2019,
-                profit_margin_avg_5y_2019,
-                operating_margin_avg_5y_2019
+                AVG(pe_avg_10y) as pe_avg_10y_2019,
+                AVG(ev_ebit_avg_10y) as ev_ebit_avg_10y_2019,
+                AVG(profit_margin_avg_5y_2019) as profit_margin_avg_5y_2019,
+                AVG(operating_margin_avg_5y_2019) as operating_margin_avg_5y_2019
             FROM analytics.calcu_numbers
             WHERE period = 'FY'
               AND YEAR(date) = 2019
+            GROUP BY isin
         """)
         data_2019 = {row["isin"]: row for row in cur.fetchall()}
         print(f"  -> {len(data_2019)} Ticker mit 2019er Daten")
@@ -245,9 +247,9 @@ def main():
         cur.execute("""
             SELECT
                 f.isin,
-                f.weighted_average_shs_out as shares_outstanding,
-                f.net_debt,
-                f.minority_interest
+                MAX(f.weighted_average_shs_out) as shares_outstanding,
+                AVG(f.net_debt) as net_debt,
+                AVG(f.minority_interest) as minority_interest
             FROM analytics.fmp_filtered_numbers f
             INNER JOIN (
                 SELECT isin, MAX(date) as max_date
@@ -256,6 +258,7 @@ def main():
                 GROUP BY isin
             ) latest ON f.isin = latest.isin AND f.date = latest.max_date
             WHERE f.period = 'FY'
+            GROUP BY f.isin
         """)
         shares_data = {row["isin"]: row for row in cur.fetchall()}
         print(f"  -> {len(shares_data)} Ticker mit Shares Outstanding")
@@ -271,11 +274,13 @@ def main():
                 isin,
                 date,
                 period,
-                net_income,
-                operating_income
+                AVG(net_income) as net_income,
+                AVG(operating_income) as operating_income
             FROM analytics.fmp_filtered_numbers
             WHERE period != 'FY'
               AND date >= DATE_SUB(CURDATE(), INTERVAL 15 MONTH)
+              AND net_income IS NOT NULL
+            GROUP BY isin, date, period
             ORDER BY isin, date DESC
         """)
 
@@ -301,8 +306,10 @@ def main():
             if is_semiannual and len(periods) >= 2:
                 # Nimm die letzten 2 Halbjahre
                 latest_periods = periods[:2]
-                ttm_ni = sum(p['net_income'] or 0 for p in latest_periods)
-                ttm_ebit = sum(p['operating_income'] or 0 for p in latest_periods)
+                ni_vals = [p['net_income'] for p in latest_periods]
+                ttm_ni = sum(ni_vals) if all(v is not None for v in ni_vals) else None
+                ebit_vals = [p['operating_income'] for p in latest_periods]
+                ttm_ebit = sum(ebit_vals) if all(v is not None for v in ebit_vals) else None
                 ttm_data[isin] = {
                     'ttm_net_income': ttm_ni,
                     'ttm_ebit': ttm_ebit,
@@ -313,8 +320,10 @@ def main():
             elif len(periods) >= 4:
                 # Quartalsberichterstatter: nimm die letzten 4 Quartale
                 latest_periods = periods[:4]
-                ttm_ni = sum(p['net_income'] or 0 for p in latest_periods)
-                ttm_ebit = sum(p['operating_income'] or 0 for p in latest_periods)
+                ni_vals = [p['net_income'] for p in latest_periods]
+                ttm_ni = sum(ni_vals) if all(v is not None for v in ni_vals) else None
+                ebit_vals = [p['operating_income'] for p in latest_periods]
+                ttm_ebit = sum(ebit_vals) if all(v is not None for v in ebit_vals) else None
                 ttm_data[isin] = {
                     'ttm_net_income': ttm_ni,
                     'ttm_ebit': ttm_ebit,

@@ -637,25 +637,28 @@ def get_stock_details(isin):
         """, (isin,))
         live = cur.fetchone() or {}
 
-        # 3. EV-Komponenten aus dem letzten FY-Eintrag holen
+        # 3. EV-Komponenten aus dem letzten FY-Eintrag holen (dedupliziert)
         cur.execute("""
-            SELECT market_cap, net_debt, minority_interest
+            SELECT AVG(market_cap) as market_cap, AVG(net_debt) as net_debt,
+                   AVG(minority_interest) as minority_interest
             FROM analytics.fmp_filtered_numbers
             WHERE isin = %s AND period = 'FY'
-            ORDER BY date DESC
-            LIMIT 1
-        """, (isin,))
+              AND date = (SELECT MAX(date) FROM analytics.fmp_filtered_numbers WHERE isin = %s AND period = 'FY')
+        """, (isin, isin))
         ev_components = cur.fetchone() or {}
 
         # 4. TTM-Berechnung: Quartale ODER Halbjahre aus fmp_filtered_numbers
         #    Nur Perioden mit revenue UND net_income (unvollstaendige ignorieren)
         cur.execute("""
-            SELECT period, date, net_income, revenue, gross_profit, operating_income
+            SELECT period, date,
+                   AVG(net_income) as net_income, AVG(revenue) as revenue,
+                   AVG(gross_profit) as gross_profit, AVG(operating_income) as operating_income
             FROM analytics.fmp_filtered_numbers
             WHERE isin = %s AND period != 'FY'
               AND date >= DATE_SUB(CURDATE(), INTERVAL 18 MONTH)
               AND revenue IS NOT NULL
               AND net_income IS NOT NULL
+            GROUP BY period, date
             ORDER BY date DESC
         """, (isin,))
         all_periods = cur.fetchall()
@@ -716,10 +719,11 @@ def get_stock_details(isin):
 
         # 5. KGV-Verlauf: Letzte 20 FY-Jahre aus calcu_numbers
         cur.execute("""
-            SELECT YEAR(date) as year, fy_pe
+            SELECT YEAR(date) as year, AVG(fy_pe) as fy_pe
             FROM analytics.calcu_numbers
             WHERE isin = %s AND period = 'FY' AND fy_pe IS NOT NULL
-            ORDER BY date DESC
+            GROUP BY YEAR(date)
+            ORDER BY year DESC
             LIMIT 20
         """, (isin,))
         pe_history_raw = cur.fetchall()
@@ -732,15 +736,21 @@ def get_stock_details(isin):
                 "pe": round(row['fy_pe'], 2) if row['fy_pe'] else None
             })
 
-        # Aktuelles TTM PE ans Ende anhängen (falls vorhanden)
-        current_ttm_pe = live.get('ttm_pe')
+        # Aktuelles TTM PE on-the-fly berechnen, Fallback auf cached
+        current_ttm_pe = None
+        market_cap_val = live.get('market_cap')
+        if market_cap_val and ttm_net_income and ttm_net_income > 0:
+            current_ttm_pe = market_cap_val / ttm_net_income
+        if current_ttm_pe is None:
+            current_ttm_pe = live.get('ttm_pe')
 
         # 6. EV/EBIT-Verlauf: Letzte 20 FY-Jahre aus calcu_numbers
         cur.execute("""
-            SELECT YEAR(date) as year, fy_ev_ebit
+            SELECT YEAR(date) as year, AVG(fy_ev_ebit) as fy_ev_ebit
             FROM analytics.calcu_numbers
             WHERE isin = %s AND period = 'FY' AND fy_ev_ebit IS NOT NULL
-            ORDER BY date DESC
+            GROUP BY YEAR(date)
+            ORDER BY year DESC
             LIMIT 20
         """, (isin,))
         ev_ebit_history_raw = cur.fetchall()
@@ -753,14 +763,24 @@ def get_stock_details(isin):
                 "ev_ebit": round(row['fy_ev_ebit'], 2) if row['fy_ev_ebit'] else None
             })
 
-        current_ttm_ev_ebit = live.get('ttm_ev_ebit')
+        # TTM EV/EBIT on-the-fly berechnen, Fallback auf cached
+        current_ttm_ev_ebit = None
+        if market_cap_val:
+            ev_val = market_cap_val + (ev_components.get('net_debt') or 0) + (ev_components.get('minority_interest') or 0)
+            if ttm_operating_income and ttm_operating_income > 0:
+                current_ttm_ev_ebit = ev_val / ttm_operating_income
+        if current_ttm_ev_ebit is None:
+            current_ttm_ev_ebit = live.get('ttm_ev_ebit')
 
         # 7. Income Statement: Letzte 10 FY-Jahre aus fmp_filtered_numbers
         cur.execute("""
-            SELECT YEAR(date) as year, revenue, gross_profit, operating_income, net_income
+            SELECT YEAR(date) as year,
+                   AVG(revenue) as revenue, AVG(gross_profit) as gross_profit,
+                   AVG(operating_income) as operating_income, AVG(net_income) as net_income
             FROM analytics.fmp_filtered_numbers
             WHERE isin = %s AND period = 'FY'
-            ORDER BY date DESC
+            GROUP BY YEAR(date)
+            ORDER BY year DESC
             LIMIT 10
         """, (isin,))
         income_raw = cur.fetchall()
