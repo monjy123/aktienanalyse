@@ -391,7 +391,7 @@ def main():
             print(f"  ⚠️  {rate_limited_count} davon durch Rate Limiting")
 
         # Schritt 4e: Beta aus eigenen Kursdaten berechnen
-        print("\nBerechne Beta aus Kursdaten (wöchentlich, 3 Jahre)...")
+        print("\nBerechne Beta aus Kursdaten (wöchentlich, 5 Jahre)...")
 
         # Index-Zuordnung pro ISIN aus tickerlist
         isin_to_index = {}
@@ -403,7 +403,7 @@ def main():
         cur.execute("""
             SELECT isin, date, close
             FROM raw_data.yf_prices
-            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 3 YEAR)
+            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)
               AND close IS NOT NULL
             ORDER BY isin, date
         """)
@@ -416,7 +416,7 @@ def main():
         cur.execute("""
             SELECT stock_index, date, close
             FROM raw_data.index_prices
-            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 3 YEAR)
+            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 5 YEAR)
               AND close IS NOT NULL
             ORDER BY stock_index, date
         """)
