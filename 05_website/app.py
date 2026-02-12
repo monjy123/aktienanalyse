@@ -1328,7 +1328,8 @@ def get_dcf_data(isin):
         cur.execute("""
             SELECT market_cap, price, price_date,
                    revenue_cagr_3y, revenue_cagr_5y, revenue_cagr_10y,
-                   operating_margin, operating_margin_avg_5y
+                   operating_margin, operating_margin_avg_5y,
+                   beta
             FROM analytics.live_metrics
             WHERE isin = %s
         """, (isin,))
@@ -1336,7 +1337,7 @@ def get_dcf_data(isin):
 
         # 3. Net Debt und Shares Outstanding aus fmp_filtered_numbers
         cur.execute("""
-            SELECT net_debt, weighted_average_shs_out_dil as shares_outstanding
+            SELECT net_debt, total_debt, weighted_average_shs_out_dil as shares_outstanding
             FROM analytics.fmp_filtered_numbers
             WHERE isin = %s AND period = 'FY'
             ORDER BY date DESC
@@ -1521,19 +1522,32 @@ def get_dcf_data(isin):
             else:
                 defaults[f"revenue_growth_y{i}"] = round(5.0 * tapering[i - 1], 1)
 
-        # EBIT-Marge: erstes Estimate-Jahr bevorzugen, sonst historischer Durchschnitt
-        first_est_ebit_margin = None
-        if estimates and estimates[0].get('ebit_margin') is not None:
-            first_est_ebit_margin = estimates[0]['ebit_margin']
+        # EBIT-Marge pro Projektionsjahr berechnen (analog zum Umsatzwachstum)
+        # Estimate-basierte Margen nach Projektionsjahr mappen
+        est_ebit_margins = {}
+        for e in estimates:
+            if e.get('ebit_margin') is not None:
+                proj_year = e['year'] - last_hist_year
+                if 1 <= proj_year <= 10:
+                    est_ebit_margins[proj_year] = round(e['ebit_margin'], 1)
+
+        for i in range(1, 11):
+            if i in est_ebit_margins:
+                defaults[f"ebit_margin_y{i}"] = est_ebit_margins[i]
+            else:
+                defaults[f"ebit_margin_y{i}"] = round(avg_ebit_margin, 1)
 
         defaults.update({
-            "ebit_margin": round(first_est_ebit_margin, 1) if first_est_ebit_margin is not None else round(avg_ebit_margin, 1),
             "tax_rate": 25.0,
             "capex_percent": 3.0,
             "wc_change_percent": 0.0,
             "depreciation_percent": 3.0,
             "terminal_growth": 2.0,
-            "wacc": 9.0
+            "wacc": 9.0,
+            "risk_free_rate": 4.0,
+            "market_return": 8.0,
+            "debt_cost": 4.0,
+            "tax_shield": 25.0
         })
 
         # 7. Gespeicherte Szenarien des Users laden
@@ -1542,6 +1556,10 @@ def get_dcf_data(isin):
                    revenue_growth_y3, revenue_growth_y4, revenue_growth_y5,
                    revenue_growth_y6, revenue_growth_y7, revenue_growth_y8,
                    revenue_growth_y9, revenue_growth_y10,
+                   ebit_margin_y1, ebit_margin_y2, ebit_margin_y3,
+                   ebit_margin_y4, ebit_margin_y5, ebit_margin_y6,
+                   ebit_margin_y7, ebit_margin_y8, ebit_margin_y9,
+                   ebit_margin_y10,
                    ebit_margin, tax_rate, capex_percent, wc_change_percent,
                    depreciation_percent, terminal_growth, wacc,
                    fair_value_per_share, created_at, updated_at
@@ -1570,7 +1588,9 @@ def get_dcf_data(isin):
                 "price": live.get('price'),
                 "price_date": live.get('price_date').strftime('%Y-%m-%d') if live.get('price_date') else None,
                 "net_debt": balance.get('net_debt'),
-                "shares_outstanding": balance.get('shares_outstanding')
+                "total_debt": balance.get('total_debt'),
+                "shares_outstanding": balance.get('shares_outstanding'),
+                "beta": live.get('beta')
             },
             "cagr": {
                 "cagr_3y": round(revenue_cagr_3y, 1) if revenue_cagr_3y else None,
@@ -1652,7 +1672,18 @@ def calculate_dcf(isin):
             data.get('revenue_growth_y9', 2) / 100,
             data.get('revenue_growth_y10', 2) / 100
         ]
-        ebit_margin = data.get('ebit_margin', 15) / 100
+        ebit_margins = [
+            data.get('ebit_margin_y1', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y2', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y3', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y4', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y5', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y6', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y7', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y8', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y9', data.get('ebit_margin', 15)) / 100,
+            data.get('ebit_margin_y10', data.get('ebit_margin', 15)) / 100
+        ]
         tax_rate = data.get('tax_rate', 25) / 100
         capex_percent = data.get('capex_percent', 3) / 100
         wc_change_percent = data.get('wc_change_percent', 0) / 100
@@ -1667,7 +1698,7 @@ def calculate_dcf(isin):
         for year in range(1, 11):
             growth = growth_rates[year - 1]
             projected_revenue = current_revenue * (1 + growth)
-            ebit = projected_revenue * ebit_margin
+            ebit = projected_revenue * ebit_margins[year - 1]
             depreciation = projected_revenue * depreciation_percent
             nopat = ebit * (1 - tax_rate)
             capex = projected_revenue * capex_percent
@@ -1801,7 +1832,12 @@ def save_dcf_scenario(isin):
                     revenue_growth_y5 = %s, revenue_growth_y6 = %s,
                     revenue_growth_y7 = %s, revenue_growth_y8 = %s,
                     revenue_growth_y9 = %s, revenue_growth_y10 = %s,
-                    ebit_margin = %s, tax_rate = %s,
+                    ebit_margin_y1 = %s, ebit_margin_y2 = %s,
+                    ebit_margin_y3 = %s, ebit_margin_y4 = %s,
+                    ebit_margin_y5 = %s, ebit_margin_y6 = %s,
+                    ebit_margin_y7 = %s, ebit_margin_y8 = %s,
+                    ebit_margin_y9 = %s, ebit_margin_y10 = %s,
+                    tax_rate = %s,
                     capex_percent = %s, wc_change_percent = %s,
                     depreciation_percent = %s,
                     terminal_growth = %s, wacc = %s,
@@ -1815,7 +1851,12 @@ def save_dcf_scenario(isin):
                 data.get('revenue_growth_y5'), data.get('revenue_growth_y6'),
                 data.get('revenue_growth_y7'), data.get('revenue_growth_y8'),
                 data.get('revenue_growth_y9'), data.get('revenue_growth_y10'),
-                data.get('ebit_margin'), data.get('tax_rate'),
+                data.get('ebit_margin_y1'), data.get('ebit_margin_y2'),
+                data.get('ebit_margin_y3'), data.get('ebit_margin_y4'),
+                data.get('ebit_margin_y5'), data.get('ebit_margin_y6'),
+                data.get('ebit_margin_y7'), data.get('ebit_margin_y8'),
+                data.get('ebit_margin_y9'), data.get('ebit_margin_y10'),
+                data.get('tax_rate'),
                 data.get('capex_percent'), data.get('wc_change_percent'),
                 data.get('depreciation_percent'),
                 data.get('terminal_growth'), data.get('wacc'),
@@ -1835,9 +1876,13 @@ def save_dcf_scenario(isin):
                  revenue_growth_y4, revenue_growth_y5, revenue_growth_y6,
                  revenue_growth_y7, revenue_growth_y8, revenue_growth_y9,
                  revenue_growth_y10,
-                 ebit_margin, tax_rate, capex_percent, wc_change_percent,
+                 ebit_margin_y1, ebit_margin_y2, ebit_margin_y3,
+                 ebit_margin_y4, ebit_margin_y5, ebit_margin_y6,
+                 ebit_margin_y7, ebit_margin_y8, ebit_margin_y9,
+                 ebit_margin_y10,
+                 tax_rate, capex_percent, wc_change_percent,
                  depreciation_percent, terminal_growth, wacc, fair_value_per_share)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 user_id, isin, scenario_name,
                 data.get('revenue_growth_y1'), data.get('revenue_growth_y2'),
@@ -1845,7 +1890,12 @@ def save_dcf_scenario(isin):
                 data.get('revenue_growth_y5'), data.get('revenue_growth_y6'),
                 data.get('revenue_growth_y7'), data.get('revenue_growth_y8'),
                 data.get('revenue_growth_y9'), data.get('revenue_growth_y10'),
-                data.get('ebit_margin'), data.get('tax_rate'),
+                data.get('ebit_margin_y1'), data.get('ebit_margin_y2'),
+                data.get('ebit_margin_y3'), data.get('ebit_margin_y4'),
+                data.get('ebit_margin_y5'), data.get('ebit_margin_y6'),
+                data.get('ebit_margin_y7'), data.get('ebit_margin_y8'),
+                data.get('ebit_margin_y9'), data.get('ebit_margin_y10'),
+                data.get('tax_rate'),
                 data.get('capex_percent'), data.get('wc_change_percent'),
                 data.get('depreciation_percent'),
                 data.get('terminal_growth'), data.get('wacc'),

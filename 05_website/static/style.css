@@ -2094,6 +2094,111 @@ h1 {
     text-align: center;
 }
 
+/* WACC-CAPM Section */
+.wacc-capm-section {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: #f8f9fb;
+    border: 1px solid #e0e4ea;
+    border-radius: 6px;
+}
+
+.wacc-capm-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+    color: #333;
+}
+
+.wacc-capm-subtitle {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.3rem;
+}
+
+.wacc-divider {
+    border-top: 1px solid #dde1e7;
+    margin: 0.4rem 0;
+}
+
+.wacc-capm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.3rem 0.6rem;
+    margin-bottom: 0.15rem;
+}
+
+.wacc-capm-grid-2col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.wacc-capm-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.wacc-capm-item label {
+    font-size: 0.7rem;
+    color: #666;
+}
+
+.wacc-capm-item input {
+    padding: 0.25rem 0.4rem;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.wacc-computed-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem;
+    text-align: center;
+    color: #1a73e8;
+}
+
+.wacc-readonly-value {
+    font-size: 0.8rem;
+    padding: 0.25rem;
+    text-align: center;
+    color: #555;
+}
+
+.wacc-hint {
+    font-size: 0.65rem;
+    color: #e67e22;
+    font-style: italic;
+}
+
+.wacc-capm-result {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid #e0e4ea;
+}
+
+.wacc-result-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.wacc-result-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a73e8;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+}
+
 /* DCF Actions */
 .dcf-actions {
     display: flex;

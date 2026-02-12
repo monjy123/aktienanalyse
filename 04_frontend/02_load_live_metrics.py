@@ -101,6 +101,17 @@ def get_yf_metrics(ticker_yf):
             except Exception:
                 pass  # Earnings dates nicht verfügbar
 
+            # Beta separat behandeln (nicht clean_value nutzen, da Beta typisch 0.5-2.5)
+            raw_beta = info.get("beta")
+            beta = None
+            if raw_beta is not None:
+                try:
+                    beta = float(raw_beta)
+                    if math.isnan(beta) or math.isinf(beta) or beta < 0 or beta > 5:
+                        beta = None
+                except (ValueError, TypeError):
+                    beta = None
+
             result = {
                 "ttm_pe": clean_value(info.get("trailingPE")),
                 "forward_pe": clean_value(info.get("forwardPE")),
@@ -108,6 +119,7 @@ def get_yf_metrics(ticker_yf):
                 "profit_margin": to_percent(info.get("profitMargins")),
                 "operating_margin": to_percent(info.get("operatingMargins")),
                 "next_earnings_date": earnings_date,
+                "beta": beta,
             }
 
             # Nur zurückgeben wenn mindestens ein Wert vorhanden ist
@@ -416,6 +428,7 @@ def main():
             profit_margin_avg_3y, profit_margin_avg_5y, profit_margin_avg_10y, profit_margin_avg_5y_2019,
             operating_margin_avg_3y, operating_margin_avg_5y, operating_margin_avg_10y, operating_margin_avg_5y_2019,
             yf_ttm_pe, yf_forward_pe, yf_payout_ratio, yf_profit_margin, yf_operating_margin,
+            beta,
             next_earnings_date,
             yf_ttm_pe_vs_avg_5y, yf_ttm_pe_vs_avg_10y, yf_ttm_pe_vs_avg_15y, yf_ttm_pe_vs_avg_20y, yf_ttm_pe_vs_avg_10y_2019,
             yf_fwd_pe_vs_avg_5y, yf_fwd_pe_vs_avg_10y, yf_fwd_pe_vs_avg_15y, yf_fwd_pe_vs_avg_20y, yf_fwd_pe_vs_avg_10y_2019,
@@ -436,6 +449,7 @@ def main():
             %s, %s, %s, %s,
             %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
+            %s,
             %s,
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
@@ -496,6 +510,7 @@ def main():
             yf_payout_ratio = VALUES(yf_payout_ratio),
             yf_profit_margin = VALUES(yf_profit_margin),
             yf_operating_margin = VALUES(yf_operating_margin),
+            beta = VALUES(beta),
             next_earnings_date = VALUES(next_earnings_date),
             yf_ttm_pe_vs_avg_5y = VALUES(yf_ttm_pe_vs_avg_5y),
             yf_ttm_pe_vs_avg_10y = VALUES(yf_ttm_pe_vs_avg_10y),
@@ -575,6 +590,7 @@ def main():
             yf_payout_ratio = yf_data.get("payout_ratio")
             yf_profit_margin = yf_data.get("profit_margin")
             yf_operating_margin = yf_data.get("operating_margin")
+            beta = yf_data.get("beta")
 
             # Nächstes Earnings-Datum: Primär aus finanzen.net, Fallback yfinance
             next_earnings_date = earnings_dates.get(isin)
@@ -660,6 +676,7 @@ def main():
                     yf_payout_ratio,
                     yf_profit_margin,
                     yf_operating_margin,
+                    beta,
                     next_earnings_date,
                     # YF TTM PE vs. Durchschnitte
                     yf_ttm_pe_vs_avg_5y,
@@ -703,6 +720,7 @@ def main():
                 SUM(CASE WHEN yf_ttm_pe IS NOT NULL THEN 1 ELSE 0 END) as with_yf_ttm_pe,
                 SUM(CASE WHEN yf_forward_pe IS NOT NULL THEN 1 ELSE 0 END) as with_yf_forward_pe,
                 SUM(CASE WHEN yf_profit_margin IS NOT NULL THEN 1 ELSE 0 END) as with_yf_profit_margin,
+                SUM(CASE WHEN beta IS NOT NULL THEN 1 ELSE 0 END) as with_beta,
                 SUM(CASE WHEN next_earnings_date IS NOT NULL THEN 1 ELSE 0 END) as with_next_earnings,
                 MAX(price_date) as latest_price_date
             FROM analytics.live_metrics
@@ -717,6 +735,7 @@ def main():
         with_yf_ttm_pe = stats["with_yf_ttm_pe"]
         with_yf_forward_pe = stats["with_yf_forward_pe"]
         with_yf_profit_margin = stats["with_yf_profit_margin"]
+        with_beta = stats["with_beta"]
         with_next_earnings = stats["with_next_earnings"]
         latest_price_date = stats["latest_price_date"]
 
@@ -738,6 +757,7 @@ def main():
         print(f"Mit yf TTM PE:           {with_yf_ttm_pe:,} ({with_yf_ttm_pe*100/total:.1f}%)" if total > 0 else "")
         print(f"Mit yf Forward PE:       {with_yf_forward_pe:,} ({with_yf_forward_pe*100/total:.1f}%)" if total > 0 else "")
         print(f"Mit yf Profit Margin:    {with_yf_profit_margin:,} ({with_yf_profit_margin*100/total:.1f}%)" if total > 0 else "")
+        print(f"Mit Beta:                {with_beta:,} ({with_beta*100/total:.1f}%)" if total > 0 else "")
         print(f"\nfinanzen.net Daten:")
         print(f"Mit nächstem Earnings:   {with_next_earnings:,} ({with_next_earnings*100/total:.1f}%)" if total > 0 else "")
         print(f"  (Quelle: earnings_calendar, Fallback: yfinance)")

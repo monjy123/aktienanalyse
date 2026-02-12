@@ -3982,11 +3982,22 @@ document.addEventListener('DOMContentLoaded', function() {
                             <input type="number" id="dcf-growth-y10" step="0.1" value="${defaults.revenue_growth_y10}" placeholder="J10">
                         </div>
                     </div>
-                    <div class="dcf-params-grid">
-                        <div class="dcf-input-item">
-                            <label>EBIT-Marge (%)</label>
-                            <input type="number" id="dcf-ebit-margin" step="0.1" value="${defaults.ebit_margin}">
+                    <div class="dcf-input-group">
+                        <label>EBIT-Marge pro Jahr (%)</label>
+                        <div class="dcf-growth-inputs">
+                            <input type="number" id="dcf-margin-y1" step="0.1" value="${defaults.ebit_margin_y1}" placeholder="J1">
+                            <input type="number" id="dcf-margin-y2" step="0.1" value="${defaults.ebit_margin_y2}" placeholder="J2">
+                            <input type="number" id="dcf-margin-y3" step="0.1" value="${defaults.ebit_margin_y3}" placeholder="J3">
+                            <input type="number" id="dcf-margin-y4" step="0.1" value="${defaults.ebit_margin_y4}" placeholder="J4">
+                            <input type="number" id="dcf-margin-y5" step="0.1" value="${defaults.ebit_margin_y5}" placeholder="J5">
+                            <input type="number" id="dcf-margin-y6" step="0.1" value="${defaults.ebit_margin_y6}" placeholder="J6">
+                            <input type="number" id="dcf-margin-y7" step="0.1" value="${defaults.ebit_margin_y7}" placeholder="J7">
+                            <input type="number" id="dcf-margin-y8" step="0.1" value="${defaults.ebit_margin_y8}" placeholder="J8">
+                            <input type="number" id="dcf-margin-y9" step="0.1" value="${defaults.ebit_margin_y9}" placeholder="J9">
+                            <input type="number" id="dcf-margin-y10" step="0.1" value="${defaults.ebit_margin_y10}" placeholder="J10">
                         </div>
+                    </div>
+                    <div class="dcf-params-grid">
                         <div class="dcf-input-item">
                             <label>Steuersatz (%)</label>
                             <input type="number" id="dcf-tax-rate" step="0.1" value="${defaults.tax_rate}">
@@ -4013,6 +4024,74 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 </div>
+
+                <!-- WACC-Berechnung (CAPM) -->
+                <div class="wacc-capm-section">
+                    <div class="wacc-capm-title">WACC-Berechnung (CAPM)</div>
+
+                    <div class="wacc-capm-subtitle">Eigenkapitalkosten (CAPM)</div>
+                    <div class="wacc-capm-grid">
+                        <div class="wacc-capm-item">
+                            <label>Risikoloser Zins Rf (%)</label>
+                            <input type="number" id="wacc-rf" step="0.1" value="${defaults.risk_free_rate}">
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>Beta</label>
+                            <input type="number" id="wacc-beta" step="0.01" value="${data.current.beta != null ? data.current.beta.toFixed(2) : '1.00'}">
+                            ${data.current.beta == null ? '<span class="wacc-hint">kein Beta verfügbar, Default 1.0</span>' : ''}
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>Markterwartung Rm (%)</label>
+                            <input type="number" id="wacc-rm" step="0.1" value="${defaults.market_return}">
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>EK-Kosten Re</label>
+                            <span id="wacc-re-display" class="wacc-computed-value">-</span>
+                        </div>
+                    </div>
+
+                    <div class="wacc-divider"></div>
+
+                    <div class="wacc-capm-subtitle">Kapitalstruktur & WACC</div>
+                    <div class="wacc-capm-grid wacc-capm-grid-2col">
+                        <div class="wacc-capm-item">
+                            <label>EK-Kosten Re</label>
+                            <span id="wacc-re-display2" class="wacc-computed-value">-</span>
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>FK-Zins Rd (%)</label>
+                            <input type="number" id="wacc-rd" step="0.1" value="${defaults.debt_cost}">
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>Market Cap (E)</label>
+                            <span class="wacc-readonly-value">${data.current.market_cap ? formatBillions(data.current.market_cap) : '-'}</span>
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>Total Debt in Mrd (D)</label>
+                            <input type="number" id="wacc-total-debt" step="0.1" value="${data.current.total_debt ? (data.current.total_debt / 1e9).toFixed(2) : '0'}">
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>EK-Anteil (E/V)</label>
+                            <span id="wacc-equity-ratio" class="wacc-computed-value">-</span>
+                        </div>
+                        <div class="wacc-capm-item">
+                            <label>FK-Anteil (D/V)</label>
+                            <span id="wacc-debt-ratio" class="wacc-computed-value">-</span>
+                        </div>
+                        <div></div>
+                        <div class="wacc-capm-item">
+                            <label>Tax Shield (%)</label>
+                            <input type="number" id="wacc-tax-shield" step="0.1" value="${defaults.tax_shield}">
+                        </div>
+                    </div>
+
+                    <div class="wacc-capm-result">
+                        <span class="wacc-result-label">Berechneter WACC:</span>
+                        <span id="wacc-capm-result-value" class="wacc-result-value">-</span>
+                        <button id="wacc-apply-btn" class="btn btn-sm">Übernehmen</button>
+                    </div>
+                </div>
+
                 <div class="dcf-actions">
                     <button id="dcf-calculate-btn" class="btn btn-primary">Berechnen</button>
                     <button id="dcf-save-btn" class="btn">Szenario speichern</button>
@@ -4057,7 +4136,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('dcf-growth-y8').value = defaults.revenue_growth_y8;
                 document.getElementById('dcf-growth-y9').value = defaults.revenue_growth_y9;
                 document.getElementById('dcf-growth-y10').value = defaults.revenue_growth_y10;
-                document.getElementById('dcf-ebit-margin').value = defaults.ebit_margin;
+                document.getElementById('dcf-margin-y1').value = defaults.ebit_margin_y1;
+                document.getElementById('dcf-margin-y2').value = defaults.ebit_margin_y2;
+                document.getElementById('dcf-margin-y3').value = defaults.ebit_margin_y3;
+                document.getElementById('dcf-margin-y4').value = defaults.ebit_margin_y4;
+                document.getElementById('dcf-margin-y5').value = defaults.ebit_margin_y5;
+                document.getElementById('dcf-margin-y6').value = defaults.ebit_margin_y6;
+                document.getElementById('dcf-margin-y7').value = defaults.ebit_margin_y7;
+                document.getElementById('dcf-margin-y8').value = defaults.ebit_margin_y8;
+                document.getElementById('dcf-margin-y9').value = defaults.ebit_margin_y9;
+                document.getElementById('dcf-margin-y10').value = defaults.ebit_margin_y10;
                 document.getElementById('dcf-tax-rate').value = defaults.tax_rate;
                 document.getElementById('dcf-capex').value = defaults.capex_percent;
                 document.getElementById('dcf-depreciation').value = defaults.depreciation_percent;
@@ -4069,6 +4157,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('dcf-results-container').innerHTML = '';
             }
         });
+
+        // WACC-CAPM Berechnung
+        const marketCap = data.current.market_cap;
+
+        function calculateWacc() {
+            const rf = parseFloat(document.getElementById('wacc-rf').value) || 0;
+            const beta = parseFloat(document.getElementById('wacc-beta').value) || 1;
+            const rm = parseFloat(document.getElementById('wacc-rm').value) || 0;
+            const rd = parseFloat(document.getElementById('wacc-rd').value) || 0;
+            const taxShield = parseFloat(document.getElementById('wacc-tax-shield').value) || 0;
+            const totalDebt = (parseFloat(document.getElementById('wacc-total-debt').value) || 0) * 1e9;
+
+            // CAPM: Re = Rf + Beta * (Rm - Rf)
+            const re = rf + beta * (rm - rf);
+            document.getElementById('wacc-re-display').textContent = re.toFixed(2) + '%';
+            document.getElementById('wacc-re-display2').textContent = re.toFixed(2) + '%';
+
+            // Kapitalstruktur
+            if (marketCap && totalDebt > 0) {
+                const v = marketCap + totalDebt;
+                const eRatio = (marketCap / v) * 100;
+                const dRatio = (totalDebt / v) * 100;
+                document.getElementById('wacc-equity-ratio').textContent = eRatio.toFixed(1) + '%';
+                document.getElementById('wacc-debt-ratio').textContent = dRatio.toFixed(1) + '%';
+
+                // WACC = (E/V) * Re + (D/V) * Rd * (1 - Tax)
+                const wacc = (marketCap / v) * re + (totalDebt / v) * rd * (1 - taxShield / 100);
+                document.getElementById('wacc-capm-result-value').textContent = wacc.toFixed(2) + '%';
+            } else {
+                // Ohne Market Cap/Debt: nur Re anzeigen, WACC = Re als Fallback
+                document.getElementById('wacc-equity-ratio').textContent = '-';
+                document.getElementById('wacc-debt-ratio').textContent = '-';
+                document.getElementById('wacc-capm-result-value').textContent = re.toFixed(2) + '% (nur EK)';
+            }
+        }
+
+        // Live-Berechnung bei jeder Eingabeänderung
+        ['wacc-rf', 'wacc-beta', 'wacc-rm', 'wacc-rd', 'wacc-tax-shield', 'wacc-total-debt'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculateWacc);
+        });
+
+        // Übernehmen-Button: WACC in das DCF-WACC-Feld setzen
+        document.getElementById('wacc-apply-btn').addEventListener('click', () => {
+            const resultText = document.getElementById('wacc-capm-result-value').textContent;
+            const match = resultText.match(/([\d.]+)%/);
+            if (match) {
+                document.getElementById('dcf-wacc').value = parseFloat(match[1]).toFixed(1);
+            }
+        });
+
+        // Initial berechnen
+        calculateWacc();
 
         // FCF Chart rendern
         if (typeof Chart !== 'undefined' && data.historical.length > 0) {
@@ -4090,7 +4230,17 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('dcf-growth-y8').value = scenario.revenue_growth_y8 || 0;
         document.getElementById('dcf-growth-y9').value = scenario.revenue_growth_y9 || 0;
         document.getElementById('dcf-growth-y10').value = scenario.revenue_growth_y10 || 0;
-        document.getElementById('dcf-ebit-margin').value = scenario.ebit_margin || 15;
+        const dflt = dcfData.defaults || {};
+        document.getElementById('dcf-margin-y1').value = scenario.ebit_margin_y1 || dflt.ebit_margin_y1 || 15;
+        document.getElementById('dcf-margin-y2').value = scenario.ebit_margin_y2 || dflt.ebit_margin_y2 || 15;
+        document.getElementById('dcf-margin-y3').value = scenario.ebit_margin_y3 || dflt.ebit_margin_y3 || 15;
+        document.getElementById('dcf-margin-y4').value = scenario.ebit_margin_y4 || dflt.ebit_margin_y4 || 15;
+        document.getElementById('dcf-margin-y5').value = scenario.ebit_margin_y5 || dflt.ebit_margin_y5 || 15;
+        document.getElementById('dcf-margin-y6').value = scenario.ebit_margin_y6 || dflt.ebit_margin_y6 || 15;
+        document.getElementById('dcf-margin-y7').value = scenario.ebit_margin_y7 || dflt.ebit_margin_y7 || 15;
+        document.getElementById('dcf-margin-y8').value = scenario.ebit_margin_y8 || dflt.ebit_margin_y8 || 15;
+        document.getElementById('dcf-margin-y9').value = scenario.ebit_margin_y9 || dflt.ebit_margin_y9 || 15;
+        document.getElementById('dcf-margin-y10').value = scenario.ebit_margin_y10 || dflt.ebit_margin_y10 || 15;
         document.getElementById('dcf-tax-rate').value = scenario.tax_rate || 25;
         document.getElementById('dcf-capex').value = scenario.capex_percent || 3;
         document.getElementById('dcf-depreciation').value = scenario.depreciation_percent || 3;
@@ -4113,7 +4263,16 @@ document.addEventListener('DOMContentLoaded', function() {
             revenue_growth_y8: parseFloat(document.getElementById('dcf-growth-y8').value) || 0,
             revenue_growth_y9: parseFloat(document.getElementById('dcf-growth-y9').value) || 0,
             revenue_growth_y10: parseFloat(document.getElementById('dcf-growth-y10').value) || 0,
-            ebit_margin: parseFloat(document.getElementById('dcf-ebit-margin').value) || 15,
+            ebit_margin_y1: parseFloat(document.getElementById('dcf-margin-y1').value) || 15,
+            ebit_margin_y2: parseFloat(document.getElementById('dcf-margin-y2').value) || 15,
+            ebit_margin_y3: parseFloat(document.getElementById('dcf-margin-y3').value) || 15,
+            ebit_margin_y4: parseFloat(document.getElementById('dcf-margin-y4').value) || 15,
+            ebit_margin_y5: parseFloat(document.getElementById('dcf-margin-y5').value) || 15,
+            ebit_margin_y6: parseFloat(document.getElementById('dcf-margin-y6').value) || 15,
+            ebit_margin_y7: parseFloat(document.getElementById('dcf-margin-y7').value) || 15,
+            ebit_margin_y8: parseFloat(document.getElementById('dcf-margin-y8').value) || 15,
+            ebit_margin_y9: parseFloat(document.getElementById('dcf-margin-y9').value) || 15,
+            ebit_margin_y10: parseFloat(document.getElementById('dcf-margin-y10').value) || 15,
             tax_rate: parseFloat(document.getElementById('dcf-tax-rate').value) || 25,
             capex_percent: parseFloat(document.getElementById('dcf-capex').value) || 3,
             depreciation_percent: parseFloat(document.getElementById('dcf-depreciation').value) || 3,
@@ -4422,7 +4581,16 @@ document.addEventListener('DOMContentLoaded', function() {
             revenue_growth_y8: parseFloat(document.getElementById('dcf-growth-y8').value) || 0,
             revenue_growth_y9: parseFloat(document.getElementById('dcf-growth-y9').value) || 0,
             revenue_growth_y10: parseFloat(document.getElementById('dcf-growth-y10').value) || 0,
-            ebit_margin: parseFloat(document.getElementById('dcf-ebit-margin').value) || 15,
+            ebit_margin_y1: parseFloat(document.getElementById('dcf-margin-y1').value) || 15,
+            ebit_margin_y2: parseFloat(document.getElementById('dcf-margin-y2').value) || 15,
+            ebit_margin_y3: parseFloat(document.getElementById('dcf-margin-y3').value) || 15,
+            ebit_margin_y4: parseFloat(document.getElementById('dcf-margin-y4').value) || 15,
+            ebit_margin_y5: parseFloat(document.getElementById('dcf-margin-y5').value) || 15,
+            ebit_margin_y6: parseFloat(document.getElementById('dcf-margin-y6').value) || 15,
+            ebit_margin_y7: parseFloat(document.getElementById('dcf-margin-y7').value) || 15,
+            ebit_margin_y8: parseFloat(document.getElementById('dcf-margin-y8').value) || 15,
+            ebit_margin_y9: parseFloat(document.getElementById('dcf-margin-y9').value) || 15,
+            ebit_margin_y10: parseFloat(document.getElementById('dcf-margin-y10').value) || 15,
             tax_rate: parseFloat(document.getElementById('dcf-tax-rate').value) || 25,
             capex_percent: parseFloat(document.getElementById('dcf-capex').value) || 3,
             wc_change_percent: parseFloat(document.getElementById('dcf-wc-change').value) || 0,
