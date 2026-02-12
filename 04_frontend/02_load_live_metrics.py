@@ -27,6 +27,7 @@ from tqdm import tqdm
 from mysql.connector import Error
 from db import get_connection
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import numpy as np
 
 # Threading Konfiguration
 MAX_WORKERS = 3  # Reduziert um Rate Limiting zu vermeiden
@@ -101,17 +102,6 @@ def get_yf_metrics(ticker_yf):
             except Exception:
                 pass  # Earnings dates nicht verfügbar
 
-            # Beta separat behandeln (nicht clean_value nutzen, da Beta typisch 0.5-2.5)
-            raw_beta = info.get("beta")
-            beta = None
-            if raw_beta is not None:
-                try:
-                    beta = float(raw_beta)
-                    if math.isnan(beta) or math.isinf(beta) or beta < 0 or beta > 5:
-                        beta = None
-                except (ValueError, TypeError):
-                    beta = None
-
             result = {
                 "ttm_pe": clean_value(info.get("trailingPE")),
                 "forward_pe": clean_value(info.get("forwardPE")),
@@ -119,7 +109,6 @@ def get_yf_metrics(ticker_yf):
                 "profit_margin": to_percent(info.get("profitMargins")),
                 "operating_margin": to_percent(info.get("operatingMargins")),
                 "next_earnings_date": earnings_date,
-                "beta": beta,
             }
 
             # Nur zurückgeben wenn mindestens ein Wert vorhanden ist
@@ -401,6 +390,113 @@ def main():
         if rate_limited_count > 0:
             print(f"  ⚠️  {rate_limited_count} davon durch Rate Limiting")
 
+        # Schritt 4e: Beta aus eigenen Kursdaten berechnen
+        print("\nBerechne Beta aus Kursdaten (wöchentlich, 3 Jahre)...")
+
+        # Index-Zuordnung pro ISIN aus tickerlist
+        isin_to_index = {}
+        for row in latest_data:
+            if row["stock_index"]:
+                isin_to_index[row["isin"]] = row["stock_index"]
+
+        # Wöchentliche Aktien-Kurse (letzter Handelstag pro Woche, letzte 3 Jahre)
+        cur.execute("""
+            SELECT isin, date, close
+            FROM raw_data.yf_prices
+            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 3 YEAR)
+              AND close IS NOT NULL
+            ORDER BY isin, date
+        """)
+        from collections import defaultdict
+        stock_prices_raw = defaultdict(list)
+        for r in cur.fetchall():
+            stock_prices_raw[r["isin"]].append((r["date"], float(r["close"])))
+
+        # Wöchentliche Index-Kurse (letzte 3 Jahre)
+        cur.execute("""
+            SELECT stock_index, date, close
+            FROM raw_data.index_prices
+            WHERE date >= DATE_SUB(CURDATE(), INTERVAL 3 YEAR)
+              AND close IS NOT NULL
+            ORDER BY stock_index, date
+        """)
+        index_prices_raw = defaultdict(list)
+        for r in cur.fetchall():
+            index_prices_raw[r["stock_index"]].append((r["date"], float(r["close"])))
+
+        def to_weekly(prices):
+            """Resample auf wöchentlich (letzter Kurs pro Kalenderwoche)."""
+            weekly = {}
+            for dt, close in prices:
+                week_key = dt.isocalendar()[:2]  # (year, week)
+                weekly[week_key] = close  # Letzter Wert gewinnt (chronologisch sortiert)
+            # Sortiert nach Woche zurückgeben
+            return sorted(weekly.items())
+
+        def calc_returns(weekly_data):
+            """Berechnet wöchentliche Returns aus sortierten (week_key, close) Paaren."""
+            returns = {}
+            prev = None
+            for week_key, close in weekly_data:
+                if prev is not None:
+                    returns[week_key] = (close / prev) - 1
+                prev = close
+            return returns
+
+        # Index-Returns vorberechnen
+        index_weekly_returns = {}
+        for idx_name, prices in index_prices_raw.items():
+            weekly = to_weekly(prices)
+            index_weekly_returns[idx_name] = calc_returns(weekly)
+
+        beta_data = {}
+        beta_count = 0
+        beta_skipped = 0
+
+        for isin, stock_index in isin_to_index.items():
+            if stock_index not in index_weekly_returns:
+                beta_skipped += 1
+                continue
+            if isin not in stock_prices_raw:
+                beta_skipped += 1
+                continue
+
+            stock_weekly = to_weekly(stock_prices_raw[isin])
+            stock_returns = calc_returns(stock_weekly)
+            idx_returns = index_weekly_returns[stock_index]
+
+            # Gemeinsame Wochen finden
+            common_weeks = sorted(set(stock_returns.keys()) & set(idx_returns.keys()))
+
+            if len(common_weeks) < 52:
+                beta_skipped += 1
+                continue
+
+            stock_arr = np.array([stock_returns[w] for w in common_weeks])
+            index_arr = np.array([idx_returns[w] for w in common_weeks])
+
+            var_index = np.var(index_arr, ddof=1)
+            if var_index == 0:
+                beta_skipped += 1
+                continue
+
+            cov = np.cov(stock_arr, index_arr, ddof=1)[0, 1]
+            beta = cov / var_index
+
+            # Plausibilitätscheck
+            if beta < -2 or beta > 5 or np.isnan(beta) or np.isinf(beta):
+                beta_skipped += 1
+                continue
+
+            beta_data[isin] = round(beta, 4)
+            beta_count += 1
+
+        print(f"  -> {beta_count} Ticker mit berechnetem Beta")
+        print(f"  -> {beta_skipped} Ticker übersprungen (zu wenig Daten oder kein Index)")
+
+        # Speicher freigeben
+        del stock_prices_raw, index_prices_raw, index_weekly_returns
+
         # Schritt 5: Daten kombinieren und in live_metrics speichern
         print("\nBerechne TTM-Kennzahlen mit aktuellen Kursen und speichere...")
 
@@ -590,7 +686,7 @@ def main():
             yf_payout_ratio = yf_data.get("payout_ratio")
             yf_profit_margin = yf_data.get("profit_margin")
             yf_operating_margin = yf_data.get("operating_margin")
-            beta = yf_data.get("beta")
+            beta = beta_data.get(isin)
 
             # Nächstes Earnings-Datum: Primär aus finanzen.net, Fallback yfinance
             next_earnings_date = earnings_dates.get(isin)
