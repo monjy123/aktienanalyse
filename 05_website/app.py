@@ -30,6 +30,15 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Bitte melden Sie sich an, um diese Seite zu sehen.'
 
+# Mapping für fiscal_year_end Monatsnamen → Monatszahl
+MONTH_MAP = {
+    'januar': 1, 'februar': 2, 'maerz': 3, 'märz': 3, 'april': 4,
+    'mai': 5, 'juni': 6, 'juli': 7, 'august': 8, 'september': 9,
+    'oktober': 10, 'november': 11, 'dezember': 12,
+    'january': 1, 'february': 2, 'march': 3, 'may': 5, 'june': 6,
+    'july': 7, 'august': 8, 'october': 10, 'december': 12,
+}
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.get_by_id(int(user_id))
@@ -1509,18 +1518,19 @@ def get_dcf_data(isin):
                 if 1 <= proj_year <= 10:
                     yoy_growth[proj_year] = round(growth, 1)
 
-        # Fallback: CAGR-basiertes Tapering für Jahre ohne Schätzungen
-        default_growth = revenue_cagr_5y or revenue_cagr_3y or 5.0
-        tapering = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.35, 0.3, 0.25]
+        # Fallback: Vom letzten geschätzten Wachstum aus abnehmend tapern
+        last_est_year = max(yoy_growth) if yoy_growth else 0
+        last_est_growth = yoy_growth[last_est_year] if last_est_year else (revenue_cagr_5y or revenue_cagr_3y or 5.0)
+        tapering_factors = [0.85, 0.70, 0.55, 0.40, 0.30, 0.20, 0.15, 0.10, 0.05, 0.0]
 
         defaults = {}
         for i in range(1, 11):
             if i in yoy_growth:
                 defaults[f"revenue_growth_y{i}"] = yoy_growth[i]
-            elif default_growth:
-                defaults[f"revenue_growth_y{i}"] = round(default_growth * tapering[i - 1], 1)
             else:
-                defaults[f"revenue_growth_y{i}"] = round(5.0 * tapering[i - 1], 1)
+                # Position im Tapering ab dem ersten nicht-geschätzten Jahr
+                taper_idx = min(i - last_est_year - 1, len(tapering_factors) - 1)
+                defaults[f"revenue_growth_y{i}"] = round(last_est_growth * tapering_factors[taper_idx], 1)
 
         # EBIT-Marge pro Projektionsjahr berechnen (analog zum Umsatzwachstum)
         # Estimate-basierte Margen nach Projektionsjahr mappen
@@ -2164,74 +2174,205 @@ def get_earnings_data(isin):
                 "status": status
             })
 
-        # 8. Fiskaljahr-Fortschritt berechnen
+        # 8. Fiskaljahr-Fortschritt berechnen (mit echten Quartalszahlen aus fmp)
         fiscal_year_progress = None
-        current_year = datetime.now().year
 
-        # Quartale des aktuellen Jahres sammeln
-        # Period Format ist z.B. "Q1 2026" oder "Q2 2025"
-        fy_quarters = []
-        for q in calendar_quarters:
-            period = q['period']
-            # Extrahiere Jahr aus dem Period-String
-            year_match = re.search(r'(\d{4})', period)
-            if year_match:
-                q_year = int(year_match.group(1))
-                if q_year == current_year:
-                    release_date = q['release_date']
-                    is_reported = release_date and release_date < today
-                    eps_estimate = float(q['eps_estimate']) if q['eps_estimate'] else None
+        # a) FY-Ende-Monat bestimmen
+        fy_end_str = (company.get('fiscal_year_end') or '').strip().lower()
+        fy_end_month = 12  # Default: Dezember
+        for name, month_num in MONTH_MAP.items():
+            if name in fy_end_str:
+                fy_end_month = month_num
+                break
 
-                    # Versuche Actual zu finden
-                    q_data = quarters_data.get(period, {})
-                    eps_actual = q_data.get('eps_actual')
+        # b) Quartals- vs. Halbjahresberichterstattung erkennen
+        cur.execute("""
+            SELECT DISTINCT period
+            FROM analytics.fmp_filtered_numbers
+            WHERE isin = %s AND period != 'FY'
+              AND date >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH)
+        """, (isin,))
+        recent_periods = set(r['period'] for r in cur.fetchall())
+        is_semiannual_reporter = recent_periods and recent_periods.issubset({'Q2', 'Q4', 'H1', 'H2'})
+        expected_periods = ['H1', 'H2'] if is_semiannual_reporter else ['Q1', 'Q2', 'Q3', 'Q4']
+        period_label = 'Halbjahre' if is_semiannual_reporter else 'Quartale'
 
-                    fy_quarters.append({
-                        'period': period,
-                        'quarter': period[:2],  # "Q1", "Q2", etc.
-                        'eps_estimate': eps_estimate,
-                        'eps_actual': eps_actual if is_reported else None,
-                        'is_reported': is_reported
-                    })
+        # c) Aktuelles Fiskaljahr bestimmen + Actuals holen
+        #    Strategie: Berechne fy_year, hole Actuals. Falls 0 Treffer → fy_year - 1 probieren.
+        #    Grund: Im Feb 2026 ist FY 2025 (Dez-Ende) noch nicht abgeschlossen (Q4 fehlt).
+        def _calc_fy_range(fy_yr, end_month):
+            """Gibt (fy_start inclusive, fy_end exclusive = 1. Tag Folgemonat) zurück."""
+            if end_month == 12:
+                return f'{fy_yr}-01-01', f'{fy_yr + 1}-01-01'
+            else:
+                return f'{fy_yr - 1}-{end_month + 1:02d}-01', f'{fy_yr}-{end_month + 1:02d}-01'
 
-        # Nach Quartal sortieren (Q1, Q2, Q3, Q4)
-        fy_quarters.sort(key=lambda x: x['quarter'])
-
-        if fy_quarters:
-            # Berechne Summen
-            total_eps_estimate = sum(q['eps_estimate'] or 0 for q in fy_quarters)
-            total_eps_actual = sum(q['eps_actual'] or 0 for q in fy_quarters if q['is_reported'])
-            quarters_reported = sum(1 for q in fy_quarters if q['is_reported'])
-            total_quarters = len(fy_quarters)
-
-            # Jahresschätzung aus analyst_estimates holen
+        def _fetch_actuals(fy_yr, end_month):
+            fs, fe = _calc_fy_range(fy_yr, end_month)
             cur.execute("""
-                SELECT estimate_value
+                SELECT period, date,
+                       AVG(revenue) as revenue,
+                       AVG(COALESCE(eps_diluted, eps)) as eps
+                FROM analytics.fmp_filtered_numbers
+                WHERE isin = %s AND period IN ({})
+                  AND date >= %s AND date < %s
+                GROUP BY period, date
+                ORDER BY date ASC
+            """.format(','.join(['%s'] * len(expected_periods))),
+                (isin, *expected_periods, fs, fe))
+            rows = cur.fetchall()
+            actuals = {}
+            for row in rows:
+                p = row['period']
+                actuals[p] = {
+                    'eps': float(row['eps']) if row['eps'] else None,
+                    'revenue': float(row['revenue']) if row['revenue'] else None,
+                }
+            return actuals
+
+        if today.month <= fy_end_month:
+            fy_year = today.year
+        else:
+            fy_year = today.year + 1
+
+        fmp_actuals = _fetch_actuals(fy_year, fy_end_month)
+
+        # Fallback: Wenn keine Actuals im berechneten FY, versuche Vorjahr
+        # (z.B. Feb 2026, Dez-FY → FY 2026 hat 0 Daten, FY 2025 hat Q1-Q3)
+        if not fmp_actuals and fy_year > today.year - 2:
+            fy_year -= 1
+            fmp_actuals = _fetch_actuals(fy_year, fy_end_month)
+
+        # Zusätzlich: Wenn ALLE Quartale bereits gemeldet, zeige nächstes FY
+        if len(fmp_actuals) >= len(expected_periods):
+            next_fy = fy_year + 1
+            next_actuals = _fetch_actuals(next_fy, fy_end_month)
+            # Nur wechseln wenn nächstes FY schon begonnen hat (mindestens Estimates vorhanden)
+            # oder bereits Actuals hat
+            if next_actuals:
+                fy_year = next_fy
+                fmp_actuals = next_actuals
+
+        # e) Quartals-Schätzungen aus analyst_estimates holen
+        ae_period_strings = [f'{p} {fy_year}' for p in expected_periods]
+        quarter_estimates = {}
+        if ae_period_strings:
+            cur.execute("""
+                SELECT period, metric, estimate_value, unit
                 FROM analytics.analyst_estimates
                 WHERE isin = %s
-                  AND period_type = 'fiscal_year'
-                  AND metric = 'eps'
-                  AND period LIKE %s
-                LIMIT 1
-            """, (isin, f'%{current_year}%'))
-            fy_eps_row = cur.fetchone()
-            full_year_estimate = float(fy_eps_row['estimate_value']) if fy_eps_row and fy_eps_row['estimate_value'] else None
+                  AND period_type = 'quarter'
+                  AND metric IN ('eps', 'revenue')
+                  AND period IN ({})
+            """.format(','.join(['%s'] * len(ae_period_strings))),
+                (isin, *ae_period_strings))
+            for row in cur.fetchall():
+                p = row['period']
+                if p not in quarter_estimates:
+                    quarter_estimates[p] = {'eps': None, 'revenue': None}
+                val = float(row['estimate_value']) if row['estimate_value'] else None
+                if row['metric'] == 'revenue' and val and row['unit'] == 'millions':
+                    val = val * 1_000_000
+                quarter_estimates[p][row['metric']] = val
 
-            # Hochrechnung: gemeldete Quartale + geschätzte verbleibende Quartale
-            projection = total_eps_actual
+        # f) Jahresschätzung aus analyst_estimates holen (EPS + Revenue)
+        cur.execute("""
+            SELECT metric, estimate_value, unit
+            FROM analytics.analyst_estimates
+            WHERE isin = %s
+              AND period_type = 'fiscal_year'
+              AND metric IN ('eps', 'revenue')
+              AND period LIKE %s
+        """, (isin, f'%{fy_year}%'))
+        annual_estimate = {'eps': None, 'revenue': None}
+        for row in cur.fetchall():
+            val = float(row['estimate_value']) if row['estimate_value'] else None
+            if row['metric'] == 'revenue' and val and row['unit'] == 'millions':
+                val = val * 1_000_000
+            annual_estimate[row['metric']] = val
+
+        # g) Zusammenbauen: Pro erwartetem Quartal
+        fy_quarters = []
+        for p in expected_periods:
+            actual = fmp_actuals.get(p)
+            ae_key = f'{p} {fy_year}'
+            estimate = quarter_estimates.get(ae_key, {})
+            is_reported = actual is not None and (actual.get('eps') is not None or actual.get('revenue') is not None)
+
+            q_entry = {
+                'period_label': p,
+                'is_reported': is_reported,
+                'eps': None,
+                'revenue': None,
+                'eps_source': None,  # 'actual', 'estimate', 'implied'
+                'revenue_source': None,
+            }
+
+            if is_reported:
+                q_entry['eps'] = actual.get('eps')
+                q_entry['eps_source'] = 'actual'
+                q_entry['revenue'] = actual.get('revenue')
+                q_entry['revenue_source'] = 'actual'
+            else:
+                # Quartals-Estimate vorhanden?
+                if estimate.get('eps') is not None:
+                    q_entry['eps'] = estimate['eps']
+                    q_entry['eps_source'] = 'estimate'
+                if estimate.get('revenue') is not None:
+                    q_entry['revenue'] = estimate['revenue']
+                    q_entry['revenue_source'] = 'estimate'
+
+            fy_quarters.append(q_entry)
+
+        # Implied Estimates berechnen (Fallback wenn kein Quartals-Estimate)
+        quarters_reported = sum(1 for q in fy_quarters if q['is_reported'])
+        missing_eps = [q for q in fy_quarters if not q['is_reported'] and q['eps'] is None]
+        missing_rev = [q for q in fy_quarters if not q['is_reported'] and q['revenue'] is None]
+
+        if missing_eps and annual_estimate['eps'] is not None:
+            sum_known_eps = sum(q['eps'] or 0 for q in fy_quarters if q['eps'] is not None)
+            remaining = annual_estimate['eps'] - sum_known_eps
+            per_quarter = remaining / len(missing_eps) if len(missing_eps) > 0 else 0
+            for q in missing_eps:
+                q['eps'] = round(per_quarter, 4)
+                q['eps_source'] = 'implied'
+
+        if missing_rev and annual_estimate['revenue'] is not None:
+            sum_known_rev = sum(q['revenue'] or 0 for q in fy_quarters if q['revenue'] is not None)
+            remaining = annual_estimate['revenue'] - sum_known_rev
+            per_quarter = remaining / len(missing_rev) if len(missing_rev) > 0 else 0
+            for q in missing_rev:
+                q['revenue'] = round(per_quarter, 2)
+                q['revenue_source'] = 'implied'
+
+        # Summen berechnen
+        eps_sum = sum(q['eps'] or 0 for q in fy_quarters if q['eps'] is not None)
+        rev_sum = sum(q['revenue'] or 0 for q in fy_quarters if q['revenue'] is not None)
+        total_periods = len(expected_periods)
+
+        # Nur anzeigen wenn mindestens ein Quartal Daten hat
+        has_any_data = any(q['eps'] is not None or q['revenue'] is not None for q in fy_quarters)
+        if has_any_data:
+            # Werte runden für Response
             for q in fy_quarters:
-                if not q['is_reported'] and q['eps_estimate']:
-                    projection += q['eps_estimate']
+                if q['eps'] is not None:
+                    q['eps'] = round(q['eps'], 2)
+                if q['revenue'] is not None:
+                    q['revenue'] = round(q['revenue'], 2)
 
             fiscal_year_progress = {
-                'year': f'FY {current_year}',
+                'year': f'FY {fy_year}',
+                'fy_end_month': fy_end_month,
+                'period_label': period_label,
+                'is_semiannual': is_semiannual_reporter,
                 'quarters': fy_quarters,
                 'quarters_reported': quarters_reported,
-                'total_quarters': total_quarters,
-                'progress_pct': round((quarters_reported / total_quarters) * 100) if total_quarters > 0 else 0,
-                'ytd_actual': round(total_eps_actual, 2) if total_eps_actual else 0,
-                'full_year_estimate': round(full_year_estimate, 2) if full_year_estimate else None,
-                'projection': round(projection, 2) if projection else None
+                'total_quarters': total_periods,
+                'progress_pct': round((quarters_reported / total_periods) * 100) if total_periods > 0 else 0,
+                'eps_sum': round(eps_sum, 2),
+                'revenue_sum': round(rev_sum, 2),
+                'annual_eps_estimate': round(annual_estimate['eps'], 2) if annual_estimate['eps'] else None,
+                'annual_revenue_estimate': round(annual_estimate['revenue'], 2) if annual_estimate['revenue'] else None,
             }
 
         # 9. Zukünftige Schätzungen (Fiskaljahre)
@@ -2251,7 +2392,7 @@ def get_earnings_data(isin):
             year_match = re.search(r'(\d{4})', period)
             if year_match:
                 year = int(year_match.group(1))
-                if year >= current_year:
+                if year >= fy_year:
                     if period not in future_estimates:
                         future_estimates[period] = {
                             "period": period,

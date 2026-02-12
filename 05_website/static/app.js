@@ -3602,43 +3602,82 @@ document.addEventListener('DOMContentLoaded', function() {
 
         heroHtml += '</div>';
 
-        // 2. Fiskaljahr-Fortschritt
+        // 2. Fiskaljahr-Fortschritt (mit EPS + Revenue Tabelle)
         let fyProgressHtml = '';
         if (data.fiscal_year_progress && data.fiscal_year_progress.quarters && data.fiscal_year_progress.quarters.length > 0) {
             const fyp = data.fiscal_year_progress;
             const currency = data.company.currency || '';
+            const periodLabel = fyp.period_label || 'Quartale';
 
-            // Quartals-Boxen erstellen
-            const quarterBoxes = fyp.quarters.map(q => {
-                const value = q.is_reported ? q.eps_actual : q.eps_estimate;
-                const statusClass = q.is_reported ? 'fy-quarter-reported' : 'fy-quarter-estimated';
-                const statusText = q.is_reported ? `${q.quarter} ✓` : `${q.quarter} (est)`;
-                return `
-                    <div class="fy-quarter-box ${statusClass}" title="${q.is_reported ? 'Gemeldet' : 'Geschätzt'}">
-                        <span class="fy-quarter-label">${statusText}</span>
-                        <span class="fy-quarter-value">${formatNumber(value)}</span>
-                    </div>
-                `;
-            }).join('<span class="fy-quarter-plus">+</span>');
+            // Smart Revenue Formatter: automatisch Mrd/Mio
+            const fmtRevenue = (val) => {
+                if (val == null) return '-';
+                const abs = Math.abs(val);
+                if (abs >= 1e9) return (val / 1e9).toFixed(1) + ' Mrd';
+                if (abs >= 1e6) return (val / 1e6).toFixed(0) + ' Mio';
+                return formatNumber(val);
+            };
+
+            // Spalten-Header + Klassen pro Quartal
+            const colHeaders = fyp.quarters.map(q => {
+                const suffix = q.is_reported ? '' : (q.eps_source === 'implied' ? '*' : ' (e)');
+                return `<th class="${q.is_reported ? 'fy-col-reported' : 'fy-col-estimated'}">${q.period_label}${suffix}</th>`;
+            }).join('');
+
+            // EPS-Zeile
+            const epsValues = fyp.quarters.map(q => {
+                const cls = q.is_reported ? 'fy-col-reported' : 'fy-col-estimated';
+                const tooltip = q.eps_source === 'implied' ? ' title="Abgeleitet aus Jahresschätzung"' : '';
+                const val = q.eps != null ? formatNumber(q.eps) : '-';
+                return `<td class="${cls}"${tooltip}>${val}</td>`;
+            }).join('');
+
+            // Revenue-Zeile
+            const revValues = fyp.quarters.map(q => {
+                const cls = q.is_reported ? 'fy-col-reported' : 'fy-col-estimated';
+                const tooltip = q.revenue_source === 'implied' ? ' title="Abgeleitet aus Jahresschätzung"' : '';
+                const val = fmtRevenue(q.revenue);
+                return `<td class="${cls}"${tooltip}>${val}</td>`;
+            }).join('');
 
             fyProgressHtml = `
                 <div class="earnings-section earnings-fy-progress">
-                    <div class="earnings-section-title">${fyp.year} Hochrechnung</div>
+                    <div class="fy-progress-header">
+                        <span class="earnings-section-title">${fyp.year} Hochrechnung</span>
+                        <span class="fy-progress-badge">${fyp.quarters_reported}/${fyp.total_quarters} ${periodLabel} gemeldet</span>
+                    </div>
                     <div class="fy-progress-content">
-                        <div class="fy-quarters-row">
-                            ${quarterBoxes}
-                            <span class="fy-quarter-equals">=</span>
-                            <div class="fy-quarter-box fy-quarter-total">
-                                <span class="fy-quarter-label">Summe</span>
-                                <span class="fy-quarter-value">${formatNumber(fyp.projection)} ${currency}</span>
-                            </div>
+                        <div class="fy-progress-table-container">
+                            <table class="fy-progress-table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        ${colHeaders}
+                                        <th class="fy-col-sum">Summe</th>
+                                        <th class="fy-col-annual">Jahres-Est.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="fy-row-label">EPS</td>
+                                        ${epsValues}
+                                        <td class="fy-col-sum">${formatNumber(fyp.eps_sum)}</td>
+                                        <td class="fy-col-annual">${fyp.annual_eps_estimate != null ? formatNumber(fyp.annual_eps_estimate) : '-'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fy-row-label">Umsatz</td>
+                                        ${revValues}
+                                        <td class="fy-col-sum">${fmtRevenue(fyp.revenue_sum)}</td>
+                                        <td class="fy-col-annual">${fyp.annual_revenue_estimate != null ? fmtRevenue(fyp.annual_revenue_estimate) : '-'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="fy-progress-bar-container">
                             <div class="fy-progress-bar" style="width: ${fyp.progress_pct}%"></div>
                         </div>
                         <div class="fy-progress-info">
-                            <span class="fy-progress-text">${fyp.quarters_reported}/${fyp.total_quarters} Quartale gemeldet (${fyp.progress_pct}%)</span>
-                            ${fyp.full_year_estimate ? `<span class="fy-estimate-text">Jahresschätzung: ${formatNumber(fyp.full_year_estimate)} ${currency}</span>` : ''}
+                            <span class="fy-progress-text">${fyp.progress_pct}% des Fiskaljahres gemeldet</span>
                         </div>
                     </div>
                 </div>
