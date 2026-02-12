@@ -2194,8 +2194,18 @@ def get_earnings_data(isin):
         """, (isin,))
         recent_periods = set(r['period'] for r in cur.fetchall())
         is_semiannual_reporter = recent_periods and recent_periods.issubset({'Q2', 'Q4', 'H1', 'H2'})
-        expected_periods = ['H1', 'H2'] if is_semiannual_reporter else ['Q1', 'Q2', 'Q3', 'Q4']
-        period_label = 'Halbjahre' if is_semiannual_reporter else 'Quartale'
+        if is_semiannual_reporter:
+            # DB-Perioden beibehalten (Q2/Q4 oder H1/H2), Display-Labels separat
+            if 'H1' in recent_periods or 'H2' in recent_periods:
+                expected_periods = ['H1', 'H2']
+            else:
+                expected_periods = ['Q2', 'Q4']
+            display_labels = {expected_periods[0]: 'H1', expected_periods[1]: 'H2'}
+            period_label = 'Halbjahre'
+        else:
+            expected_periods = ['Q1', 'Q2', 'Q3', 'Q4']
+            display_labels = {p: p for p in expected_periods}
+            period_label = 'Quartale'
 
         # c) Aktuelles Fiskaljahr bestimmen + Actuals holen
         #    Strategie: Berechne fy_year, hole Actuals. Falls 0 Treffer → fy_year - 1 probieren.
@@ -2300,7 +2310,7 @@ def get_earnings_data(isin):
             is_reported = actual is not None and (actual.get('eps') is not None or actual.get('revenue') is not None)
 
             q_entry = {
-                'period_label': p,
+                'period_label': display_labels.get(p, p),
                 'is_reported': is_reported,
                 'eps': None,
                 'revenue': None,
