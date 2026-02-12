@@ -2264,26 +2264,29 @@ def get_earnings_data(isin):
                 fmp_actuals = next_actuals
 
         # e) Quartals-Schätzungen aus analyst_estimates holen
-        ae_period_strings = [f'{p} {fy_year}' for p in expected_periods]
+        #    Für Halbjahresberichterstatter überspringen — analyst_estimates enthält
+        #    Quartals-Werte, die nicht als Halbjahreswerte verwendbar sind.
         quarter_estimates = {}
-        if ae_period_strings:
-            cur.execute("""
-                SELECT period, metric, estimate_value, unit
-                FROM analytics.analyst_estimates
-                WHERE isin = %s
-                  AND period_type = 'quarter'
-                  AND metric IN ('eps', 'revenue')
-                  AND period IN ({})
-            """.format(','.join(['%s'] * len(ae_period_strings))),
-                (isin, *ae_period_strings))
-            for row in cur.fetchall():
-                p = row['period']
-                if p not in quarter_estimates:
-                    quarter_estimates[p] = {'eps': None, 'revenue': None}
-                val = float(row['estimate_value']) if row['estimate_value'] else None
-                if row['metric'] == 'revenue' and val and row['unit'] == 'millions':
-                    val = val * 1_000_000
-                quarter_estimates[p][row['metric']] = val
+        if not is_semiannual_reporter:
+            ae_period_strings = [f'{p} {fy_year}' for p in expected_periods]
+            if ae_period_strings:
+                cur.execute("""
+                    SELECT period, metric, estimate_value, unit
+                    FROM analytics.analyst_estimates
+                    WHERE isin = %s
+                      AND period_type = 'quarter'
+                      AND metric IN ('eps', 'revenue')
+                      AND period IN ({})
+                """.format(','.join(['%s'] * len(ae_period_strings))),
+                    (isin, *ae_period_strings))
+                for row in cur.fetchall():
+                    p = row['period']
+                    if p not in quarter_estimates:
+                        quarter_estimates[p] = {'eps': None, 'revenue': None}
+                    val = float(row['estimate_value']) if row['estimate_value'] else None
+                    if row['metric'] == 'revenue' and val and row['unit'] == 'millions':
+                        val = val * 1_000_000
+                    quarter_estimates[p][row['metric']] = val
 
         # f) Jahresschätzung aus analyst_estimates holen (EPS + Revenue)
         cur.execute("""
@@ -2340,17 +2343,24 @@ def get_earnings_data(isin):
         missing_rev = [q for q in fy_quarters if not q['is_reported'] and q['revenue'] is None]
 
         if missing_eps and annual_estimate['eps'] is not None:
-            sum_known_eps = sum(q['eps'] or 0 for q in fy_quarters if q['eps'] is not None)
-            remaining = annual_estimate['eps'] - sum_known_eps
-            per_quarter = remaining / len(missing_eps) if len(missing_eps) > 0 else 0
+            if is_semiannual_reporter:
+                # Halbjahresberichterstatter: FY / Anzahl Perioden
+                per_quarter = annual_estimate['eps'] / len(expected_periods)
+            else:
+                sum_known_eps = sum(q['eps'] or 0 for q in fy_quarters if q['eps'] is not None)
+                remaining = annual_estimate['eps'] - sum_known_eps
+                per_quarter = remaining / len(missing_eps) if len(missing_eps) > 0 else 0
             for q in missing_eps:
                 q['eps'] = round(per_quarter, 4)
                 q['eps_source'] = 'implied'
 
         if missing_rev and annual_estimate['revenue'] is not None:
-            sum_known_rev = sum(q['revenue'] or 0 for q in fy_quarters if q['revenue'] is not None)
-            remaining = annual_estimate['revenue'] - sum_known_rev
-            per_quarter = remaining / len(missing_rev) if len(missing_rev) > 0 else 0
+            if is_semiannual_reporter:
+                per_quarter = annual_estimate['revenue'] / len(expected_periods)
+            else:
+                sum_known_rev = sum(q['revenue'] or 0 for q in fy_quarters if q['revenue'] is not None)
+                remaining = annual_estimate['revenue'] - sum_known_rev
+                per_quarter = remaining / len(missing_rev) if len(missing_rev) > 0 else 0
             for q in missing_rev:
                 q['revenue'] = round(per_quarter, 2)
                 q['revenue_source'] = 'implied'
