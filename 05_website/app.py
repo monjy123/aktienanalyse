@@ -1541,11 +1541,15 @@ def get_dcf_data(isin):
                 if 1 <= proj_year <= 10:
                     est_ebit_margins[proj_year] = round(e['ebit_margin'], 1)
 
+        # Fallback: EBIT-Marge des letzten geschätzten Jahres fortschreiben
+        last_est_margin_year = max(est_ebit_margins) if est_ebit_margins else 0
+        last_est_margin = est_ebit_margins[last_est_margin_year] if last_est_margin_year else round(avg_ebit_margin, 1)
+
         for i in range(1, 11):
             if i in est_ebit_margins:
                 defaults[f"ebit_margin_y{i}"] = est_ebit_margins[i]
             else:
-                defaults[f"ebit_margin_y{i}"] = round(avg_ebit_margin, 1)
+                defaults[f"ebit_margin_y{i}"] = last_est_margin
 
         defaults.update({
             "tax_rate": 25.0,

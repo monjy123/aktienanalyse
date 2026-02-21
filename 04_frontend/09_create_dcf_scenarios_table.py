@@ -76,18 +76,29 @@ def create_dcf_scenarios_table():
 
         # Migration: Füge neue Wachstumsfelder hinzu falls sie fehlen
         migration_columns = [
-            ("revenue_growth_y6", "DOUBLE"),
-            ("revenue_growth_y7", "DOUBLE"),
-            ("revenue_growth_y8", "DOUBLE"),
-            ("revenue_growth_y9", "DOUBLE"),
-            ("revenue_growth_y10", "DOUBLE"),
+            ("revenue_growth_y6", "DOUBLE", "revenue_growth_y5"),
+            ("revenue_growth_y7", "DOUBLE", "revenue_growth_y6"),
+            ("revenue_growth_y8", "DOUBLE", "revenue_growth_y7"),
+            ("revenue_growth_y9", "DOUBLE", "revenue_growth_y8"),
+            ("revenue_growth_y10", "DOUBLE", "revenue_growth_y9"),
+            # EBIT-Marge pro Jahr (Y1–Y10)
+            ("ebit_margin_y1", "DOUBLE", "revenue_growth_y10"),
+            ("ebit_margin_y2", "DOUBLE", "ebit_margin_y1"),
+            ("ebit_margin_y3", "DOUBLE", "ebit_margin_y2"),
+            ("ebit_margin_y4", "DOUBLE", "ebit_margin_y3"),
+            ("ebit_margin_y5", "DOUBLE", "ebit_margin_y4"),
+            ("ebit_margin_y6", "DOUBLE", "ebit_margin_y5"),
+            ("ebit_margin_y7", "DOUBLE", "ebit_margin_y6"),
+            ("ebit_margin_y8", "DOUBLE", "ebit_margin_y7"),
+            ("ebit_margin_y9", "DOUBLE", "ebit_margin_y8"),
+            ("ebit_margin_y10", "DOUBLE", "ebit_margin_y9"),
         ]
 
-        for col_name, col_type in migration_columns:
+        for col_name, col_type, after_col in migration_columns:
             try:
                 cur.execute(f"""
                     ALTER TABLE analytics.user_dcf_scenarios
-                    ADD COLUMN {col_name} {col_type} AFTER revenue_growth_y5
+                    ADD COLUMN {col_name} {col_type} AFTER {after_col}
                 """)
                 print(f"✓ Spalte {col_name} hinzugefügt")
             except Exception:

@@ -42,65 +42,45 @@ def get_yf_metrics(ticker_yf):
     if not ticker_yf:
         return None
 
-    # Retry-Logik bei Rate Limiting
+    def clean_value(value):
+        """Filtere ungültige Werte (None, NaN, Infinity, extreme Werte)."""
+        if value is None:
+            return None
+        if isinstance(value, str):
+            try:
+                value = float(value)
+            except (ValueError, TypeError):
+                return None
+        if math.isnan(value) or math.isinf(value):
+            return None
+        if abs(value) > 10000:
+            return None
+        return value
+
+    def to_percent(val):
+        cleaned = clean_value(val)
+        return cleaned * 100 if cleaned is not None else None
+
     max_retries = 3
-    retry_delay = 2  # Sekunden
+    retry_delay = 3  # Sekunden
 
     for attempt in range(max_retries):
         try:
-            # Kleines Delay um Rate Limiting zu vermeiden
             if attempt > 0:
-                time.sleep(retry_delay * attempt)  # Exponential backoff
+                time.sleep(retry_delay * (attempt + 1))  # 6s, 9s
+
+            # Kleines Delay vor jedem Request um Rate Limiting zu vermeiden
+            time.sleep(0.3)
 
             stock = yf.Ticker(ticker_yf)
             info = stock.info
 
             # Prüfe ob gültige Daten zurückkamen
-            if not info:
+            if not info or len(info) <= 1:
+                # yfinance gibt bei Rate Limiting oft nur {'trailingPegRatio': ...} zurück
+                if attempt < max_retries - 1:
+                    continue  # Retry bei leeren/minimalen Daten
                 return None
-
-            def clean_value(value):
-                """Filtere ungültige Werte (None, NaN, Infinity, extreme Werte)."""
-                if value is None:
-                    return None
-
-                # String-Werte abfangen (manchmal gibt yfinance Strings zurück)
-                if isinstance(value, str):
-                    try:
-                        value = float(value)
-                    except (ValueError, TypeError):
-                        return None
-
-                # Prüfe auf NaN oder Infinity
-                if math.isnan(value) or math.isinf(value):
-                    return None
-
-                # Filtere extreme Werte (z.B. PE > 10000 oder < -1000)
-                if abs(value) > 10000:
-                    return None
-
-                return value
-
-            # Hilfsfunktion: Dezimalwert zu Prozent umwandeln (0.25 -> 25.0)
-            def to_percent(val):
-                cleaned = clean_value(val)
-                return cleaned * 100 if cleaned is not None else None
-
-            # Nächstes Earnings Date aus get_earnings_dates() extrahieren
-            # Diese Methode liefert eine Liste aller bekannten Earnings-Dates
-            # Wir wählen das nächste zukünftige Datum aus
-            earnings_date = None
-            try:
-                from datetime import datetime
-                ed = stock.get_earnings_dates(limit=8)  # Hole die nächsten 8
-                if ed is not None and not ed.empty:
-                    today = datetime.now().astimezone()
-                    for dt in ed.index:
-                        if dt > today:
-                            earnings_date = dt.strftime('%Y-%m-%d')
-                            break  # Erstes zukünftiges Datum gefunden
-            except Exception:
-                pass  # Earnings dates nicht verfügbar
 
             result = {
                 "ttm_pe": clean_value(info.get("trailingPE")),
@@ -108,26 +88,38 @@ def get_yf_metrics(ticker_yf):
                 "payout_ratio": to_percent(info.get("payoutRatio")),
                 "profit_margin": to_percent(info.get("profitMargins")),
                 "operating_margin": to_percent(info.get("operatingMargins")),
-                "next_earnings_date": earnings_date,
             }
 
-            # Nur zurückgeben wenn mindestens ein Wert vorhanden ist
-            if any(v is not None for v in result.values()):
-                return result
-            else:
+            # Nächstes Earnings Date
+            earnings_date = None
+            try:
+                from datetime import datetime
+                ed = stock.get_earnings_dates(limit=8)
+                if ed is not None and not ed.empty:
+                    today = datetime.now().astimezone()
+                    for dt in ed.index:
+                        if dt > today:
+                            earnings_date = dt.strftime('%Y-%m-%d')
+                            break
+            except Exception:
+                pass
+
+            result["next_earnings_date"] = earnings_date
+
+            # Retry wenn keine einzige numerische Kennzahl vorhanden
+            numeric_values = [v for k, v in result.items() if k != "next_earnings_date"]
+            if not any(v is not None for v in numeric_values):
+                if attempt < max_retries - 1:
+                    continue  # Retry — wahrscheinlich Rate Limited
                 return None
+
+            return result
 
         except Exception as e:
             error_msg = str(e)
-
-            # Bei Rate Limiting: Retry
-            if "Too Many Requests" in error_msg or "Rate limited" in error_msg:
-                if attempt < max_retries - 1:
-                    continue  # Nächster Versuch
-                else:
-                    return None  # Nach max_retries aufgeben
-
-            # Bei anderen Fehlern: nicht retrien
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay * (attempt + 1))
+                continue
             return None
 
     return None
@@ -361,8 +353,7 @@ def main():
                 ticker_mapping[row["isin"]] = row["ticker"]
 
         yf_metrics = {}
-        failed_count = 0
-        rate_limited_count = 0
+        failed_isins = []
 
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             futures = {
@@ -370,7 +361,7 @@ def main():
                 for isin, ticker_yf in ticker_mapping.items()
             }
 
-            with tqdm(total=len(futures), desc="yfinance API") as pbar:
+            with tqdm(total=len(futures), desc="yfinance API (Durchlauf 1)") as pbar:
                 for future in as_completed(futures):
                     isin = futures[future]
                     try:
@@ -378,17 +369,32 @@ def main():
                         if result:
                             yf_metrics[isin] = result
                         else:
-                            failed_count += 1
-                    except Exception as e:
-                        failed_count += 1
-                        if "Rate limited" in str(e):
-                            rate_limited_count += 1
+                            failed_isins.append(isin)
+                    except Exception:
+                        failed_isins.append(isin)
                     pbar.update(1)
 
-        print(f"  -> {len(yf_metrics)} Ticker mit yfinance Metriken")
-        print(f"  -> {failed_count} Ticker fehlgeschlagen")
-        if rate_limited_count > 0:
-            print(f"  ⚠️  {rate_limited_count} davon durch Rate Limiting")
+        print(f"  -> {len(yf_metrics)} Ticker erfolgreich, {len(failed_isins)} fehlgeschlagen")
+
+        # Durchlauf 2: Fehlgeschlagene Ticker nochmal versuchen (seriell, mit Pause)
+        if failed_isins:
+            import time
+            print(f"\nDurchlauf 2: {len(failed_isins)} fehlgeschlagene Ticker erneut versuchen (seriell)...")
+            time.sleep(5)  # Pause vor Retry-Runde
+            retry_success = 0
+            for isin in tqdm(failed_isins, desc="yfinance API (Durchlauf 2)"):
+                ticker_yf = ticker_mapping.get(isin)
+                if not ticker_yf:
+                    continue
+                time.sleep(1.0)  # 1s Pause zwischen Requests
+                result = get_yf_metrics(ticker_yf)
+                if result:
+                    yf_metrics[isin] = result
+                    retry_success += 1
+            still_failed = len(failed_isins) - retry_success
+            print(f"  -> Durchlauf 2: {retry_success} gerettet, {still_failed} weiterhin fehlgeschlagen")
+
+        print(f"  -> Gesamt: {len(yf_metrics)} Ticker mit yfinance Metriken")
 
         # Schritt 4e: Beta aus eigenen Kursdaten berechnen
         print("\nBerechne Beta aus Kursdaten (wöchentlich, 5 Jahre)...")
@@ -601,23 +607,23 @@ def main():
             operating_margin_avg_5y = VALUES(operating_margin_avg_5y),
             operating_margin_avg_10y = VALUES(operating_margin_avg_10y),
             operating_margin_avg_5y_2019 = COALESCE(VALUES(operating_margin_avg_5y_2019), operating_margin_avg_5y_2019),
-            yf_ttm_pe = VALUES(yf_ttm_pe),
-            yf_forward_pe = VALUES(yf_forward_pe),
-            yf_payout_ratio = VALUES(yf_payout_ratio),
-            yf_profit_margin = VALUES(yf_profit_margin),
-            yf_operating_margin = VALUES(yf_operating_margin),
-            beta = VALUES(beta),
-            next_earnings_date = VALUES(next_earnings_date),
-            yf_ttm_pe_vs_avg_5y = VALUES(yf_ttm_pe_vs_avg_5y),
-            yf_ttm_pe_vs_avg_10y = VALUES(yf_ttm_pe_vs_avg_10y),
-            yf_ttm_pe_vs_avg_15y = VALUES(yf_ttm_pe_vs_avg_15y),
-            yf_ttm_pe_vs_avg_20y = VALUES(yf_ttm_pe_vs_avg_20y),
-            yf_ttm_pe_vs_avg_10y_2019 = VALUES(yf_ttm_pe_vs_avg_10y_2019),
-            yf_fwd_pe_vs_avg_5y = VALUES(yf_fwd_pe_vs_avg_5y),
-            yf_fwd_pe_vs_avg_10y = VALUES(yf_fwd_pe_vs_avg_10y),
-            yf_fwd_pe_vs_avg_15y = VALUES(yf_fwd_pe_vs_avg_15y),
-            yf_fwd_pe_vs_avg_20y = VALUES(yf_fwd_pe_vs_avg_20y),
-            yf_fwd_pe_vs_avg_10y_2019 = VALUES(yf_fwd_pe_vs_avg_10y_2019),
+            yf_ttm_pe = COALESCE(VALUES(yf_ttm_pe), yf_ttm_pe),
+            yf_forward_pe = COALESCE(VALUES(yf_forward_pe), yf_forward_pe),
+            yf_payout_ratio = COALESCE(VALUES(yf_payout_ratio), yf_payout_ratio),
+            yf_profit_margin = COALESCE(VALUES(yf_profit_margin), yf_profit_margin),
+            yf_operating_margin = COALESCE(VALUES(yf_operating_margin), yf_operating_margin),
+            beta = COALESCE(VALUES(beta), beta),
+            next_earnings_date = COALESCE(VALUES(next_earnings_date), next_earnings_date),
+            yf_ttm_pe_vs_avg_5y = COALESCE(VALUES(yf_ttm_pe_vs_avg_5y), yf_ttm_pe_vs_avg_5y),
+            yf_ttm_pe_vs_avg_10y = COALESCE(VALUES(yf_ttm_pe_vs_avg_10y), yf_ttm_pe_vs_avg_10y),
+            yf_ttm_pe_vs_avg_15y = COALESCE(VALUES(yf_ttm_pe_vs_avg_15y), yf_ttm_pe_vs_avg_15y),
+            yf_ttm_pe_vs_avg_20y = COALESCE(VALUES(yf_ttm_pe_vs_avg_20y), yf_ttm_pe_vs_avg_20y),
+            yf_ttm_pe_vs_avg_10y_2019 = COALESCE(VALUES(yf_ttm_pe_vs_avg_10y_2019), yf_ttm_pe_vs_avg_10y_2019),
+            yf_fwd_pe_vs_avg_5y = COALESCE(VALUES(yf_fwd_pe_vs_avg_5y), yf_fwd_pe_vs_avg_5y),
+            yf_fwd_pe_vs_avg_10y = COALESCE(VALUES(yf_fwd_pe_vs_avg_10y), yf_fwd_pe_vs_avg_10y),
+            yf_fwd_pe_vs_avg_15y = COALESCE(VALUES(yf_fwd_pe_vs_avg_15y), yf_fwd_pe_vs_avg_15y),
+            yf_fwd_pe_vs_avg_20y = COALESCE(VALUES(yf_fwd_pe_vs_avg_20y), yf_fwd_pe_vs_avg_20y),
+            yf_fwd_pe_vs_avg_10y_2019 = COALESCE(VALUES(yf_fwd_pe_vs_avg_10y_2019), yf_fwd_pe_vs_avg_10y_2019),
             ev_ebit_vs_avg_5y = VALUES(ev_ebit_vs_avg_5y),
             ev_ebit_vs_avg_10y = VALUES(ev_ebit_vs_avg_10y),
             ev_ebit_vs_avg_15y = VALUES(ev_ebit_vs_avg_15y),

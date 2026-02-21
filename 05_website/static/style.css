@@ -282,6 +282,12 @@ h1 {
     max-width: 900px;
 }
 
+#note-modal #note-text {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    min-height: 400px;
+}
+
 .modal-large {
     max-width: 700px;
 }
