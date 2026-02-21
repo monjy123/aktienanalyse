@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Befüllt analytics.calcu_numbers mit berechneten Kennzahlen aus fmp_filtered_numbers.
+Befüllt analytics.calcu_numbers mit berechneten Kennzahlen aus historical_fundamentals.
 
 Berechnete Kennzahlen:
 - FY PE/EV-EBIT (Ganzjahresdaten)
@@ -146,7 +146,7 @@ def calculate_ttm_values(rows, current_row):
 def process_ticker(rows):
     """
     Verarbeitet alle Zeilen eines Tickers und berechnet die Kennzahlen.
-    rows: Liste von Tupeln mit den Daten aus fmp_filtered_numbers
+    rows: Liste von Tupeln mit den Daten aus historical_fundamentals
 
     Returns: Liste von Dictionaries mit berechneten Werten
     """
@@ -448,15 +448,15 @@ def main():
         conn = get_connection(autocommit=False)
         cur = conn.cursor(dictionary=True)
 
-        # Alle Daten aus fmp_filtered_numbers laden
-        print("Lade Daten aus fmp_filtered_numbers...")
+        # Alle Daten aus historical_fundamentals laden
+        print("Lade Daten aus historical_fundamentals...")
         cur.execute("""
             SELECT
                 ticker, isin, stock_index, company_name, date, period,
                 price, market_cap, net_debt, minority_interest,
                 operating_income, ebitda, revenue, net_income, eps,
                 total_assets, total_equity
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             ORDER BY isin, date
         """)
 

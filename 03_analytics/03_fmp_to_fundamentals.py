@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Befuellt analytics.fmp_filtered_numbers aus raw_data.fmp_financial_statements.
+Befuellt analytics.historical_fundamentals aus raw_data.fmp_financial_statements.
 
 Logik:
 - Kopiert ausgewaehlte Spalten von fmp_financial_statements
@@ -21,7 +21,7 @@ from db import get_connection
 
 # Schritt 1: Fundamentaldaten kopieren
 INSERT_FUNDAMENTALS_SQL = """
-INSERT INTO analytics.fmp_filtered_numbers (
+INSERT INTO analytics.historical_fundamentals (
     ticker, isin, stock_index, company_name,
     date, period,
 
@@ -147,7 +147,7 @@ ON DUPLICATE KEY UPDATE
 
 # Schritt 2: avg_price hinzufuegen (Durchschnitt pro ISIN und Jahr)
 UPDATE_AVG_PRICE_SQL = """
-UPDATE analytics.fmp_filtered_numbers ffn
+UPDATE analytics.historical_fundamentals ffn
 JOIN (
     SELECT isin, YEAR(date) AS year, AVG(close) AS avg_price
     FROM raw_data.yf_prices
@@ -159,7 +159,7 @@ SET ffn.avg_price = yp.avg_price;
 # Schritt 3: price (letzter Kurs des Jahres) hinzufuegen
 # Optimiert mit ROW_NUMBER() Window Function (MySQL 8+)
 UPDATE_LAST_PRICE_SQL = """
-UPDATE analytics.fmp_filtered_numbers ffn
+UPDATE analytics.historical_fundamentals ffn
 JOIN (
     SELECT isin, year, close AS price
     FROM (
@@ -177,7 +177,7 @@ SET ffn.price = yp.price;
 
 # Schritt 4: market_cap berechnen (price * weighted_average_shs_out)
 UPDATE_MARKET_CAP_SQL = """
-UPDATE analytics.fmp_filtered_numbers
+UPDATE analytics.historical_fundamentals
 SET market_cap = price * weighted_average_shs_out
 WHERE price IS NOT NULL
   AND weighted_average_shs_out IS NOT NULL;
@@ -251,15 +251,15 @@ def main():
         print("FERTIG - STATISTIK")
         print("=" * 60)
 
-        cur.execute("SELECT COUNT(*) FROM analytics.fmp_filtered_numbers")
+        cur.execute("SELECT COUNT(*) FROM analytics.historical_fundamentals")
         total = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(DISTINCT stock_index) FROM analytics.fmp_filtered_numbers")
+        cur.execute("SELECT COUNT(DISTINCT stock_index) FROM analytics.historical_fundamentals")
         indices = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(DISTINCT isin) FROM analytics.fmp_filtered_numbers")
+        cur.execute("SELECT COUNT(DISTINCT isin) FROM analytics.historical_fundamentals")
         isins = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM analytics.fmp_filtered_numbers WHERE price IS NOT NULL")
+        cur.execute("SELECT COUNT(*) FROM analytics.historical_fundamentals WHERE price IS NOT NULL")
         with_price = cur.fetchone()[0]
-        cur.execute("SELECT COUNT(*) FROM analytics.fmp_filtered_numbers WHERE market_cap IS NOT NULL")
+        cur.execute("SELECT COUNT(*) FROM analytics.historical_fundamentals WHERE market_cap IS NOT NULL")
         with_mcap = cur.fetchone()[0]
 
         print(f"Total Zeilen:             {total:,}")
@@ -272,7 +272,7 @@ def main():
         print("\nAufschluesselung nach stock_index:")
         cur.execute("""
             SELECT stock_index, COUNT(*) as cnt, COUNT(DISTINCT isin) as isins
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             GROUP BY stock_index
             ORDER BY cnt DESC
         """)
@@ -283,7 +283,7 @@ def main():
         print("\nAufschluesselung nach period:")
         cur.execute("""
             SELECT period, COUNT(*) as cnt
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             GROUP BY period
             ORDER BY cnt DESC
         """)

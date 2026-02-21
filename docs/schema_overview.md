@@ -178,7 +178,7 @@ Keys: `UNIQUE (isin, stock_index)`.
 
 # 3) Datenbank: `analytics`
 
-## 3.1 `fmp_filtered_numbers`
+## 3.1 `historical_fundamentals`
 Gefilterte/angereicherte Fundamentals aus FMP + Kursdaten.
 
 | Spalte | Typ | Beschreibung |
@@ -237,7 +237,7 @@ Gefilterte/angereicherte Fundamentals aus FMP + Kursdaten.
 Keys: `UNIQUE (isin, stock_index, date, period)`, Indizes auf `ticker`, `isin`, `stock_index`, `date`.
 
 ## 3.2 `calcu_numbers`
-Berechnete Kennzahlen auf Basis `fmp_filtered_numbers`.
+Berechnete Kennzahlen auf Basis `historical_fundamentals`.
 
 | Spalte | Typ |
 |--------|-----|
@@ -370,7 +370,7 @@ Abweichungs-Berechnung: `((aktueller_wert / durchschnitt) - 1) * 100`
 - Positiv (+25%): Aktie handelt 25% teurer als historischer Durchschnitt
 - Negativ (-15%): Aktie handelt 15% günstiger als historischer Durchschnitt
 
-Quellen: `calcu_numbers` (aktuellste Zeile + 2019er Daten), `fmp_filtered_numbers` (Preise), `yfinance API` (TTM/Forward PE).
+Quellen: `calcu_numbers` (aktuellste Zeile + 2019er Daten), `historical_fundamentals` (Preise), `yfinance API` (TTM/Forward PE).
 
 ### 3.3.3 `user_watchlist`
 Benutzer-spezifische Favoriten und Notizen. Update: manuell.
@@ -391,14 +391,14 @@ Pivot aus `eodhd_financial_statements` (1 Zeile je ISIN/Index/Jahr) mit Kurs/AVG
 
 # Beziehungen (Auszug)
 - `tickerdb.tickerlist` ↔ `raw_data.yf_prices` über `isin`/`yf_ticker`.
-- `raw_data.fmp_financial_statements` → `analytics.fmp_filtered_numbers` (Copy ausgewählter Felder + Preis/Market Cap).
-- `analytics.fmp_filtered_numbers` → `analytics.calcu_numbers` (berechnete Kennzahlen).
+- `raw_data.fmp_financial_statements` → `analytics.historical_fundamentals` (Copy ausgewählter Felder + Preis/Market Cap).
+- `analytics.historical_fundamentals` → `analytics.calcu_numbers` (berechnete Kennzahlen).
 - Legacy: `raw_data.eodhd_financial_statements` → `analytics.eodhd_filtered_numbers`.
 
 ## Frontend-Datenfluss
 ```
 tickerlist + yfinance API  →  company_info      (Stammdaten)
-calcu_numbers + fmp_filtered_numbers  →  live_metrics  (Kennzahlen)
+calcu_numbers + historical_fundamentals  →  live_metrics  (Kennzahlen)
 tickerlist  →  user_watchlist  (ISINs für Favoriten/Notizen)
 ```
 

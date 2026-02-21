@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Erstellt die Tabelle analytics.calcu_numbers.
-Enthält berechnete Kennzahlen basierend auf fmp_filtered_numbers.
+Enthält berechnete Kennzahlen basierend auf historical_fundamentals.
 """
 
 import sys
@@ -16,7 +16,7 @@ CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS analytics.calcu_numbers (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
-    -- Identifikation (übernommen von fmp_filtered_numbers)
+    -- Identifikation (übernommen von historical_fundamentals)
     ticker VARCHAR(20) NOT NULL,
     isin VARCHAR(20) NOT NULL,
     stock_index VARCHAR(255) NOT NULL,

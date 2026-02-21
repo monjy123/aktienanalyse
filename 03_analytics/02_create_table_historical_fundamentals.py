@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Erstellt die Tabelle analytics.fmp_filtered_numbers.
+Erstellt die Tabelle analytics.historical_fundamentals.
 UNIQUE KEY auf (isin, stock_index, date, period).
 """
 
@@ -13,7 +13,7 @@ from mysql.connector import Error
 from db import get_connection
 
 CREATE_TABLE_SQL = """
-CREATE TABLE analytics.fmp_filtered_numbers (
+CREATE TABLE analytics.historical_fundamentals (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     -- Identifikation
@@ -97,7 +97,7 @@ def main():
         conn = get_connection(autocommit=False)
         cur = conn.cursor()
 
-        print("Erstelle Tabelle analytics.fmp_filtered_numbers...")
+        print("Erstelle Tabelle analytics.historical_fundamentals...")
         cur.execute(CREATE_TABLE_SQL)
         conn.commit()
 

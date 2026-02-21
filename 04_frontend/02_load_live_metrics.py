@@ -7,7 +7,7 @@ Quellen:
 - calcu_numbers: Aktuellste Zeile pro ISIN (Bewertungen, CAGRs, Bilanz, TTM-Fundamentals)
 - calcu_numbers (2019): Historische 10-Jahres-Durchschnitte für Vor-Corona-Vergleich
 - raw_data.yf_prices: Aktuellster Schlusskurs
-- fmp_filtered_numbers: SharesOutstanding, Net Debt, Minority Interest für EV-Berechnung
+- historical_fundamentals: SharesOutstanding, Net Debt, Minority Interest für EV-Berechnung
 - yfinance API: TTM PE, Forward PE, Payout Ratio, Profit/Operating Margins
 - earnings_calendar (finanzen.net): Nächste Earnings-Termine (primär), yfinance als Fallback
 
@@ -234,19 +234,19 @@ def main():
         price_data = {row["isin"]: row for row in cur.fetchall()}
         print(f"  -> {len(price_data)} Ticker mit aktuellen Kursen")
 
-        # Schritt 4: Shares Outstanding, Net Debt, Minority Interest aus fmp_filtered_numbers
+        # Schritt 4: Shares Outstanding, Net Debt, Minority Interest aus historical_fundamentals
         # (für Market Cap und EV Berechnung)
-        print("\nLade Shares Outstanding und Bilanz-Daten aus fmp_filtered_numbers...")
+        print("\nLade Shares Outstanding und Bilanz-Daten aus historical_fundamentals...")
         cur.execute("""
             SELECT
                 f.isin,
                 MAX(f.weighted_average_shs_out) as shares_outstanding,
                 AVG(f.net_debt) as net_debt,
                 AVG(f.minority_interest) as minority_interest
-            FROM analytics.fmp_filtered_numbers f
+            FROM analytics.historical_fundamentals f
             INNER JOIN (
                 SELECT isin, MAX(date) as max_date
-                FROM analytics.fmp_filtered_numbers
+                FROM analytics.historical_fundamentals
                 WHERE period = 'FY'
                 GROUP BY isin
             ) latest ON f.isin = latest.isin AND f.date = latest.max_date
@@ -269,7 +269,7 @@ def main():
                 period,
                 AVG(net_income) as net_income,
                 AVG(operating_income) as operating_income
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE period != 'FY'
               AND date >= DATE_SUB(CURDATE(), INTERVAL 15 MONTH)
               AND net_income IS NOT NULL

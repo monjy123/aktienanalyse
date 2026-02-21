@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Ergaenzt analytics.fmp_filtered_numbers mit neuen Perioden aus yfinance.
+Ergaenzt analytics.historical_fundamentals mit neuen Perioden aus yfinance.
 
 - Laedt GuV, Bilanz und Cashflow pro Unternehmen
 - Erkennt Halbjahresreporter (leere quarterly_financials) → nur FY
@@ -131,7 +131,7 @@ def get_existing_periods(cur, isin):
     cur.execute("""
         SELECT YEAR(date) AS yr, period, date,
                revenue, gross_profit, operating_income, net_income
-        FROM analytics.fmp_filtered_numbers
+        FROM analytics.historical_fundamentals
         WHERE isin = %s
     """, (isin,))
     complete = set()
@@ -179,7 +179,7 @@ def build_insert_sql():
     update_parts.append('updated_at = NOW()')
 
     sql = f"""
-        INSERT INTO analytics.fmp_filtered_numbers ({cols})
+        INSERT INTO analytics.historical_fundamentals ({cols})
         VALUES ({placeholders})
         ON DUPLICATE KEY UPDATE
             {', '.join(update_parts)}
@@ -270,7 +270,7 @@ def update_prices_for_isins(cur, conn, isins):
 
     # avg_price
     cur.execute(f"""
-        UPDATE analytics.fmp_filtered_numbers ffn
+        UPDATE analytics.historical_fundamentals ffn
         JOIN (
             SELECT isin, YEAR(date) AS year, AVG(close) AS avg_price
             FROM raw_data.yf_prices
@@ -284,7 +284,7 @@ def update_prices_for_isins(cur, conn, isins):
 
     # price (letzter Kurs des Jahres)
     cur.execute(f"""
-        UPDATE analytics.fmp_filtered_numbers ffn
+        UPDATE analytics.historical_fundamentals ffn
         JOIN (
             SELECT isin, year, close AS price
             FROM (
@@ -302,7 +302,7 @@ def update_prices_for_isins(cur, conn, isins):
 
     # market_cap
     cur.execute(f"""
-        UPDATE analytics.fmp_filtered_numbers
+        UPDATE analytics.historical_fundamentals
         SET market_cap = price * weighted_average_shs_out
         WHERE isin IN ({placeholders})
           AND price IS NOT NULL
@@ -446,7 +446,7 @@ def main():
                     set_parts.append('updated_at = NOW()')
                     params.extend([isin, stock_index, upd['db_date'], upd['period']])
                     cur.execute(f"""
-                        UPDATE analytics.fmp_filtered_numbers
+                        UPDATE analytics.historical_fundamentals
                         SET {', '.join(set_parts)}
                         WHERE isin = %s AND stock_index = %s
                           AND date = %s AND period = %s

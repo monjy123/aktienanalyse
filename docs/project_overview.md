@@ -6,7 +6,7 @@ Kurzbeschreibung: lokales Aktien-Datenprojekt mit Fokus auf saubere Datenbeschaf
 - Tickerbasis: `tickerdb.tickerlist` aus iShares-Scrapes (DAX, MDAX, STOXX600, S&P500, FTSE100, NIKKEI225) inkl. Mapping zu Yahoo und FMP.
 - Kurse: `raw_data.yf_prices` via yfinance.
 - Fundamentals & Zusatzdaten (FMP): `raw_data.fmp_financial_statements`, `fmp_historical_market_cap`, Revenue-Segmente, Sector PE/Performance, Treasury Rates, Economic Indicators.
-- Analytics-Layer: `analytics.fmp_filtered_numbers` (aus FMP + Kursen), `analytics.calcu_numbers` (berechnete Kennzahlen). Legacy-Pfad für EODHD (`analytics.eodhd_filtered_numbers`) existiert noch.
+- Analytics-Layer: `analytics.historical_fundamentals` (aus FMP + Kursen), `analytics.calcu_numbers` (berechnete Kennzahlen). Legacy-Pfad für EODHD (`analytics.eodhd_filtered_numbers`) existiert noch.
 - Frontend: noch nicht implementiert; Watchlist/Screener als nächster Meilenstein.
 
 ## Projektziele
@@ -25,7 +25,7 @@ Kurzbeschreibung: lokales Aktien-Datenprojekt mit Fokus auf saubere Datenbeschaf
 - `00_tickerlist`: Tickerlisten anlegen/aktualisieren (`create_table`, iShares-Scraper, CSV-Import, Yahoo-/EODHD-Ticker-Fill).  
 - `01_load_fundamentals`: FMP-Loader für Financial Statements, Historical Market Cap, Revenue Segmente, Sector PE/Performance, Treasury Rates, Economic Indicators.  
 - `02_history`: Kurs-Tabelle `raw_data.yf_prices` anlegen und per yfinance befüllen.  
-- `03_analytics`: FMP-Daten nach `analytics.fmp_filtered_numbers` mappen (inkl. Kurs/Market Cap), Kennzahlen nach `analytics.calcu_numbers` berechnen, Legacy-Pivot aus EODHD.  
+- `03_analytics`: FMP-Daten nach `analytics.historical_fundamentals` mappen (inkl. Kurs/Market Cap), Kennzahlen nach `analytics.calcu_numbers` berechnen, Legacy-Pivot aus EODHD.  
 - `04_frontend`: Platzhalter für künftige UI/Assets.  
 - `db.py`: zentrale DB-Verbindung (Environment-gestützt).
 

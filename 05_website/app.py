@@ -650,19 +650,19 @@ def get_stock_details(isin):
         cur.execute("""
             SELECT AVG(market_cap) as market_cap, AVG(net_debt) as net_debt,
                    AVG(minority_interest) as minority_interest
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE isin = %s AND period = 'FY'
-              AND date = (SELECT MAX(date) FROM analytics.fmp_filtered_numbers WHERE isin = %s AND period = 'FY')
+              AND date = (SELECT MAX(date) FROM analytics.historical_fundamentals WHERE isin = %s AND period = 'FY')
         """, (isin, isin))
         ev_components = cur.fetchone() or {}
 
-        # 4. TTM-Berechnung: Quartale ODER Halbjahre aus fmp_filtered_numbers
+        # 4. TTM-Berechnung: Quartale ODER Halbjahre aus historical_fundamentals
         #    Nur Perioden mit revenue UND net_income (unvollstaendige ignorieren)
         cur.execute("""
             SELECT period, date,
                    AVG(net_income) as net_income, AVG(revenue) as revenue,
                    AVG(gross_profit) as gross_profit, AVG(operating_income) as operating_income
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE isin = %s AND period != 'FY'
               AND date >= DATE_SUB(CURDATE(), INTERVAL 18 MONTH)
               AND revenue IS NOT NULL
@@ -781,12 +781,12 @@ def get_stock_details(isin):
         if current_ttm_ev_ebit is None:
             current_ttm_ev_ebit = live.get('ttm_ev_ebit')
 
-        # 7. Income Statement: Letzte 10 FY-Jahre aus fmp_filtered_numbers
+        # 7. Income Statement: Letzte 10 FY-Jahre aus historical_fundamentals
         cur.execute("""
             SELECT YEAR(date) as year,
                    AVG(revenue) as revenue, AVG(gross_profit) as gross_profit,
                    AVG(operating_income) as operating_income, AVG(net_income) as net_income
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE isin = %s AND period = 'FY'
             GROUP BY YEAR(date)
             ORDER BY year DESC
@@ -1344,10 +1344,10 @@ def get_dcf_data(isin):
         """, (isin,))
         live = cur.fetchone() or {}
 
-        # 3. Net Debt und Shares Outstanding aus fmp_filtered_numbers
+        # 3. Net Debt und Shares Outstanding aus historical_fundamentals
         cur.execute("""
             SELECT net_debt, total_debt, weighted_average_shs_out_dil as shares_outstanding
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE isin = %s AND period = 'FY'
             ORDER BY date DESC
             LIMIT 1
@@ -1358,7 +1358,7 @@ def get_dcf_data(isin):
         cur.execute("""
             SELECT YEAR(date) as year, revenue, operating_income,
                    free_cash_flow, net_income, COALESCE(eps_diluted, eps) as eps
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE isin = %s AND period = 'FY'
             ORDER BY date DESC
             LIMIT 10
@@ -1656,7 +1656,7 @@ def calculate_dcf(isin):
 
         cur.execute("""
             SELECT revenue, net_debt, weighted_average_shs_out_dil as shares_outstanding
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE isin = %s AND period = 'FY'
             ORDER BY date DESC
             LIMIT 1
@@ -2192,7 +2192,7 @@ def get_earnings_data(isin):
         # b) Quartals- vs. Halbjahresberichterstattung erkennen
         cur.execute("""
             SELECT DISTINCT period
-            FROM analytics.fmp_filtered_numbers
+            FROM analytics.historical_fundamentals
             WHERE isin = %s AND period != 'FY'
               AND date >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH)
         """, (isin,))
@@ -2227,7 +2227,7 @@ def get_earnings_data(isin):
                 SELECT period, date,
                        AVG(revenue) as revenue,
                        AVG(COALESCE(eps_diluted, eps)) as eps
-                FROM analytics.fmp_filtered_numbers
+                FROM analytics.historical_fundamentals
                 WHERE isin = %s AND period IN ({})
                   AND date >= %s AND date < %s
                 GROUP BY period, date

@@ -233,13 +233,13 @@ CREATE TABLE `eodhd_filtered_numbers` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `fmp_filtered_numbers`
+-- Table structure for table `historical_fundamentals`
 --
 
-DROP TABLE IF EXISTS `fmp_filtered_numbers`;
+DROP TABLE IF EXISTS `historical_fundamentals`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `fmp_filtered_numbers` (
+CREATE TABLE `historical_fundamentals` (
   `id` int NOT NULL AUTO_INCREMENT,
   `ticker` varchar(20) NOT NULL,
   `isin` varchar(20) NOT NULL,
