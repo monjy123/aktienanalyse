@@ -40,3 +40,8 @@ backups/
 aktien.db
 .claude-info
 nohup.out
+
+# Generierte Analyse-Outputs
+*.html
+*.pdf
+06_scrapers/fallback_earnings_*.txt
