@@ -272,6 +272,14 @@ h1 {
     border-color: #3b82f6;
 }
 
+/* G/V-Spalte kompakt */
+.holding-gv-cell {
+    font-size: 0.8em;
+    padding-left: 4px;
+    padding-right: 4px;
+    white-space: nowrap;
+}
+
 /* G/V-Farben */
 .gv-positive {
     color: #16a34a;
