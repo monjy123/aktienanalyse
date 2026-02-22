@@ -3570,6 +3570,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         html += '</div>';
 
+        if (data.has_analysis) {
+            html += `
+            <div class="analysis-section">
+                <button class="btn-analysis" onclick="openAnalysisModal('${data.isin}', '${data.company_name}')">
+                    📄 Aktienanalyse ansehen
+                </button>
+            </div>`;
+        }
+
         html += '</div>';
         detailBody.innerHTML = html;
     }
@@ -3971,53 +3980,36 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
 
-        // 3. Quartals-Historie mit Beat/Miss
+        // 3. Quartals-Historie
         let historyHtml = '';
         if (data.history && data.history.length > 0) {
             const historyRows = data.history.map(h => {
-                const epsSurpriseClass = h.eps_surprise_pct > 0 ? 'surprise-positive' : (h.eps_surprise_pct < 0 ? 'surprise-negative' : '');
-                const revSurpriseClass = h.revenue_surprise_pct > 0 ? 'surprise-positive' : (h.revenue_surprise_pct < 0 ? 'surprise-negative' : '');
-
                 return `
                     <tr>
                         <td class="earnings-history-period">${h.period}</td>
                         <td class="earnings-history-date">${formatDate(h.release_date)}</td>
-                        <td class="num">${formatNumber(h.eps_estimate)}</td>
                         <td class="num">${formatNumber(h.eps_actual)}</td>
-                        <td class="num ${epsSurpriseClass}">${formatPercent(h.eps_surprise_pct, true)}</td>
-                        <td class="num">${formatMillions(h.revenue_estimate)}</td>
-                        <td class="num">${formatMillions(h.revenue_actual)}</td>
-                        <td class="num ${revSurpriseClass}">${formatPercent(h.revenue_surprise_pct, true)}</td>
                         <td class="num ${getPriceReactionClass(h.price_reaction)}">${formatPercent(h.price_reaction, true)}</td>
-                        <td class="earnings-status-cell">${getStatusIcon(h.status)}</td>
                     </tr>
                 `;
             }).join('');
 
             historyHtml = `
                 <div class="earnings-section">
-                    <div class="earnings-section-title">Quartals-Historie (letzte 8 Quartale)</div>
-                    <div class="earnings-history-table-container">
-                        <table class="earnings-history-table">
-                            <thead>
-                                <tr>
-                                    <th>Quartal</th>
-                                    <th>Datum</th>
-                                    <th class="num">EPS Est</th>
-                                    <th class="num">EPS Act</th>
-                                    <th class="num">Surprise</th>
-                                    <th class="num">Rev Est</th>
-                                    <th class="num">Rev Act</th>
-                                    <th class="num">Surprise</th>
-                                    <th class="num">Kursreaktion</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${historyRows}
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="earnings-section-title">Quartals-Historie</div>
+                    <table class="earnings-history-table">
+                        <thead>
+                            <tr>
+                                <th>Quartal</th>
+                                <th>Datum</th>
+                                <th class="num">Tatsächliche EPS</th>
+                                <th class="num">Kursreaktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${historyRows}
+                        </tbody>
+                    </table>
                 </div>
             `;
         }
@@ -4036,7 +4028,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             futureHtml = `
                 <div class="earnings-section">
-                    <div class="earnings-section-title">Künftige Schätzungen</div>
+                    <div class="earnings-section-title">Schätzungen</div>
                     <table class="earnings-future-table">
                         <thead>
                             <tr>
@@ -4055,12 +4047,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Gesamtes HTML zusammenbauen
+        const hasBoth = historyHtml && futureHtml;
         let html = `
             <div class="earnings-tab-content">
                 ${heroHtml}
                 ${fyProgressHtml}
-                ${historyHtml}
-                ${futureHtml}
+                ${hasBoth
+                    ? `<div class="earnings-side-by-side">${historyHtml}${futureHtml}</div>`
+                    : historyHtml + futureHtml
+                }
                 ${(!data.history || data.history.length === 0) && (!data.future_estimates || data.future_estimates.length === 0) ?
                     '<div class="earnings-empty-state"><p>Keine Earnings-Daten verfügbar.</p></div>' : ''}
             </div>
@@ -4954,3 +4949,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 });
+
+function openAnalysisModal(isin, companyName) {
+    const modal = document.getElementById('analysis-viewer-modal');
+    const embed = document.getElementById('analysis-pdf-embed');
+    const title = document.getElementById('analysis-modal-title');
+    title.textContent = `Analyse: ${companyName}`;
+    embed.src = `/static/analyses/${isin}.pdf`;
+    modal.classList.remove('hidden');
+}

@@ -1236,6 +1236,9 @@ def get_stock_info(isin):
             info['market_cap'] = metrics['market_cap']
             info['next_earnings_date'] = metrics['next_earnings_date']
 
+        analyses_dir = os.path.join(os.path.dirname(__file__), 'static', 'analyses')
+        info['has_analysis'] = os.path.exists(os.path.join(analyses_dir, f"{isin}.pdf"))
+
         return jsonify(info)
 
     except Exception as e:
@@ -2242,58 +2245,20 @@ def get_earnings_data(isin):
 
         # Nächstes Quartal (Zukunft) und letztes Quartal (Vergangenheit) bestimmen
         today = datetime.now().date()
-        next_quarter = None
-        last_quarter = None
+        future = [q for q in calendar_quarters if q['release_date'] and q['release_date'] >= today]
+        past   = [q for q in calendar_quarters if q['release_date'] and q['release_date'] < today]
+        next_quarter = min(future, key=lambda q: q['release_date']) if future else None
+        last_quarter = max(past,   key=lambda q: q['release_date']) if past   else None
 
-        for q in calendar_quarters:
-            if q['release_date']:
-                if q['release_date'] >= today and next_quarter is None:
-                    next_quarter = q
-                elif q['release_date'] < today and last_quarter is None:
-                    last_quarter = q
-            if next_quarter and last_quarter:
-                break
-
-        # Falls kein nächstes gefunden, nimm das erste aus der Zukunft
-        if not next_quarter:
-            for q in reversed(calendar_quarters):
-                if q['release_date'] and q['release_date'] >= today:
-                    next_quarter = q
-                    break
-
-        # 3. Historische Actuals aus analyst_estimates holen
+        # 3. Historische EPS Actuals aus analyst_estimates holen
         cur.execute("""
-            SELECT period, metric, estimate_value, actual_value, currency, unit
+            SELECT period, actual_value
             FROM analytics.analyst_estimates
             WHERE isin = %s
               AND period_type = 'quarter'
-              AND metric IN ('eps', 'revenue')
-            ORDER BY period DESC
+              AND metric = 'eps'
         """, (isin,))
-        estimates_raw = cur.fetchall()
-
-        # Gruppieren nach Quartal
-        quarters_data = {}
-        for row in estimates_raw:
-            period = row['period']
-            if period not in quarters_data:
-                quarters_data[period] = {
-                    'period': period,
-                    'eps_estimate': None,
-                    'eps_actual': None,
-                    'revenue_estimate': None,
-                    'revenue_actual': None,
-                    'currency': row['currency'],
-                    'unit': row['unit']
-                }
-
-            metric = row['metric']
-            if metric == 'eps':
-                quarters_data[period]['eps_estimate'] = float(row['estimate_value']) if row['estimate_value'] else None
-                quarters_data[period]['eps_actual'] = float(row['actual_value']) if row['actual_value'] else None
-            elif metric == 'revenue':
-                quarters_data[period]['revenue_estimate'] = float(row['estimate_value']) if row['estimate_value'] else None
-                quarters_data[period]['revenue_actual'] = float(row['actual_value']) if row['actual_value'] else None
+        quarters_data = {row['period']: float(row['actual_value']) for row in cur.fetchall() if row['actual_value'] is not None}
 
         # 4. Nächstes Quartal aufbereiten
         next_earnings = None
@@ -2304,39 +2269,21 @@ def get_earnings_data(isin):
                 "eps_estimate": float(next_quarter['eps_estimate']) if next_quarter['eps_estimate'] else None
             }
 
-        # 5. Letztes Quartal mit Actuals aufbereiten
+        # 5. Letztes Quartal aufbereiten
         last_earnings = None
         if last_quarter:
             last_period = last_quarter['period']
-            last_data = quarters_data.get(last_period, {})
-
-            # EPS Surprise berechnen
-            eps_estimate = float(last_quarter['eps_estimate']) if last_quarter['eps_estimate'] else None
-            eps_actual = last_data.get('eps_actual')
-            eps_surprise = None
-            if eps_estimate and eps_actual and eps_estimate != 0:
-                eps_surprise = round(((eps_actual - eps_estimate) / abs(eps_estimate)) * 100, 1)
-
-            # Status bestimmen
-            status = None
-            if eps_surprise is not None:
-                status = 'beat' if eps_surprise > 0 else ('miss' if eps_surprise < 0 else 'inline')
-
             last_earnings = {
                 "period": last_period,
                 "date": last_quarter['release_date'].strftime('%Y-%m-%d') if last_quarter['release_date'] else None,
-                "eps_estimate": eps_estimate,
-                "eps_actual": eps_actual,
-                "eps_surprise": eps_surprise,
-                "status": status
+                "eps_actual": quarters_data.get(last_period),
             }
 
         # 6. Release-Daten Mapping erstellen
         release_dates = {q['period']: q['release_date'] for q in calendar_quarters}
 
-        # 7. Historie aufbauen (letzte 8 Quartale mit Daten)
+        # 7. Historie aufbauen (letzte 8 Quartale)
         history = []
-        # Sortiere nach release_date aus calendar
         sorted_periods = sorted(
             [p for p in release_dates.keys() if release_dates[p] and release_dates[p] < today],
             key=lambda p: release_dates[p],
@@ -2345,33 +2292,6 @@ def get_earnings_data(isin):
 
         for period in sorted_periods:
             release_date = release_dates.get(period)
-
-            # EPS aus earnings_calendar
-            cal_data = next((q for q in calendar_quarters if q['period'] == period), None)
-            eps_estimate = float(cal_data['eps_estimate']) if cal_data and cal_data['eps_estimate'] else None
-
-            # Actuals aus analyst_estimates
-            q_data = quarters_data.get(period, {})
-            eps_actual = q_data.get('eps_actual')
-            rev_estimate = q_data.get('revenue_estimate')
-            rev_actual = q_data.get('revenue_actual')
-            unit = q_data.get('unit', '')
-
-            # Unit-Konvertierung für Revenue
-            if unit == 'millions':
-                if rev_estimate:
-                    rev_estimate = rev_estimate * 1_000_000
-                if rev_actual:
-                    rev_actual = rev_actual * 1_000_000
-
-            # Surprise berechnen
-            eps_surprise_pct = None
-            if eps_estimate and eps_actual and eps_estimate != 0:
-                eps_surprise_pct = round(((eps_actual - eps_estimate) / abs(eps_estimate)) * 100, 2)
-
-            revenue_surprise_pct = None
-            if rev_estimate and rev_actual and rev_estimate != 0:
-                revenue_surprise_pct = round(((rev_actual - rev_estimate) / abs(rev_estimate)) * 100, 2)
 
             # Kursreaktion berechnen
             price_reaction = None
@@ -2394,22 +2314,11 @@ def get_earnings_data(isin):
                 if price_row and price_row['price_before'] and price_row['price_after']:
                     price_reaction = round(((price_row['price_after'] - price_row['price_before']) / price_row['price_before']) * 100, 2)
 
-            # Status
-            status = None
-            if eps_surprise_pct is not None:
-                status = 'beat' if eps_surprise_pct > 0 else ('miss' if eps_surprise_pct < 0 else 'inline')
-
             history.append({
                 "period": period,
                 "release_date": release_date.strftime('%Y-%m-%d') if release_date else None,
-                "eps_estimate": eps_estimate,
-                "eps_actual": eps_actual,
-                "eps_surprise_pct": eps_surprise_pct,
-                "revenue_estimate": rev_estimate,
-                "revenue_actual": rev_actual,
-                "revenue_surprise_pct": revenue_surprise_pct,
+                "eps_actual": quarters_data.get(period),
                 "price_reaction": price_reaction,
-                "status": status
             })
 
         # 8. Fiskaljahr-Fortschritt berechnen (mit echten Quartalszahlen aus fmp)
@@ -2478,25 +2387,52 @@ def get_earnings_data(isin):
                 }
             return actuals
 
+        def _fetch_ae_actuals(fy_yr):
+            """EPS-Actuals aus analyst_estimates holen (ergänzt historical_fundamentals)."""
+            ae_periods = [f'{p} {fy_yr}' for p in expected_periods]
+            if not ae_periods:
+                return {}
+            cur.execute("""
+                SELECT period, actual_value
+                FROM analytics.analyst_estimates
+                WHERE isin = %s AND metric = 'eps' AND actual_value IS NOT NULL
+                  AND period IN ({})
+            """.format(','.join(['%s'] * len(ae_periods))), (isin, *ae_periods))
+            result = {}
+            for row in cur.fetchall():
+                short_p = row['period'].split(' ')[0]  # 'Q1 2026' → 'Q1'
+                result[short_p] = {'eps': float(row['actual_value']), 'revenue': None}
+            return result
+
+        def _merge_ae(base, ae):
+            """Ergänzt base-Actuals mit analyst_estimates wo Daten fehlen."""
+            for p, data in ae.items():
+                if p not in base:
+                    base[p] = data
+                elif base[p].get('eps') is None:
+                    base[p]['eps'] = data['eps']
+            return base
+
         if today.month <= fy_end_month:
             fy_year = today.year
         else:
             fy_year = today.year + 1
 
         fmp_actuals = _fetch_actuals(fy_year, fy_end_month)
+        fmp_actuals = _merge_ae(fmp_actuals, _fetch_ae_actuals(fy_year))
 
         # Fallback: Wenn keine Actuals im berechneten FY, versuche Vorjahr
-        # (z.B. Feb 2026, Dez-FY → FY 2026 hat 0 Daten, FY 2025 hat Q1-Q3)
         if not fmp_actuals and fy_year > today.year - 2:
             fy_year -= 1
             fmp_actuals = _fetch_actuals(fy_year, fy_end_month)
+            fmp_actuals = _merge_ae(fmp_actuals, _fetch_ae_actuals(fy_year))
 
-        # Zusätzlich: Wenn ALLE Quartale bereits gemeldet, zeige nächstes FY
+        # Wenn ALLE Quartale des aktuellen FY gemeldet → prüfe nächstes FY
+        # Quelle: historical_fundamentals ODER analyst_estimates
         if len(fmp_actuals) >= len(expected_periods):
             next_fy = fy_year + 1
             next_actuals = _fetch_actuals(next_fy, fy_end_month)
-            # Nur wechseln wenn nächstes FY schon begonnen hat (mindestens Estimates vorhanden)
-            # oder bereits Actuals hat
+            next_actuals = _merge_ae(next_actuals, _fetch_ae_actuals(next_fy))
             if next_actuals:
                 fy_year = next_fy
                 fmp_actuals = next_actuals

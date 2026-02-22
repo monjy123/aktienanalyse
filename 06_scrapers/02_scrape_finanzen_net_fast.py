@@ -190,20 +190,32 @@ def get_finanzen_slug(session: requests.Session, isin: str) -> str | None:
 # TERMINE SCRAPER (requests + BeautifulSoup)
 # =============================================================================
 
-def scrape_termine(session: requests.Session, slug: str, isin: str) -> list[dict]:
-    """Scraped die Termine-Seite."""
+def scrape_termine(session: requests.Session, slug: str, isin: str) -> tuple[list[dict], list[dict]]:
+    """Scraped die Termine-Seite.
+
+    Gibt zwei Listen zurück:
+    - termine: Für earnings_calendar (zukünftige mit Schätzung EPS, vergangene ohne)
+    - actuals: Für analyst_estimates (vergangene Termine mit Tatsächliche EPS)
+    """
     url = f"https://www.finanzen.net/termine/{slug}"
 
     try:
         r = session.get(url, timeout=REQUEST_TIMEOUT)
         soup = BeautifulSoup(r.text, 'html.parser')
     except Exception:
-        return []
+        return [], []
 
     termine = []
+    actuals = []
 
     for table in soup.find_all('table'):
         rows = table.find_all('tr')
+
+        # Tabellentyp bestimmen: "vergangene termine" vs. zukünftige
+        prev_heading = table.find_previous(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+        heading_text = prev_heading.get_text(strip=True).lower() if prev_heading else ""
+        is_past_table = "vergangen" in heading_text
+
         for row in rows:
             cells = row.find_all('td')
             if len(cells) >= 4:
@@ -221,23 +233,52 @@ def scrape_termine(session: requests.Session, slug: str, isin: str) -> list[dict
                 elif "dividende" in terminart.lower():
                     event_type = "dividende"
 
-                period, _ = extract_period_info(info)
+                period, period_type = extract_period_info(info)
                 is_estimated = "(e)*" in datum_text or "(e)" in datum_text
                 release_date = parse_german_date(datum_text)
                 eps_value = parse_german_number(eps_text)
                 eps_currency = extract_currency(eps_text)
 
-                termine.append({
-                    "isin": isin,
-                    "period": period,
-                    "release_date": release_date,
-                    "event_type": event_type,
-                    "eps_estimate": eps_value,
-                    "eps_currency": eps_currency,
-                    "is_estimated": is_estimated,
-                })
+                if is_past_table:
+                    # Vergangene Termine: eps_value ist tatsächlicher Wert
+                    termine.append({
+                        "isin": isin,
+                        "period": period,
+                        "release_date": release_date,
+                        "event_type": event_type,
+                        "eps_estimate": None,  # kein Schätzwert aus vergangener Tabelle
+                        "eps_currency": eps_currency,
+                        "is_estimated": is_estimated,
+                    })
+                    # Tatsächlichen EPS in analyst_estimates speichern
+                    if event_type == "earnings" and period and eps_value is not None:
+                        actuals.append({
+                            "isin": isin,
+                            "period": period,
+                            "period_type": period_type,
+                            "period_end_date": None,
+                            "metric": "eps",
+                            "estimate_value": None,
+                            "prior_year_value": None,
+                            "actual_value": eps_value,
+                            "currency": eps_currency or "EUR",
+                            "unit": "per_share",
+                            "num_analysts": None,
+                            "release_date": release_date,
+                        })
+                else:
+                    # Zukünftige Termine: eps_value ist Schätzung
+                    termine.append({
+                        "isin": isin,
+                        "period": period,
+                        "release_date": release_date,
+                        "event_type": event_type,
+                        "eps_estimate": eps_value,
+                        "eps_currency": eps_currency,
+                        "is_estimated": is_estimated,
+                    })
 
-    return termine
+    return termine, actuals
 
 
 # =============================================================================
@@ -445,8 +486,8 @@ def save_termine(con, termine: list[dict]) -> int:
         VALUES (%(isin)s, %(period)s, %(release_date)s, %(event_type)s, %(eps_estimate)s, %(eps_currency)s, %(is_estimated)s)
         ON DUPLICATE KEY UPDATE
             release_date = VALUES(release_date),
-            eps_estimate = VALUES(eps_estimate),
-            eps_currency = VALUES(eps_currency),
+            eps_estimate = COALESCE(VALUES(eps_estimate), eps_estimate),
+            eps_currency = COALESCE(VALUES(eps_currency), eps_currency),
             is_estimated = VALUES(is_estimated),
             updated_at = CURRENT_TIMESTAMP
     """
@@ -524,8 +565,10 @@ def process_isin(session, con_analytics, con_ticker, isin: str, name: str, exist
         time.sleep(REQUEST_DELAY)
 
         # Termine scrapen
-        termine = scrape_termine(session, slug, isin)
+        termine, actuals = scrape_termine(session, slug, isin)
         result["termine"] = save_termine(con_analytics, termine)
+        if actuals:
+            save_estimates(con_analytics, actuals)
         time.sleep(REQUEST_DELAY)
 
         # Schätzungen scrapen

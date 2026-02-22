@@ -3505,6 +3505,29 @@ h1 {
     margin-bottom: 1.25rem;
 }
 
+.earnings-side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+}
+
+.earnings-side-by-side > .earnings-section {
+    margin-bottom: 0;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.earnings-side-by-side > .earnings-section .earnings-section-title {
+    margin-bottom: 0;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+    border-radius: 0;
+}
+
 .earnings-section-title {
     font-weight: 600;
     font-size: 1em;
@@ -3524,6 +3547,11 @@ h1 {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85em;
+}
+
+.earnings-side-by-side .earnings-history-table,
+.earnings-side-by-side .earnings-future-table {
+    width: 100%;
 }
 
 .earnings-history-table th,
@@ -3664,6 +3692,10 @@ h1 {
         grid-template-columns: 1fr;
     }
 
+    .earnings-side-by-side {
+        grid-template-columns: 1fr;
+    }
+
     .earnings-history-table {
         font-size: 0.8em;
     }
@@ -3672,4 +3704,41 @@ h1 {
     .earnings-history-table td {
         padding: 0.4rem 0.3rem;
     }
+}
+
+/* PDF-Analyse Viewer */
+.modal-analysis {
+    width: 98vw;
+    height: 96vh;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.analysis-body {
+    flex: 1;
+    padding: 0;
+    overflow: hidden;
+    max-height: none;
+    min-height: 0;
+}
+
+.analysis-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-analysis {
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-analysis:hover {
+    background: #0056b3;
 }
