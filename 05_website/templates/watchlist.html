@@ -21,8 +21,8 @@
                 <th class="sortable {{ 'num' if col.format_type != 'text' else '' }}" data-column="{{ col.column_key }}" data-type="{{ 'date' if col.format_type == 'date' else ('text' if col.format_type == 'text' else 'number') }}">{{ col.display_name | replace('/', '/<wbr>') | safe }}</th>
                 {% endfor %}
                 <th>Notizen</th>
-                <th class="num">Wert (€)</th>
-                <th class="num">G/V</th>
+                <th class="sortable num" data-column="holding_value" data-type="number">Wert (€)</th>
+                <th class="sortable num" data-column="holding_gv_pct" data-type="number">G/V</th>
             </tr>
         </thead>
         <tbody>
@@ -65,14 +65,14 @@
                             data-name="{{ stock.company_name or stock.isin }}"
                             title="Position eingeben">💼</button>
                 </td>
-                <td class="num holding-value-cell" data-isin="{{ stock.isin }}">
+                <td class="num holding-value-cell" data-column="holding_value" data-isin="{{ stock.isin }}" data-value="{{ stock.holding_value if stock.holding_value is not none else '' }}">
                     {% if stock.holding_value is not none %}
                         {{ stock.holding_value|de(0) }} €
                     {% else %}
                         —
                     {% endif %}
                 </td>
-                <td class="num holding-gv-cell {% if stock.holding_gv_pct is not none %}{% if stock.holding_gv_pct >= 0 %}gv-positive{% else %}gv-negative{% endif %}{% endif %}" data-isin="{{ stock.isin }}">
+                <td class="num holding-gv-cell {% if stock.holding_gv_pct is not none %}{% if stock.holding_gv_pct >= 0 %}gv-positive{% else %}gv-negative{% endif %}{% endif %}" data-column="holding_gv_pct" data-isin="{{ stock.isin }}" data-value="{{ stock.holding_gv_pct if stock.holding_gv_pct is not none else '' }}">
                     {% if stock.holding_gv_pct is not none %}
                         {% if stock.holding_gv_pct >= 0 %}+{% endif %}{{ stock.holding_gv_pct|de(1) }}%
                     {% else %}
