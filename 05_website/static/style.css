@@ -185,7 +185,7 @@ h1 {
 
 .stock-table th,
 .stock-table td {
-    padding: 10px 12px;
+    padding: 6px 10px;
     text-align: left;
     border-bottom: 1px solid #eee;
 }
@@ -240,7 +240,9 @@ h1 {
     background: none;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 4px 8px;
+    padding: 3px 0;
+    width: 28px;
+    text-align: center;
     cursor: pointer;
     transition: background 0.2s;
 }
@@ -255,7 +257,9 @@ h1 {
     background: none;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 4px 7px;
+    padding: 3px 0;
+    width: 28px;
+    text-align: center;
     cursor: pointer;
     transition: background 0.2s, border-color 0.2s;
     opacity: 0.4;
