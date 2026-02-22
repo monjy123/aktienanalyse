@@ -20,7 +20,7 @@
                 {% for col in columns %}
                 <th class="sortable {{ 'num' if col.format_type != 'text' else '' }}" data-column="{{ col.column_key }}" data-type="{{ 'date' if col.format_type == 'date' else ('text' if col.format_type == 'text' else 'number') }}">{{ col.display_name | replace('/', '/<wbr>') | safe }}</th>
                 {% endfor %}
-                <th>Notizen</th>
+                <th data-column="notes">Notizen</th>
                 <th class="sortable num" data-column="holding_value" data-type="number">Wert (€)</th>
                 <th class="sortable num" data-column="holding_gv_pct" data-type="number">G/V</th>
             </tr>
@@ -56,7 +56,7 @@
                     {% endif %}
                 </td>
                 {% endfor %}
-                <td data-label="Notizen" class="notes-cell">
+                <td data-label="Notizen" class="notes-cell" data-column="notes">
                     <button class="note-btn" data-isin="{{ stock.isin }}" data-notes="{{ stock.notes or '' }}">
                         {% if stock.notes %}📝{% else %}+{% endif %}
                     </button>

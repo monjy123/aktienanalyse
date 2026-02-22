@@ -105,7 +105,42 @@ function getCurrentView() {
     return 'watchlist';
 }
 
+// Watchlist-Spaltenreihenfolge aus localStorage anwenden (inkl. Notes/Wert/G/V)
+function applyWatchlistColOrder() {
+    const table = document.querySelector('.stock-table');
+    if (!table) return;
+    let keys;
+    try {
+        keys = JSON.parse(localStorage.getItem('wl_col_order') || 'null');
+    } catch (_) { return; }
+    if (!Array.isArray(keys) || keys.length === 0) return;
+
+    const thead_tr = table.querySelector('thead tr');
+    const tbody_rows = table.querySelectorAll('tbody tr');
+
+    // th-Map (ohne 'favorite', das immer vorne bleibt)
+    const thMap = {};
+    thead_tr.querySelectorAll('th[data-column]').forEach(th => {
+        if (th.dataset.column !== 'favorite') thMap[th.dataset.column] = th;
+    });
+    for (const key of keys) {
+        if (thMap[key]) thead_tr.appendChild(thMap[key]);
+    }
+
+    // td-Map pro Zeile
+    tbody_rows.forEach(row => {
+        const tdMap = {};
+        row.querySelectorAll('td[data-column]').forEach(td => {
+            if (td.dataset.column !== 'favorite') tdMap[td.dataset.column] = td;
+        });
+        for (const key of keys) {
+            if (tdMap[key]) row.appendChild(tdMap[key]);
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    applyWatchlistColOrder();
 
     // =========================================================================
     // Unified Modal State (alle 8 Tabs in einem Modal)
@@ -765,11 +800,38 @@ document.addEventListener('DOMContentLoaded', function() {
         html += '<p class="hint">Drag & Drop zum Sortieren</p>';
         html += '<ul class="order-list">';
 
-        for (const col of visibleColumns) {
+        // Feste Spalten (immer sichtbar, nicht ausblendbar)
+        const FIXED_COLS = [
+            { column_key: 'notes',          display_name: 'Notizen'  },
+            { column_key: 'holding_value',  display_name: 'Wert (€)' },
+            { column_key: 'holding_gv_pct', display_name: 'G/V'      },
+        ];
+
+        // Gespeicherte Reihenfolge aus localStorage (enthält DB + fixed keys)
+        let orderedForList = [...visibleColumns, ...FIXED_COLS];
+        try {
+            const savedOrder = JSON.parse(localStorage.getItem('wl_col_order') || 'null');
+            if (Array.isArray(savedOrder)) {
+                const allMap = {};
+                [...visibleColumns, ...FIXED_COLS].forEach(c => { allMap[c.column_key] = c; });
+                const reordered = [];
+                for (const key of savedOrder) {
+                    if (allMap[key]) { reordered.push(allMap[key]); delete allMap[key]; }
+                }
+                // Übrige Spalten (neu hinzugekommen) anhängen
+                reordered.push(...Object.values(allMap));
+                orderedForList = reordered;
+            }
+        } catch (_) {}
+
+        for (const col of orderedForList) {
+            const isFixed = FIXED_COLS.some(f => f.column_key === col.column_key);
+            const badge = isFixed ? '<span class="col-fixed-badge">immer</span>' : '';
             html += `
-                <li class="order-item" draggable="true" data-key="${col.column_key}">
+                <li class="order-item" draggable="true" data-key="${col.column_key}" ${isFixed ? 'data-fixed="true"' : ''}>
                     <span class="drag-handle">☰</span>
                     <span class="order-name">${col.display_name}</span>
+                    ${badge}
                 </li>
             `;
         }
@@ -885,10 +947,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // 1. Sichtbare Spalten aus der Sortier-Liste (Reihenfolge zählt!)
             const orderList = document.querySelector('.order-list');
             const visibleKeys = new Set();
+            const fixedColKeys = new Set(['notes', 'holding_value', 'holding_gv_pct']);
+            const fullOrderKeys = [];
 
             if (orderList) {
                 orderList.querySelectorAll('.order-item').forEach(item => {
                     const columnKey = item.dataset.key;
+                    fullOrderKeys.push(columnKey);
+                    if (fixedColKeys.has(columnKey)) return; // fixed: nicht in DB speichern
                     visibleKeys.add(columnKey);
                     updates.push({
                         column_key: columnKey,
@@ -897,6 +963,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
             }
+
+            // Volle Reihenfolge (inkl. fixed) in localStorage speichern
+            localStorage.setItem('wl_col_order', JSON.stringify(fullOrderKeys));
 
             // 2. Nicht-sichtbare Spalten hinzufügen (Reihenfolge egal)
             document.querySelectorAll('.column-item').forEach(item => {

@@ -272,6 +272,18 @@ h1 {
     border-color: #3b82f6;
 }
 
+/* Badge für immer-sichtbare Spalten im Order-Modal */
+.col-fixed-badge {
+    font-size: 0.7em;
+    color: #6b7280;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 3px;
+    padding: 1px 4px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
 /* G/V-Spalte kompakt */
 .holding-gv-cell {
     font-size: 0.8em;
