@@ -10,6 +10,7 @@ Starten mit: python app.py
 import sys
 import os
 import re
+import time
 from pathlib import Path
 
 # Parent-Ordner für db.py Import
@@ -20,6 +21,31 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from functools import wraps
 from db import get_connection
 from auth import User
+
+# --- FX-Rate Cache (Heimatwährung → EUR) ---
+_fx_cache = {}   # { 'DKK': (rate, timestamp), ... }
+_FX_TTL = 3600   # 1 Stunde
+
+def get_eur_rate(currency: str) -> float:
+    """Gibt den Wechselkurs currency→EUR zurück (via yfinance, gecacht)."""
+    if not currency or currency == 'EUR':
+        return 1.0
+    currency = currency.upper()
+    entry = _fx_cache.get(currency)
+    if entry and (time.time() - entry[1]) < _FX_TTL:
+        return entry[0]
+    try:
+        import yfinance as yf
+        ticker = yf.Ticker(f"{currency}EUR=X")
+        hist = ticker.history(period="5d")
+        if not hist.empty:
+            rate = float(hist['Close'].dropna().iloc[-1])
+        else:
+            rate = 1.0
+    except Exception:
+        rate = 1.0
+    _fx_cache[currency] = (rate, time.time())
+    return rate
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -120,6 +146,33 @@ app.jinja_env.filters['de'] = format_de
 app.jinja_env.filters['de_percent'] = format_de_percent
 app.jinja_env.filters['de_billions'] = format_de_billions
 app.jinja_env.filters['de_date'] = format_de_date
+
+
+# =============================================================================
+# DB-Initialisierung
+# =============================================================================
+
+def init_db():
+    """Erstellt fehlende Tabellen beim Start."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS analytics.user_holdings (
+            id             INT AUTO_INCREMENT PRIMARY KEY,
+            user_id        INT NOT NULL,
+            isin           VARCHAR(20) NOT NULL,
+            quantity       DECIMAL(15,4) NOT NULL,
+            purchase_price DECIMAL(15,4) NOT NULL,
+            purchase_date  DATE,
+            notes          VARCHAR(255),
+            created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_user_isin (user_id, isin),
+            FOREIGN KEY (user_id) REFERENCES analytics.users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
 
 
 def safe_round(value, decimals=2):
@@ -265,6 +318,51 @@ def watchlist():
     cur.execute(query, [user_id] + visible_favorites)
     stocks = cur.fetchall()
 
+    # Holdings + Preis für Wert/G/V-Berechnung
+    isins = [s['isin'] for s in stocks]
+    holdings_map = {}
+    if isins:
+        ph = ','.join(['%s'] * len(isins))
+        cur.execute(f"""
+            SELECT
+                h.isin,
+                SUM(h.quantity) AS holding_quantity,
+                SUM(h.quantity * h.purchase_price) / NULLIF(SUM(h.quantity), 0) AS avg_cost,
+                lm.price,
+                ci.currency
+            FROM analytics.user_holdings h
+            LEFT JOIN analytics.live_metrics lm ON h.isin = lm.isin
+            LEFT JOIN analytics.company_info ci ON h.isin = ci.isin
+            WHERE h.user_id = %s AND h.isin IN ({ph})
+            GROUP BY h.isin, lm.price, ci.currency
+        """, [user_id] + isins)
+        holdings_map = {row['isin']: row for row in cur.fetchall()}
+
+    for stock in stocks:
+        h = holdings_map.get(stock['isin'])
+        if h and h['holding_quantity']:
+            qty = float(h['holding_quantity'])
+            avg = float(h['avg_cost'])
+            price_home = float(h['price']) if h['price'] else None
+            currency = h.get('currency') or 'EUR'
+            fx = get_eur_rate(currency)
+            price_eur = price_home * fx if price_home else None
+            stock['holding_quantity'] = qty
+            total_cost = qty * avg  # purchase_price ist bereits in EUR gespeichert
+            if price_eur and total_cost:
+                stock['holding_value'] = round(qty * price_eur, 2)
+                stock['holding_gv_pct'] = round((stock['holding_value'] - total_cost) / total_cost * 100, 1)
+                stock['holding_gv_abs'] = round(stock['holding_value'] - total_cost, 2)
+            else:
+                stock['holding_value'] = None
+                stock['holding_gv_pct'] = None
+                stock['holding_gv_abs'] = None
+        else:
+            stock['holding_quantity'] = 0
+            stock['holding_value'] = None
+            stock['holding_gv_pct'] = None
+            stock['holding_gv_abs'] = None
+
     cur.close()
     conn.close()
 
@@ -360,6 +458,127 @@ def update_favorite():
     conn.close()
 
     return jsonify({"success": True})
+
+
+@app.route("/api/holdings/<isin>")
+@login_required
+def get_holdings(isin):
+    """API: Alle Tranchen des Users für eine ISIN + Zusammenfassung."""
+    user_id = current_user.id
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT id, quantity, purchase_price, purchase_date, notes
+        FROM analytics.user_holdings
+        WHERE user_id = %s AND isin = %s
+        ORDER BY purchase_date ASC, id ASC
+    """, (user_id, isin))
+    tranches = cur.fetchall()
+
+    # Aktuellen Kurs + Währung holen
+    cur.execute("""
+        SELECT lm.price, ci.currency
+        FROM analytics.live_metrics lm
+        LEFT JOIN analytics.company_info ci ON lm.isin = ci.isin
+        WHERE lm.isin = %s
+    """, (isin,))
+    live = cur.fetchone()
+    current_price_home = float(live['price']) if live and live['price'] else None
+    currency = (live.get('currency') or 'EUR') if live else 'EUR'
+    fx = get_eur_rate(currency)
+    current_price_eur = current_price_home * fx if current_price_home else None
+
+    cur.close()
+    conn.close()
+
+    # Serialisierung: Datum → String
+    for t in tranches:
+        t['quantity'] = float(t['quantity'])
+        t['purchase_price'] = float(t['purchase_price'])
+        t['purchase_date'] = t['purchase_date'].isoformat() if t['purchase_date'] else None
+
+    # Zusammenfassung berechnen (alle Werte in EUR)
+    summary = {}
+    if tranches:
+        total_qty = sum(t['quantity'] for t in tranches)
+        total_cost = sum(t['quantity'] * t['purchase_price'] for t in tranches)
+        avg_cost = total_cost / total_qty if total_qty else 0
+        summary = {
+            'total_quantity': round(total_qty, 4),
+            'avg_cost': round(avg_cost, 4),
+            'total_cost': round(total_cost, 2),
+            'current_price': current_price_eur,
+            'current_value': round(total_qty * current_price_eur, 2) if current_price_eur else None,
+            'gv_pct': round((total_qty * current_price_eur - total_cost) / total_cost * 100, 2) if (current_price_eur and total_cost) else None,
+        }
+
+    return jsonify({'tranches': tranches, 'summary': summary})
+
+
+@app.route("/api/holdings", methods=["POST"])
+@login_required
+def save_holdings():
+    """API: Alle Tranchen für user+isin ersetzen (Transaktion)."""
+    data = request.json
+    isin = data.get('isin')
+    tranches = data.get('tranches', [])
+
+    if not isin:
+        return jsonify({'error': 'ISIN fehlt'}), 400
+
+    user_id = current_user.id
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("START TRANSACTION")
+        cur.execute("DELETE FROM analytics.user_holdings WHERE user_id = %s AND isin = %s",
+                    (user_id, isin))
+        for t in tranches:
+            qty = t.get('quantity')
+            price = t.get('purchase_price')
+            if qty is None or price is None:
+                continue
+            cur.execute("""
+                INSERT INTO analytics.user_holdings (user_id, isin, quantity, purchase_price, purchase_date, notes)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (user_id, isin, qty, price,
+                  t.get('purchase_date') or None,
+                  t.get('notes') or None))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        cur.close()
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
+    cur.close()
+    conn.close()
+    return jsonify({'success': True})
+
+
+@app.route("/api/holdings/<int:tranche_id>", methods=["DELETE"])
+@login_required
+def delete_holding(tranche_id):
+    """API: Einzelne Tranche löschen (nur eigene)."""
+    user_id = current_user.id
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        DELETE FROM analytics.user_holdings
+        WHERE id = %s AND user_id = %s
+    """, (tranche_id, user_id))
+    conn.commit()
+
+    deleted = cur.rowcount
+    cur.close()
+    conn.close()
+
+    if deleted == 0:
+        return jsonify({'error': 'Nicht gefunden'}), 404
+    return jsonify({'success': True})
 
 
 @app.route("/api/favorite-settings")
@@ -2464,6 +2683,7 @@ def get_earnings_data(isin):
 # =============================================================================
 
 if __name__ == "__main__":
+    init_db()
     print("=" * 50)
     print("Starte Aktien-Webserver...")
     print("Öffne: http://localhost:5001")

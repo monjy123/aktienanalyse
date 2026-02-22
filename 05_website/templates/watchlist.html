@@ -21,6 +21,8 @@
                 <th class="sortable {{ 'num' if col.format_type != 'text' else '' }}" data-column="{{ col.column_key }}" data-type="{{ 'date' if col.format_type == 'date' else ('text' if col.format_type == 'text' else 'number') }}">{{ col.display_name | replace('/', '/<wbr>') | safe }}</th>
                 {% endfor %}
                 <th>Notizen</th>
+                <th class="num">Wert (€)</th>
+                <th class="num">G/V</th>
             </tr>
         </thead>
         <tbody>
@@ -58,6 +60,24 @@
                     <button class="note-btn" data-isin="{{ stock.isin }}" data-notes="{{ stock.notes or '' }}">
                         {% if stock.notes %}📝{% else %}+{% endif %}
                     </button>
+                    <button class="holdings-btn {% if stock.holding_quantity %}holdings-btn-active{% endif %}"
+                            data-isin="{{ stock.isin }}"
+                            data-name="{{ stock.company_name or stock.isin }}"
+                            title="Position eingeben">💼</button>
+                </td>
+                <td class="num holding-value-cell" data-isin="{{ stock.isin }}">
+                    {% if stock.holding_value is not none %}
+                        {{ stock.holding_value|de(0) }} €
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td class="num holding-gv-cell {% if stock.holding_gv_pct is not none %}{% if stock.holding_gv_pct >= 0 %}gv-positive{% else %}gv-negative{% endif %}{% endif %}" data-isin="{{ stock.isin }}">
+                    {% if stock.holding_gv_pct is not none %}
+                        {% if stock.holding_gv_pct >= 0 %}+{% endif %}{{ stock.holding_gv_pct|de(1) }}%
+                    {% else %}
+                        —
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -81,6 +101,37 @@
         <textarea id="note-text" rows="6" placeholder="Notizen eingeben..."></textarea>
         <div class="modal-footer">
             <button id="note-save" class="btn btn-primary">Speichern</button>
+            <button class="modal-close btn">Abbrechen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Holdings / Positionen -->
+<div id="holdings-modal" class="modal hidden">
+    <div class="modal-content modal-holdings">
+        <div class="modal-header">
+            <h3 id="holdings-modal-title">Position</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <table class="holdings-table" id="holdings-table">
+                <thead>
+                    <tr>
+                        <th>Stück</th>
+                        <th>Kurs (€)</th>
+                        <th>Datum</th>
+                        <th>Notiz</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="holdings-tbody">
+                </tbody>
+            </table>
+            <button id="holdings-add-row" class="btn btn-add-row">+ Tranche hinzufügen</button>
+            <div class="holdings-summary" id="holdings-summary"></div>
+        </div>
+        <div class="modal-footer">
+            <button id="holdings-save" class="btn btn-primary">Speichern</button>
             <button class="modal-close btn">Abbrechen</button>
         </div>
     </div>

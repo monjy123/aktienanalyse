@@ -300,6 +300,185 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // =========================================================================
+    // Holdings Modal (Positionen / Tranchen)
+    // =========================================================================
+    const holdingsModal = document.getElementById('holdings-modal');
+    const holdingsTbody = document.getElementById('holdings-tbody');
+    const holdingsSummary = document.getElementById('holdings-summary');
+    let currentHoldingsIsin = null;
+
+    function formatEur(val) {
+        if (val == null) return '—';
+        return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+
+    function formatPct(val) {
+        if (val == null) return '—';
+        const sign = val >= 0 ? '+' : '';
+        return sign + val.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
+    }
+
+    function addHoldingsRow(t = {}) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="number" class="h-qty" step="0.0001" min="0" value="${t.quantity || ''}" placeholder="Stück"></td>
+            <td><input type="number" class="h-price" step="0.01" min="0" value="${t.purchase_price || ''}" placeholder="Kurs"></td>
+            <td><input type="date" class="h-date" value="${t.purchase_date || ''}"></td>
+            <td><input type="text" class="h-notes" value="${t.notes || ''}" placeholder="Notiz"></td>
+            <td><button class="holdings-delete-row" title="Löschen">🗑</button></td>
+        `;
+        tr.querySelector('.holdings-delete-row').addEventListener('click', function() {
+            tr.remove();
+            updateHoldingsSummary();
+        });
+        ['h-qty', 'h-price'].forEach(cls => {
+            tr.querySelector('.' + cls).addEventListener('input', updateHoldingsSummary);
+        });
+        holdingsTbody.appendChild(tr);
+    }
+
+    function updateHoldingsSummary() {
+        const rows = holdingsTbody.querySelectorAll('tr');
+        let totalQty = 0, totalCost = 0;
+        rows.forEach(row => {
+            const qty = parseFloat(row.querySelector('.h-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.h-price').value) || 0;
+            if (qty > 0 && price > 0) {
+                totalQty += qty;
+                totalCost += qty * price;
+            }
+        });
+        if (totalQty === 0) {
+            holdingsSummary.innerHTML = '';
+            return;
+        }
+        const avgCost = totalCost / totalQty;
+        holdingsSummary.innerHTML = `
+            <span><b>Gesamt:</b> ${totalQty.toLocaleString('de-DE', {maximumFractionDigits: 4})} Stück</span>
+            <span>Ø ${formatEur(avgCost)}</span>
+            <span>Einstand: ${formatEur(totalCost)}</span>
+        `;
+    }
+
+    async function openHoldingsModal(isin, name) {
+        currentHoldingsIsin = isin;
+        document.getElementById('holdings-modal-title').textContent = `💼 ${name} – Position`;
+        holdingsTbody.innerHTML = '';
+        holdingsSummary.innerHTML = '<span>Lade…</span>';
+        holdingsModal.classList.remove('hidden');
+
+        try {
+            const resp = await fetch(`/api/holdings/${isin}`);
+            const data = await resp.json();
+            holdingsTbody.innerHTML = '';
+            if (data.tranches && data.tranches.length > 0) {
+                data.tranches.forEach(t => addHoldingsRow(t));
+            } else {
+                addHoldingsRow();
+            }
+            updateHoldingsSummary();
+            // Zusammenfassung mit Live-Daten überschreiben falls vorhanden
+            if (data.summary && data.summary.total_quantity) {
+                const s = data.summary;
+                const gvClass = s.gv_pct >= 0 ? 'gv-positive' : 'gv-negative';
+                holdingsSummary.innerHTML = `
+                    <span><b>Gesamt:</b> ${(s.total_quantity).toLocaleString('de-DE', {maximumFractionDigits: 4})} Stück</span>
+                    <span>Ø ${formatEur(s.avg_cost)}</span>
+                    <span>Einstand: ${formatEur(s.total_cost)}</span>
+                    ${s.current_value != null ? `<span>Wert: ${formatEur(s.current_value)}</span>` : ''}
+                    ${s.gv_pct != null ? `<span class="${gvClass}">G/V: ${formatPct(s.gv_pct)}</span>` : ''}
+                `;
+            }
+        } catch (e) {
+            holdingsTbody.innerHTML = '<tr><td colspan="5">Fehler beim Laden</td></tr>';
+        }
+    }
+
+    // Holdings-Button klicken
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.holdings-btn');
+        if (btn) {
+            openHoldingsModal(btn.dataset.isin, btn.dataset.name);
+        }
+    });
+
+    // Tranche hinzufügen
+    const addRowBtn = document.getElementById('holdings-add-row');
+    if (addRowBtn) {
+        addRowBtn.addEventListener('click', function() {
+            addHoldingsRow();
+            // Letztes Input-Feld fokussieren
+            const inputs = holdingsTbody.querySelectorAll('tr:last-child input');
+            if (inputs.length) inputs[0].focus();
+        });
+    }
+
+    // Holdings speichern
+    const holdingsSaveBtn = document.getElementById('holdings-save');
+    if (holdingsSaveBtn) {
+        holdingsSaveBtn.addEventListener('click', async function() {
+            if (!currentHoldingsIsin) return;
+
+            const rows = holdingsTbody.querySelectorAll('tr');
+            const tranches = [];
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.h-qty').value);
+                const price = parseFloat(row.querySelector('.h-price').value);
+                if (!qty || !price) return;
+                tranches.push({
+                    quantity: qty,
+                    purchase_price: price,
+                    purchase_date: row.querySelector('.h-date').value || null,
+                    notes: row.querySelector('.h-notes').value || null,
+                });
+            });
+
+            try {
+                const resp = await fetch('/api/holdings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isin: currentHoldingsIsin, tranches })
+                });
+                if (!resp.ok) throw new Error('Fehler');
+
+                // Watchlist-Zeile aktualisieren: Button-Status + Spalten
+                const holdingBtn = document.querySelector(`.holdings-btn[data-isin="${currentHoldingsIsin}"]`);
+                if (holdingBtn) {
+                    holdingBtn.classList.toggle('holdings-btn-active', tranches.length > 0);
+                }
+
+                // Wert + G/V aus API neu laden und Zellen aktualisieren
+                const detailResp = await fetch(`/api/holdings/${currentHoldingsIsin}`);
+                const detailData = await detailResp.json();
+                const s = detailData.summary || {};
+
+                const valueCell = document.querySelector(`.holding-value-cell[data-isin="${currentHoldingsIsin}"]`);
+                const gvCell = document.querySelector(`.holding-gv-cell[data-isin="${currentHoldingsIsin}"]`);
+
+                if (valueCell) {
+                    valueCell.textContent = s.current_value != null
+                        ? s.current_value.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + ' €'
+                        : '—';
+                }
+                if (gvCell) {
+                    gvCell.className = 'num holding-gv-cell';
+                    gvCell.dataset.isin = currentHoldingsIsin;
+                    if (s.gv_pct != null) {
+                        gvCell.classList.add(s.gv_pct >= 0 ? 'gv-positive' : 'gv-negative');
+                        gvCell.textContent = formatPct(s.gv_pct);
+                    } else {
+                        gvCell.textContent = '—';
+                    }
+                }
+
+                holdingsModal.classList.add('hidden');
+            } catch (e) {
+                alert('Fehler beim Speichern');
+            }
+        });
+    }
+
+    // =========================================================================
     // Modal schließen
     // =========================================================================
     function resetModalState(modal) {

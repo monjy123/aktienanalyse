@@ -250,6 +250,39 @@ h1 {
     background: #eee;
 }
 
+/* Holdings-Button */
+.holdings-btn {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 7px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    opacity: 0.4;
+    margin-left: 2px;
+}
+
+.holdings-btn:hover {
+    background: #eee;
+    opacity: 1;
+}
+
+.holdings-btn-active {
+    opacity: 1;
+    border-color: #3b82f6;
+}
+
+/* G/V-Farben */
+.gv-positive {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.gv-negative {
+    color: #dc2626;
+    font-weight: 600;
+}
+
 /* =============================================================================
    Modal
 ============================================================================= */
@@ -290,6 +323,74 @@ h1 {
 
 .modal-large {
     max-width: 700px;
+}
+
+/* Holdings Modal */
+.modal-holdings {
+    max-width: 720px;
+}
+
+.holdings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+.holdings-table th,
+.holdings-table td {
+    padding: 5px 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.holdings-table input {
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.holdings-table input[type="number"] { width: 90px; }
+.holdings-table input[type="date"]   { width: 130px; }
+.holdings-table input[type="text"]   { width: 140px; }
+
+.holdings-delete-row {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.5;
+    font-size: 1rem;
+    padding: 2px 4px;
+}
+
+.holdings-delete-row:hover { opacity: 1; }
+
+.btn-add-row {
+    margin: 8px 0;
+    font-size: 0.85rem;
+    padding: 5px 12px;
+    background: #f0f4ff;
+    border: 1px solid #93c5fd;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #1d4ed8;
+}
+
+.btn-add-row:hover { background: #dbeafe; }
+
+.holdings-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #334155;
 }
 
 .modal-header {
