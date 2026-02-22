@@ -1755,19 +1755,26 @@ def get_dcf_data(isin):
                 if 1 <= proj_year <= 10:
                     yoy_growth[proj_year] = round(growth, 1)
 
-        # Fallback: Vom letzten geschätzten Wachstum aus abnehmend tapern
+        # Tapering ab dem letzten Estimate-Jahr
         last_est_year = max(yoy_growth) if yoy_growth else 0
-        last_est_growth = yoy_growth[last_est_year] if last_est_year else (revenue_cagr_5y or revenue_cagr_3y or 5.0)
         tapering_factors = [0.85, 0.70, 0.55, 0.40, 0.30, 0.20, 0.15, 0.10, 0.05, 0.0]
+
+        # Taper-Basis: Durchschnitt der positiven Estimate-Wachstumsraten
+        # (nicht das letzte, da Fernschätzungen oft Ausreißer sind)
+        positive_growths = [yoy_growth[y] for y in yoy_growth if yoy_growth[y] > 0]
+        if positive_growths:
+            taper_base_growth = sum(positive_growths) / len(positive_growths)
+        else:
+            taper_base_growth = revenue_cagr_5y or revenue_cagr_3y or 5.0
+        taper_base_growth = max(taper_base_growth, 0)
 
         defaults = {}
         for i in range(1, 11):
             if i in yoy_growth:
                 defaults[f"revenue_growth_y{i}"] = yoy_growth[i]
             else:
-                # Position im Tapering ab dem ersten nicht-geschätzten Jahr
                 taper_idx = min(i - last_est_year - 1, len(tapering_factors) - 1)
-                defaults[f"revenue_growth_y{i}"] = round(last_est_growth * tapering_factors[taper_idx], 1)
+                defaults[f"revenue_growth_y{i}"] = round(taper_base_growth * tapering_factors[taper_idx], 1)
 
         # EBIT-Marge pro Projektionsjahr berechnen (analog zum Umsatzwachstum)
         # Estimate-basierte Margen nach Projektionsjahr mappen
