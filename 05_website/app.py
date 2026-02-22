@@ -26,6 +26,21 @@ from auth import User
 _fx_cache = {}   # { 'DKK': (rate, timestamp), ... }
 _FX_TTL = 3600   # 1 Stunde
 
+_ISIN_CURRENCY = {
+    'US': 'USD', 'CA': 'CAD', 'JP': 'JPY', 'GB': 'GBP',
+    'CH': 'CHF', 'AU': 'AUD', 'HK': 'HKD', 'NZ': 'NZD',
+    'SG': 'SGD', 'SE': 'SEK', 'NO': 'NOK', 'DK': 'DKK',
+}
+
+def resolve_currency(currency: str, isin: str = None) -> str:
+    """Leitet Währung ab — Fallback über ISIN-Präfix wenn NULL."""
+    if currency:
+        return currency.upper()
+    if isin and len(isin) >= 2:
+        prefix = isin[:2].upper()
+        return _ISIN_CURRENCY.get(prefix, 'USD')
+    return 'USD'
+
 def get_eur_rate(currency: str) -> float:
     """Gibt den Wechselkurs currency→EUR zurück (via yfinance, gecacht)."""
     if not currency or currency == 'EUR':
@@ -344,7 +359,7 @@ def watchlist():
             qty = float(h['holding_quantity'])
             avg = float(h['avg_cost'])
             price_home = float(h['price']) if h['price'] else None
-            currency = h.get('currency') or 'EUR'
+            currency = resolve_currency(h.get('currency'), stock['isin'])
             fx = get_eur_rate(currency)
             price_eur = price_home * fx if price_home else None
             stock['holding_quantity'] = qty
@@ -485,7 +500,7 @@ def get_holdings(isin):
     """, (isin,))
     live = cur.fetchone()
     current_price_home = float(live['price']) if live and live['price'] else None
-    currency = (live.get('currency') or 'EUR') if live else 'EUR'
+    currency = resolve_currency(live.get('currency') if live else None, isin)
     fx = get_eur_rate(currency)
     current_price_eur = current_price_home * fx if current_price_home else None
 
