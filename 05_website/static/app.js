@@ -109,6 +109,18 @@ function getCurrentView() {
 function applyWatchlistColOrder() {
     const table = document.querySelector('.stock-table');
     if (!table) return;
+
+    // Sichtbarkeit von Wert/G/V anwenden
+    try {
+        const vis = JSON.parse(localStorage.getItem('wl_fixed_vis') || '{}');
+        ['holding_value', 'holding_gv_pct'].forEach(key => {
+            const show = vis[key] !== false;
+            table.querySelectorAll(`[data-column="${key}"]`).forEach(el => {
+                el.style.display = show ? '' : 'none';
+            });
+        });
+    } catch (_) {}
+
     let keys;
     try {
         keys = JSON.parse(localStorage.getItem('wl_col_order') || 'null');
@@ -792,6 +804,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
             html += `</ul></div>`;
         }
+
+        // Portfolio-Spalten (Wert/G/V) als togglebare Gruppe
+        const fixedVis = {};
+        try { Object.assign(fixedVis, JSON.parse(localStorage.getItem('wl_fixed_vis') || '{}')); } catch (_) {}
+        const PORTFOLIO_COLS = [
+            { column_key: 'holding_value',  display_name: 'Wert (€)' },
+            { column_key: 'holding_gv_pct', display_name: 'G/V'      },
+        ];
+        html += `<div class="column-group"><h5>Portfolio</h5><ul class="column-list">`;
+        for (const col of PORTFOLIO_COLS) {
+            const isVisible = fixedVis[col.column_key] !== false;
+            html += `
+                <li class="column-item" data-key="${col.column_key}" data-name="${col.display_name}" data-portfolio="true">
+                    <label>
+                        <input type="checkbox" ${isVisible ? 'checked' : ''}>
+                        ${col.display_name}
+                    </label>
+                </li>`;
+        }
+        html += `</ul></div>`;
         html += '</div>';
 
         // Rechte Seite: Reihenfolge
@@ -800,11 +832,11 @@ document.addEventListener('DOMContentLoaded', function() {
         html += '<p class="hint">Drag & Drop zum Sortieren</p>';
         html += '<ul class="order-list">';
 
-        // Feste Spalten (immer sichtbar, nicht ausblendbar)
+        // Feste Spalten für die Order-Liste (notes immer, Wert/G/V nur wenn sichtbar)
         const FIXED_COLS = [
-            { column_key: 'notes',          display_name: 'Notizen'  },
-            { column_key: 'holding_value',  display_name: 'Wert (€)' },
-            { column_key: 'holding_gv_pct', display_name: 'G/V'      },
+            { column_key: 'notes', display_name: 'Notizen' },
+            ...(fixedVis['holding_value']  !== false ? [{ column_key: 'holding_value',  display_name: 'Wert (€)' }] : []),
+            ...(fixedVis['holding_gv_pct'] !== false ? [{ column_key: 'holding_gv_pct', display_name: 'G/V'      }] : []),
         ];
 
         // Gespeicherte Reihenfolge aus localStorage (enthält DB + fixed keys)
@@ -825,10 +857,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (_) {}
 
         for (const col of orderedForList) {
-            const isFixed = FIXED_COLS.some(f => f.column_key === col.column_key);
-            const badge = isFixed ? '<span class="col-fixed-badge">immer</span>' : '';
+            const isNotes = col.column_key === 'notes';
+            const badge = isNotes ? '<span class="col-fixed-badge">immer</span>' : '';
             html += `
-                <li class="order-item" draggable="true" data-key="${col.column_key}" ${isFixed ? 'data-fixed="true"' : ''}>
+                <li class="order-item" draggable="true" data-key="${col.column_key}" ${isNotes ? 'data-fixed="true"' : ''}>
                     <span class="drag-handle">☰</span>
                     <span class="order-name">${col.display_name}</span>
                     ${badge}
@@ -967,8 +999,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Volle Reihenfolge (inkl. fixed) in localStorage speichern
             localStorage.setItem('wl_col_order', JSON.stringify(fullOrderKeys));
 
-            // 2. Nicht-sichtbare Spalten hinzufügen (Reihenfolge egal)
-            document.querySelectorAll('.column-item').forEach(item => {
+            // Portfolio-Sichtbarkeit (Wert/G/V) in localStorage speichern
+            const fixedVisToSave = {};
+            document.querySelectorAll('.column-item[data-portfolio="true"]').forEach(item => {
+                fixedVisToSave[item.dataset.key] = item.querySelector('input[type="checkbox"]').checked;
+            });
+            localStorage.setItem('wl_fixed_vis', JSON.stringify(fixedVisToSave));
+
+            // 2. Nicht-sichtbare DB-Spalten hinzufügen (Reihenfolge egal)
+            document.querySelectorAll('.column-item:not([data-portfolio])').forEach(item => {
                 const columnKey = item.dataset.key;
                 if (!visibleKeys.has(columnKey)) {
                     updates.push({
