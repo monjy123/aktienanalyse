@@ -1712,19 +1712,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Klick auf Tabellenzellen mit Kennzahlen initialisieren
     initializeClickableCells();
 
-    // Helper: Modal-Header konsistent setzen (Ticker | Sektor | Land | FJ)
+    // Helper: Modal-Header konsistent setzen (Ticker | Kurs | Sektor | FJ)
     function setModalHeader(companyData) {
         if (!companyData) return;
         // Normalisiere verschiedene API-Formate (flat vs nested)
         const name = companyData.name || companyData.company_name || '-';
         const ticker = companyData.ticker || '';
         const sector = companyData.sector || '';
-        const country = companyData.country || '';
-        const fiscalYear = companyData.fiscal_year_end ? ` | FJ: ${companyData.fiscal_year_end}` : '';
+        const currency = companyData.currency || '';
+        const priceVal = companyData.price;
+        let priceStr = '';
+        if (priceVal !== null && priceVal !== undefined && priceVal !== '') {
+            const num = typeof priceVal === 'number' ? priceVal : parseFloat(priceVal);
+            if (!isNaN(num)) {
+                priceStr = num.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (currency) priceStr += ' ' + currency;
+            }
+        }
+        const fiscalYear = companyData.fiscal_year_end ? `FJ: ${companyData.fiscal_year_end}` : '';
 
         detailCompanyName.textContent = name;
-        const parts = [ticker, sector, country].filter(Boolean);
-        detailMeta.textContent = parts.join(' | ') + fiscalYear;
+        const parts = [ticker, priceStr, sector, fiscalYear].filter(Boolean);
+        detailMeta.textContent = parts.join(' | ');
     }
 
     // Unified Modal öffnen — ersetzt openStockDetail, openCompanyInfo, openCompanyInfoWithTab
@@ -3528,7 +3537,8 @@ document.addEventListener('DOMContentLoaded', function() {
             name: data.company_name,
             ticker: data.ticker,
             sector: data.sector,
-            country: data.country,
+            price: data.price,
+            currency: data.currency,
             fiscal_year_end: data.fiscal_year_end
         });
 

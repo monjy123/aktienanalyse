@@ -227,13 +227,17 @@ def build_dynamic_query(view_name: str, user_id: int, where_clause: str = "", or
     """Baut dynamisch eine SQL-Query basierend auf konfigurierten Spalten."""
     columns = get_visible_columns(view_name, user_id)
 
-    # Immer ISIN dabei
-    select_parts = ['ci.isin']
+    # Immer ISIN, company_name und ticker dabei (für Note-Modal-Titel etc.)
+    select_parts = ['ci.isin', 'ci.company_name', 'ci.ticker']
+    seen_ci_cols = {'isin', 'company_name', 'ticker'}
     needs_live_metrics = False
 
     for col in columns:
         if col['source_table'] == 'company_info':
+            if col['column_key'] in seen_ci_cols:
+                continue
             select_parts.append(f"ci.{col['column_key']}")
+            seen_ci_cols.add(col['column_key'])
         else:
             select_parts.append(f"lm.{col['column_key']}")
             needs_live_metrics = True
@@ -856,7 +860,7 @@ def get_stock_details(isin):
         if not company:
             return jsonify({"error": "Aktie nicht gefunden"}), 404
 
-        # 2. Aktuelle Kennzahlen aus live_metrics (inkl. alle PE-, EV/EBIT-, CAGR- und Margen-Werte)
+        # 2. Aktuelle Kennzahlen aus live_metrics (inkl. alle PE-, EV/EBIT-, CAGR- und Margen-Werte, plus price für Modal-Header)
         cur.execute("""
             SELECT market_cap, price, price_date,
                    ttm_pe, fy_pe,
@@ -1048,7 +1052,9 @@ def get_stock_details(isin):
                 "sector": company['sector'],
                 "industry": company['industry'],
                 "country": company['country'],
-                "currency": company['currency']
+                "currency": company['currency'],
+                "fiscal_year_end": company['fiscal_year_end'],
+                "price": live.get('price')
             },
             "current": {
                 "market_cap": live.get('market_cap'),
@@ -1224,9 +1230,9 @@ def get_stock_info(isin):
         if not info:
             return jsonify({"error": "Aktie nicht gefunden"}), 404
 
-        # Marktkapitalisierung und nächsten Earnings-Termin aus live_metrics abrufen
+        # Marktkapitalisierung, Kurs und nächsten Earnings-Termin aus live_metrics abrufen
         cur.execute("""
-            SELECT market_cap, next_earnings_date
+            SELECT market_cap, price, next_earnings_date
             FROM analytics.live_metrics
             WHERE isin = %s
         """, (isin,))
@@ -1234,6 +1240,7 @@ def get_stock_info(isin):
 
         if metrics:
             info['market_cap'] = metrics['market_cap']
+            info['price'] = metrics['price']
             info['next_earnings_date'] = metrics['next_earnings_date']
 
         analyses_dir = os.path.join(os.path.dirname(__file__), 'static', 'analyses')
@@ -1264,7 +1271,7 @@ def get_price_history(isin):
     try:
         # Stammdaten für Header
         cur.execute("""
-            SELECT isin, ticker, company_name, currency
+            SELECT isin, ticker, company_name, currency, sector, fiscal_year_end
             FROM analytics.company_info
             WHERE isin = %s
         """, (isin,))
@@ -1352,7 +1359,10 @@ def get_price_history(isin):
                 "isin": company['isin'],
                 "ticker": company['ticker'],
                 "name": company['company_name'],
-                "currency": company['currency']
+                "currency": company['currency'],
+                "sector": company['sector'],
+                "fiscal_year_end": company['fiscal_year_end'],
+                "price": current.get('price')
             },
             "current": {
                 "price": current.get('price'),
@@ -1561,7 +1571,7 @@ def get_dcf_data(isin):
     try:
         # 1. Stammdaten
         cur.execute("""
-            SELECT isin, ticker, company_name, currency
+            SELECT isin, ticker, company_name, currency, sector, fiscal_year_end
             FROM analytics.company_info
             WHERE isin = %s
         """, (isin,))
@@ -1839,7 +1849,10 @@ def get_dcf_data(isin):
                 "isin": company['isin'],
                 "ticker": company['ticker'],
                 "name": company['company_name'],
-                "currency": company['currency']
+                "currency": company['currency'],
+                "sector": company['sector'],
+                "fiscal_year_end": company['fiscal_year_end'],
+                "price": live.get('price')
             },
             "current": {
                 "market_cap": live.get('market_cap'),
@@ -2231,7 +2244,7 @@ def get_earnings_data(isin):
     try:
         # 1. Stammdaten aus company_info
         cur.execute("""
-            SELECT isin, ticker, company_name, currency, fiscal_year_end
+            SELECT isin, ticker, company_name, currency, fiscal_year_end, sector
             FROM analytics.company_info
             WHERE isin = %s
         """, (isin,))
@@ -2239,6 +2252,11 @@ def get_earnings_data(isin):
 
         if not company:
             return jsonify({"error": "Aktie nicht gefunden"}), 404
+
+        # Aktuellen Kurs aus live_metrics (für Modal-Header)
+        cur.execute("SELECT price FROM analytics.live_metrics WHERE isin = %s", (isin,))
+        _live_row = cur.fetchone() or {}
+        company['price'] = _live_row.get('price')
 
         # 2. Alle Quartale aus earnings_calendar holen (mit EPS Estimates)
         cur.execute("""
@@ -2615,7 +2633,9 @@ def get_earnings_data(isin):
                 "ticker": company['ticker'],
                 "name": company['company_name'],
                 "currency": company['currency'],
-                "fiscal_year_end": company['fiscal_year_end']
+                "fiscal_year_end": company['fiscal_year_end'],
+                "sector": company['sector'],
+                "price": company.get('price')
             },
             "next_earnings": next_earnings,
             "last_earnings": last_earnings,

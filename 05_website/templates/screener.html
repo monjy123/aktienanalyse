@@ -63,7 +63,7 @@
                 </td>
                 {% endfor %}
                 <td data-label="Notizen" class="notes-cell">
-                    <button class="note-btn" data-isin="{{ stock.isin }}" data-notes="{{ stock.notes or '' }}">
+                    <button class="note-btn" data-isin="{{ stock.isin }}" data-notes="{{ stock.notes or '' }}" data-company="{{ stock.company_name or '' }}" data-ticker="{{ stock.ticker or '' }}">
                         {% if stock.notes %}📝{% else %}+{% endif %}
                     </button>
                 </td>
