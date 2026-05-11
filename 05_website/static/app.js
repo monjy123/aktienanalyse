@@ -3569,6 +3569,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }) + ' Mrd.';
             html += `<p><strong>Marktkapitalisierung:</strong> ${marketCapFormatted}</p>`;
         }
+        if (data.shares_outstanding) {
+            const shares = Number(data.shares_outstanding);
+            let sharesFormatted;
+            if (shares >= 1e9) {
+                sharesFormatted = (shares / 1e9).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Mrd.';
+            } else {
+                sharesFormatted = (shares / 1e6).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' Mio.';
+            }
+            html += `<p><strong>Anzahl Aktien:</strong> ${sharesFormatted}</p>`;
+        }
         if (data.next_earnings_date) {
             const earningsDate = new Date(data.next_earnings_date);
             const earningsFormatted = earningsDate.toLocaleDateString('de-DE', {

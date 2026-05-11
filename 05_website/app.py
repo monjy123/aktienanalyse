@@ -1243,6 +1243,18 @@ def get_stock_info(isin):
             info['price'] = metrics['price']
             info['next_earnings_date'] = metrics['next_earnings_date']
 
+        # Anzahl ausstehender Aktien (letzter FY-Eintrag, dediplizierter Schnitt)
+        cur.execute("""
+            SELECT AVG(weighted_average_shs_out_dil) as shares_outstanding
+            FROM analytics.v_fundamentals
+            WHERE isin = %s AND period = 'FY'
+              AND date = (SELECT MAX(date) FROM analytics.v_fundamentals
+                          WHERE isin = %s AND period = 'FY'
+                            AND weighted_average_shs_out_dil IS NOT NULL)
+        """, (isin, isin))
+        shares_row = cur.fetchone() or {}
+        info['shares_outstanding'] = shares_row.get('shares_outstanding')
+
         analyses_dir = os.path.join(os.path.dirname(__file__), 'static', 'analyses')
         info['has_analysis'] = os.path.exists(os.path.join(analyses_dir, f"{isin}.pdf"))
 
